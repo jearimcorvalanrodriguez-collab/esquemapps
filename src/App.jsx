@@ -49,7 +49,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('DASHBOARD');
   const [selectedProject, setSelectedProject] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
-  const [globalUsers, setGlobalUsers] = useState([]); // Para la lista de asignaciones
+  const [globalUsers, setGlobalUsers] = useState([]); 
   
   const showToast = (message) => {
     setToastMessage(message);
@@ -78,15 +78,14 @@ export default function App() {
     const admin = { id: 'ADMIN_PANEL', label: 'Admin Panel', icon: ShieldCheck };
     const profile = { id: 'PROFILE', label: 'Mi Perfil', icon: User };
     
-    // ORDEN ESPECÍFICO SEGÚN NUEVO REQUERIMIENTO DEL USUARIO
     if (r === ROLES.ADMIN) return [ proy, time, riders, transport, chat, dir, admin, profile ];
     if (r === ROLES.MANAGER) return [ proy, time, riders, transport, chat, dir, profile ];
     if (r === ROLES.TOUR_MANAGER) return [ proy, time, riders, transport, chat, dir, profile ];
     if (r === ROLES.TECH) return [ proy, time, riders, transport, chat, dir, profile ];
-    if (r === ROLES.TRASLADO) return [ proy, time, transport, chat, dir, profile ]; // Traslado no ve Riders
-    if (r === ROLES.APV) return [ proy, time, transport, chat, dir, profile ]; // APV no ve Riders
+    if (r === ROLES.TRASLADO) return [ proy, time, transport, chat, dir, profile ]; 
+    if (r === ROLES.APV) return [ proy, time, transport, chat, dir, profile ]; 
     
-    return [ proy, time, transport, chat, dir, profile ]; // Fallback
+    return [ proy, time, transport, chat, dir, profile ]; 
   };
 
   const AuthRouter = () => {
@@ -245,7 +244,7 @@ export default function App() {
     const [proyectos, setProyectos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
-    const [editingProject, setEditingProject] = useState(null); // Nuevo estado para edición
+    const [editingProject, setEditingProject] = useState(null); 
     const [form, setForm] = useState({ name: '', type: 'Gira Musical' });
 
     const fetchProyectos = async () => {
@@ -264,14 +263,12 @@ export default function App() {
       e.preventDefault(); setLoading(true);
       try {
         if (editingProject) {
-           // Lógica de Edición
            await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'updateProyecto', payload: { id: editingProject.id, name: form.name, type: form.type } }) });
            showToast("Proyecto actualizado.");
         } else {
-           // Lógica de Creación
            const payload = { ...form, manager: currentUser.name };
            await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'createProyecto', payload }) });
-           showToast("Proyecto guardado en BD. Ahora puedes entrar para agregar eventos.");
+           showToast("Proyecto guardado en BD. Haz clic en la tarjeta para agregar hitos.");
         }
         setIsCreating(false); setEditingProject(null); setForm({ name: '', type: 'Gira Musical' }); fetchProyectos();
       } catch(e) { showToast("Error al guardar proyecto."); setLoading(false); }
@@ -336,10 +333,14 @@ export default function App() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {proyectos.map(proyecto => (
-                <Card key={proyecto.id} className={`group ${proyecto.status === 'ACTIVO' ? 'hover:border-emerald-500' : 'opacity-70 grayscale hover:grayscale-0'}`}>
-                  <div className="p-5">
+                <Card 
+                  key={proyecto.id} 
+                  className={`group cursor-pointer ${proyecto.status === 'ACTIVO' ? 'hover:border-emerald-500' : 'opacity-70 grayscale hover:grayscale-0'}`}
+                  onClick={() => { setSelectedProject(proyecto); setCurrentView('PROJECT_DETAILS'); }}
+                >
+                  <div className="p-5 flex flex-col h-full">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/20"><Music className="text-emerald-500" size={24} /></div>
+                      <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors"><Music className="text-emerald-500" size={24} /></div>
                       <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded block w-fit ${proyecto.status === 'ACTIVO' ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-400 bg-slate-800 border border-slate-700'}`}>{proyecto.status}</span>
                     </div>
                     
@@ -347,15 +348,26 @@ export default function App() {
                     <p className="text-[11px] font-bold uppercase text-emerald-400 mb-3">{proyecto.type}</p>
                     <p className="text-sm text-slate-400 mb-4 flex items-center gap-2"><User size={14}/> Manager: {proyecto.manager}</p>
                     
-                    <div className="flex flex-col gap-2 border-t border-slate-700 pt-4 mt-auto">
-                      <Button variant="primary" className="w-full" icon={Navigation} onClick={() => { setSelectedProject(proyecto); setCurrentView('PROJECT_DETAILS'); }}>Ingresar al Proyecto</Button>
-                      {canCreate && (
-                        <div className="flex gap-2">
-                          <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 text-xs" icon={Edit3} onClick={() => openEdit(proyecto)}>Editar</Button>
-                          <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 text-xs" onClick={() => handleUpdateStatus(proyecto.id, proyecto.status)}>{proyecto.status === 'ACTIVO' ? 'Finalizar' : 'Reactivar'}</Button>
-                        </div>
-                      )}
-                    </div>
+                    {/* Botones de acción. El stopPropagation evita que se entre al proyecto si solo se quiere editar/finalizar */}
+                    {canCreate && (
+                      <div className="flex gap-2 border-t border-slate-700 pt-4 mt-auto">
+                        <Button 
+                          variant="ghost" 
+                          className="flex-1 bg-slate-900 border border-slate-700 text-xs z-10 hover:text-emerald-400" 
+                          icon={Edit3} 
+                          onClick={(e) => { e.stopPropagation(); openEdit(proyecto); }}
+                        >
+                          Editar
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          className="flex-1 bg-slate-900 border border-slate-700 text-xs z-10 hover:text-white" 
+                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(proyecto.id, proyecto.status); }}
+                        >
+                          {proyecto.status === 'ACTIVO' ? 'Finalizar' : 'Reactivar'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
@@ -372,7 +384,7 @@ export default function App() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
-    const [assigningEvent, setAssigningEvent] = useState(null); // ID del evento para asignar crew
+    const [assigningEvent, setAssigningEvent] = useState(null); 
     
     const [form, setForm] = useState({ title: '', location: '', date: '', time: '' });
     const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
@@ -389,7 +401,7 @@ export default function App() {
         const json = await res.json();
         if (json.status === 'success') {
           const parsedEvents = json.data
-            .filter(ev => ev.proyectoId === p.id) // Filtrar solo eventos de ESTE proyecto
+            .filter(ev => ev.proyectoId == p.id) 
             .map(ev => {
               const dateObj = new Date(`${ev.date}T${ev.time}:00`);
               return { ...ev, fullDate: isNaN(dateObj.getTime()) ? null : dateObj };
@@ -402,20 +414,29 @@ export default function App() {
 
     useEffect(() => { fetchEvents(); }, [p.id]);
 
+    const handleGetLocation = () => {
+      if ("geolocation" in navigator) {
+        showToast("Obteniendo ubicación GPS...");
+        navigator.geolocation.getCurrentPosition((position) => {
+          setForm(prev => ({ ...prev, location: `${position.coords.latitude}, ${position.coords.longitude}` }));
+          showToast("Ubicación capturada.");
+        }, () => showToast("Error al obtener GPS."));
+      }
+    };
+
     const handleCreateEvent = async (e) => {
       e.preventDefault(); setLoading(true);
       try {
         await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'createEvento', payload: { ...form, proyectoId: p.id } }) });
-        showToast("Evento agendado en el Proyecto."); setIsCreating(false); setForm({ title: '', location: '', date: '', time: '' }); fetchEvents();
-      } catch(e) { showToast("Error al crear evento."); setLoading(false); }
+        showToast("Hito agendado en el Proyecto."); setIsCreating(false); setForm({ title: '', location: '', date: '', time: '' }); fetchEvents();
+      } catch(e) { showToast("Error al crear hito."); setLoading(false); }
     };
 
     const handleDeleteEvent = async (id) => {
-      // Se eliminó window.confirm
       setLoading(true);
       try {
         await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'deleteEvento', payload: { id } }) });
-        showToast("Evento eliminado."); fetchEvents();
+        showToast("Hito eliminado."); fetchEvents();
       } catch(e) { showToast("Error al eliminar."); setLoading(false); }
     };
 
@@ -423,7 +444,7 @@ export default function App() {
       setLoading(true);
       try {
          await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'updateEventoAsignaciones', payload: { id: eventId, asignados: newAssignados } }) });
-         showToast("Equipo técnico asignado al evento.");
+         showToast("Equipo técnico asignado al hito.");
          setAssigningEvent(null);
          fetchEvents();
       } catch(e) { showToast("Error al asignar."); setLoading(false); }
@@ -465,20 +486,39 @@ export default function App() {
 
         <div className="flex justify-between items-center mb-4">
            <h2 className="text-xl font-bold text-white flex items-center gap-2"><Clock className="text-emerald-500"/> Run of Show / Timing del Proyecto</h2>
-           {canCreate && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Agendar Evento</Button>}
+           {canCreate && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Agregar Hito</Button>}
         </div>
 
         {isCreating && (
           <Card className="p-6 border-emerald-500 mb-6">
-            <h2 className="text-lg font-bold text-white mb-4">Agendar Evento en {p.name}</h2>
+            <h2 className="text-lg font-bold text-white mb-4">Agregar Nuevo Hito en {p.name}</h2>
             <form onSubmit={handleCreateEvent} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label className="text-xs text-slate-400 block mb-1">Título del Evento</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" placeholder="Ej: Soundcheck" onChange={e=>setForm({...form, title: e.target.value})} /></div>
-                <div><label className="text-xs text-slate-400 block mb-1">Ubicación</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" placeholder="Ej: Escenario Principal" onChange={e=>setForm({...form, location: e.target.value})} /></div>
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">Título del Hito</label>
+                  <input required list="hitos-list" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" placeholder="Ej: Load In, Soundcheck..." value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
+                  <datalist id="hitos-list">
+                    <option value="Load In (Montaje)" />
+                    <option value="Soundcheck" />
+                    <option value="Cena / Catering" />
+                    <option value="Apertura de Puertas" />
+                    <option value="Show Telonero" />
+                    <option value="Show Principal" />
+                    <option value="Meet & Greet" />
+                    <option value="Load Out (Desmontaje)" />
+                  </datalist>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 flex justify-between items-center mb-1">
+                    <span>Ubicación / Locación</span>
+                    <button type="button" onClick={handleGetLocation} className="text-emerald-500 hover:text-emerald-400 font-bold flex items-center gap-1 text-[10px]"><MapPin size={10}/> GPS</button>
+                  </label>
+                  <input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" placeholder="Ej: Escenario Principal" value={form.location} onChange={e=>setForm({...form, location: e.target.value})} />
+                </div>
                 <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, date: e.target.value})} /></div>
                 <div><label className="text-xs text-slate-400 block mb-1">Hora</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, time: e.target.value})} /></div>
               </div>
-              <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1">Guardar Evento</Button></div>
+              <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1">Guardar Hito</Button></div>
             </form>
           </Card>
         )}
@@ -486,7 +526,7 @@ export default function App() {
         {loading ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> : events.length === 0 ? (
           <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50">
             <CalendarPlus className="mx-auto text-slate-600 mb-4" size={48} />
-            <p className="text-slate-400 text-sm">Aún no has agregado eventos al timing de este proyecto.</p>
+            <p className="text-slate-400 text-sm">Aún no has agregado hitos al timing de este proyecto.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -497,7 +537,7 @@ export default function App() {
               return (
                 <div key={event.id} className={`p-5 rounded-xl border transition-all duration-500 relative group ${status.bg} ${status.border}`}>
                   {canCreate && (
-                    <button onClick={() => handleDeleteEvent(event.id)} className="absolute top-4 right-4 text-slate-500 hover:text-red-500 transition-colors p-1 bg-slate-900 rounded border border-slate-700 shadow z-10" title="Eliminar Evento">
+                    <button onClick={() => handleDeleteEvent(event.id)} className="absolute top-4 right-4 text-slate-500 hover:text-red-500 transition-colors p-1 bg-slate-900 rounded border border-slate-700 shadow z-10" title="Eliminar Hito">
                       <Trash2 size={16} />
                     </button>
                   )}
@@ -515,9 +555,9 @@ export default function App() {
                         <span className="flex items-center gap-1"><MapPin size={14}/> {event.location}</span>
                       </div>
 
-                      {/* --- ASIGNACIÓN DE CREW AL EVENTO --- */}
+                      {/* --- ASIGNACIÓN DE CREW AL HITO --- */}
                       <div className="border-t border-slate-700/50 pt-3">
-                        <p className="text-xs text-slate-500 mb-2 font-bold">CREW ASIGNADO AL EVENTO</p>
+                        <p className="text-xs text-slate-500 mb-2 font-bold">CREW ASIGNADO AL HITO</p>
                         {assigningEvent === event.id ? (
                            <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 mt-2 animate-fade-in">
                              <p className="text-xs text-slate-400 mb-3">Selecciona al personal de la BD:</p>
@@ -589,7 +629,6 @@ export default function App() {
     const [isEditing, setIsEditing] = useState(false);
     
     const [form, setForm] = useState({ id: null, title: '', type: 'SONIDO', content: '' });
-    // Permisos de Riders
     const canManageRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TECH].includes(currentUser.role);
 
     const fetchRiders = async () => {
@@ -628,7 +667,6 @@ export default function App() {
     };
 
     const handleDelete = async (id) => {
-      // Se reemplaza la alerta nativa con una ejecución directa tras pulsarlo, o se podría hacer un estado de confirmación. Por sanidad, lo ejecuta directo.
       setLoading(true);
       try {
         await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'deleteRider', payload: { id } }) });
@@ -753,6 +791,10 @@ export default function App() {
             <h2 className="text-lg font-bold text-white mb-4">Crear Nueva Ruta (Generar Token)</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div><label className="text-xs text-slate-400 block mb-1">Título / Vehículo</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" placeholder="Ej: Van Equipo Sonido" onChange={e=>setForm({...form, title: e.target.value})} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, date: e.target.value})} /></div>
+                <div><label className="text-xs text-slate-400 block mb-1">Hora Pick-up</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, time: e.target.value})} /></div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-slate-400 flex justify-between items-center mb-1">
