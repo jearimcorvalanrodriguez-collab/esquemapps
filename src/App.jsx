@@ -5,7 +5,7 @@ import {
   Navigation, User, Settings, ShieldCheck, UserPlus, 
   UserCheck, Edit3, X, Key, AlertCircle, Loader2,
   Phone, Mail, CheckCheck, Send, Timer, Hourglass,
-  Shield
+  Shield, CalendarPlus, FileText, Mic2, Lightbulb, Map as MapIcon, Save
 } from 'lucide-react';
 
 const ROLES = {
@@ -56,25 +56,36 @@ export default function App() {
 
   const getMenuOptions = () => {
     if (!currentUser) return [];
+    
+    // Si es conductor, solo ve su ruta
+    if (currentUser.role === 'CONDUCTOR') {
+      return [{ id: 'CONDUCTOR_VIEW', label: 'Mi Ruta', icon: Truck }, { id: 'LOGOUT', label: 'Salir', icon: LogOut }];
+    }
+
     const r = currentUser.role;
     const chat = { id: 'CHAT', label: 'Mensajes', icon: MessageSquare };
     const time = { id: 'TIMING', label: 'Timing', icon: Clock };
     const dir = { id: 'STAFF', label: 'Directorio', icon: Users };
+    const transport = { id: 'TRANSPORT', label: 'Transportes', icon: Truck };
+    const riders = { id: 'RIDERS', label: 'Riders Técnicos', icon: FileText };
     const admin = { id: 'ADMIN_PANEL', label: 'Admin Panel', icon: ShieldCheck };
     const profile = { id: 'PROFILE', label: 'Mi Perfil', icon: User };
     
-    if (r === ROLES.ADMIN) return [ { id: 'DASHBOARD', label: 'Proyectos', icon: Navigation }, admin, time, chat, dir, profile ];
-    if (r === ROLES.MANAGER) return [ { id: 'DASHBOARD', label: 'Proyectos', icon: Navigation }, time, chat, dir, profile ];
-    if (r === ROLES.TOUR_MANAGER) return [ { id: 'DASHBOARD', label: 'Giras', icon: Music }, time, chat, dir, profile ];
-    if (r === ROLES.TECH || r === ROLES.APV || r === ROLES.TRASLADO) return [ { id: 'DASHBOARD', label: 'Mis Shows', icon: Calendar }, time, chat, dir, profile ];
-    return [];
+    // Configuración de visualización de menú según roles
+    if (r === ROLES.ADMIN) return [ { id: 'DASHBOARD', label: 'Proyectos', icon: Navigation }, admin, time, transport, riders, chat, dir, profile ];
+    if (r === ROLES.MANAGER) return [ { id: 'DASHBOARD', label: 'Proyectos', icon: Navigation }, time, transport, riders, chat, dir, profile ];
+    if (r === ROLES.TOUR_MANAGER) return [ { id: 'DASHBOARD', label: 'Giras', icon: Music }, time, transport, riders, chat, dir, profile ];
+    
+    // Técnicos, APV y Traslados
+    return [ { id: 'DASHBOARD', label: 'Mis Shows', icon: Calendar }, time, transport, chat, dir, profile ];
   };
 
   // --- 1. AUTENTICACIÓN ---
   const AuthRouter = () => {
-    const [mode, setMode] = useState('LOGIN');
+    const [mode, setMode] = useState('LOGIN'); // LOGIN, REGISTER, CONDUCTOR
     const [email, setEmail] = useState(''); 
     const [pass, setPass] = useState('');
+    const [driverToken, setDriverToken] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -83,29 +94,36 @@ export default function App() {
     const [regPhone, setRegPhone] = useState('+569');
 
     const handleLogin = async (e) => {
-      e.preventDefault(); 
-      setError(''); setLoading(true);
+      e.preventDefault(); setError(''); setLoading(true);
       try {
-        const response = await fetch('/.netlify/functions/api', {
-          method: 'POST', body: JSON.stringify({ action: 'login', payload: { email, password: pass } })
-        });
+        const response = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'login', payload: { email, password: pass } }) });
         const data = await response.json();
-        if (data.status === 'success') { setCurrentUser(data.user); } 
-        else { setError(data.message || "Credenciales incorrectas."); }
+        if (data.status === 'success') setCurrentUser(data.user); 
+        else setError(data.message);
       } catch (err) { setError("Error de red conectando al servidor."); }
+      setLoading(false);
+    };
+
+    const handleDriverLogin = async (e) => {
+      e.preventDefault(); setError(''); setLoading(true);
+      try {
+        const response = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'loginConductor', payload: { token: driverToken.trim() } }) });
+        const data = await response.json();
+        if (data.status === 'success') {
+          setCurrentUser(data.user);
+          setCurrentView('CONDUCTOR_VIEW');
+        } else setError(data.message);
+      } catch (err) { setError("Error de red."); }
       setLoading(false);
     };
 
     const handleRegister = async (e) => {
       e.preventDefault(); setError(''); setLoading(true);
       try {
-        const response = await fetch('/.netlify/functions/api', {
-          method: 'POST', body: JSON.stringify({ action: 'solicitarAcceso', payload: { name: regName, email, phone: regPhone, role: regRole } })
-        });
+        const response = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'solicitarAcceso', payload: { name: regName, email, phone: regPhone, role: regRole } }) });
         const result = await response.json();
-        if (result.status === 'success') {
-           setMode('LOGIN'); alert("¡Solicitud enviada! Producción la revisará pronto.");
-        } else { setError(result.message || 'Error al solicitar.'); }
+        if (result.status === 'success') { setMode('LOGIN'); alert("Solicitud enviada."); } 
+        else setError(result.message);
       } catch (err) { setError('Error de red.'); }
       setLoading(false);
     };
@@ -119,30 +137,40 @@ export default function App() {
         </div>
         <Card className="w-full max-w-md p-8 animate-slide-up">
           <div className="mb-6 text-center border-b border-slate-800 pb-4">
-            <h2 className="text-2xl font-bold text-white">{mode === 'LOGIN' ? 'Iniciar Sesión' : 'Solicitar Acceso'}</h2>
+            <h2 className="text-2xl font-bold text-white">
+              {mode === 'LOGIN' ? 'Iniciar Sesión' : mode === 'CONDUCTOR' ? 'Acceso Conductor' : 'Solicitar Acceso'}
+            </h2>
           </div>
-          {mode === 'LOGIN' ? (
+          
+          {mode === 'LOGIN' && (
             <form onSubmit={handleLogin} className="space-y-5">
-               {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg flex items-center gap-2"><AlertCircle size={16} className="shrink-0" /><span>{error}</span></div>}
-              <div><label className="block text-xs font-bold text-slate-400 mb-1">Correo Electrónico</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500" required /></div>
-              <div><label className="block text-xs font-bold text-slate-400 mb-1">Contraseña</label><input type="password" value={pass} onChange={e=>setPass(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500" required /></div>
+               {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg flex items-center gap-2"><AlertCircle size={16} /><span>{error}</span></div>}
+              <div><label className="block text-xs font-bold text-slate-400 mb-1">Correo Electrónico</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-emerald-500" required /></div>
+              <div><label className="block text-xs font-bold text-slate-400 mb-1">Contraseña</label><input type="password" value={pass} onChange={e=>setPass(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-emerald-500" required /></div>
               <Button type="submit" className="w-full py-3" disabled={loading}>{loading ? <Loader2 className="animate-spin"/> : 'Ingresar a Plataforma'}</Button>
-              <p className="text-center text-xs text-slate-400 mt-4">¿No eres parte del Crew aún? <button type="button" onClick={()=>setMode('REGISTER')} className="text-emerald-500 font-bold hover:underline">Solicitar Acceso</button></p>
+              <div className="border-t border-slate-800 pt-4 space-y-2 mt-4">
+                <Button type="button" variant="secondary" className="w-full bg-slate-800 text-emerald-400" onClick={()=>setMode('CONDUCTOR')} icon={Truck}>Acceso Especial (Conductor)</Button>
+                <p className="text-center text-xs text-slate-400 mt-4">¿No eres parte del Crew aún? <button type="button" onClick={()=>setMode('REGISTER')} className="text-emerald-500 font-bold hover:underline">Solicitar Acceso</button></p>
+              </div>
             </form>
-          ) : (
+          )}
+
+          {mode === 'CONDUCTOR' && (
+            <form onSubmit={handleDriverLogin} className="space-y-5">
+              {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg flex items-center gap-2"><AlertCircle size={16} /><span>{error}</span></div>}
+              <p className="text-sm text-slate-400 text-center">Ingresa el Token de Ruta que te envió producción (Ej: TR-1234).</p>
+              <div><label className="block text-xs font-bold text-slate-400 mb-1">Token de Ruta</label><input type="text" value={driverToken} onChange={e=>setDriverToken(e.target.value.toUpperCase())} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-center font-mono text-xl tracking-widest focus:border-emerald-500" placeholder="TR-XXXX" required /></div>
+              <Button type="submit" className="w-full py-3" variant="blue" disabled={loading} icon={Truck}>{loading ? <Loader2 className="animate-spin"/> : 'Iniciar Ruta'}</Button>
+              <p className="text-center text-xs text-slate-400 mt-4"><button type="button" onClick={()=>setMode('LOGIN')} className="text-emerald-500 font-bold hover:underline">Volver al Login de Crew</button></p>
+            </form>
+          )}
+
+          {mode === 'REGISTER' && (
             <form onSubmit={handleRegister} className="space-y-4">
-              {error && <div className="bg-red-500/10 text-red-500 border border-red-500/30 text-sm p-3 rounded-lg flex gap-2"><AlertCircle size={16} /><span>{error}</span></div>}
-              <div><label className="block text-xs font-bold text-slate-400 mb-1">Nombre Completo</label><input type="text" value={regName} onChange={e=>setRegName(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500" required /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-bold text-slate-400 mb-1">Correo</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500" required /></div>
-                <div><label className="block text-xs font-bold text-slate-400 mb-1">Teléfono</label><input type="tel" value={regPhone} onChange={e=>setRegPhone(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500" required /></div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Rol Solicitado</label>
-                <select value={regRole} onChange={e=>setRegRole(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500 appearance-none">
-                  {Object.values(ROLES).map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
-              </div>
+              {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg flex items-center gap-2"><AlertCircle size={16} /><span>{error}</span></div>}
+              <div><label className="block text-xs font-bold text-slate-400 mb-1">Nombre Completo</label><input type="text" value={regName} onChange={e=>setRegName(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-emerald-500" required /></div>
+              <div className="grid grid-cols-2 gap-3"><div><label className="block text-xs font-bold text-slate-400 mb-1">Correo</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-emerald-500" required /></div><div><label className="block text-xs font-bold text-slate-400 mb-1">Teléfono</label><input type="tel" value={regPhone} onChange={e=>setRegPhone(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-emerald-500" required /></div></div>
+              <div><label className="block text-xs font-bold text-slate-400 mb-1">Rol</label><select value={regRole} onChange={e=>setRegRole(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-emerald-500">{Object.values(ROLES).map(r => <option key={r} value={r}>{r}</option>)}</select></div>
               <Button type="submit" className="w-full py-3 mt-2" disabled={loading}>{loading ? <Loader2 className="animate-spin"/> : 'Enviar Solicitud'}</Button>
               <p className="text-center text-xs text-slate-400 mt-4"><button type="button" onClick={()=>setMode('LOGIN')} className="text-emerald-500 font-bold hover:underline">Volver al Login</button></p>
             </form>
@@ -152,7 +180,230 @@ export default function App() {
     );
   };
 
-  // --- 2. DIRECTORIO (STAFF) ---
+  // --- 2. VISTA EXCLUSIVA CONDUCTOR ---
+  const ConductorView = () => {
+    const r = currentUser.routeInfo;
+    const [status, setStatus] = useState(r.status);
+    const [loading, setLoading] = useState(false);
+
+    const updateStatus = async (newStatus) => {
+      setLoading(true);
+      try {
+        await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'updateTransportStatus', payload: { token: r.token, newStatus } }) });
+        setStatus(newStatus); showToast("Ruta actualizada: " + newStatus);
+      } catch (e) { showToast("Error al actualizar."); }
+      setLoading(false);
+    };
+
+    return (
+      <div className="max-w-md mx-auto space-y-6 pt-10 px-4">
+        <div className="text-center mb-8"><Truck className="mx-auto text-blue-500 mb-4" size={56} /><h1 className="text-3xl font-black text-white">Panel de Ruta</h1><p className="text-slate-400">Token: <span className="text-blue-400 font-mono font-bold">{r.token}</span></p></div>
+        <Card className="p-6 border-blue-500/30 text-center space-y-4">
+          <h2 className="text-xl font-bold text-white">{r.title}</h2>
+          <div className="bg-slate-900 p-4 rounded-lg flex flex-col gap-2 text-sm text-slate-300">
+             <div className="flex justify-between border-b border-slate-700 pb-2"><span>Fecha:</span><span className="font-bold text-white">{r.date}</span></div>
+             <div className="flex justify-between border-b border-slate-700 pb-2"><span>Hora Pick-Up:</span><span className="font-bold text-blue-400">{r.time}</span></div>
+             <div className="flex flex-col text-left pt-2"><span className="text-xs text-slate-500">Origen</span><span className="font-bold text-white">{r.origin}</span></div>
+             <div className="flex flex-col text-left pt-2"><span className="text-xs text-slate-500">Destino</span><span className="font-bold text-white">{r.dest}</span></div>
+          </div>
+          <div className="pt-6 space-y-3">
+             <Button variant={status === 'LLEGUE' ? 'ghost' : 'blue'} className="w-full py-4 text-lg" disabled={loading || status !== 'PENDING'} onClick={() => updateStatus('LLEGUE')}>{status === 'LLEGUE' ? '✓ Ya marcaste Llegada' : 'Llegué al Punto (Esperando)'}</Button>
+             <Button variant={status === 'EN RUTA' ? 'ghost' : 'primary'} className="w-full py-4 text-lg bg-emerald-600" disabled={loading || status === 'EN RUTA' || status === 'FINALIZADO'} onClick={() => updateStatus('EN RUTA')}>{status === 'EN RUTA' ? '✓ Ruta en progreso' : 'Comenzar Ruta'}</Button>
+             <Button variant={status === 'FINALIZADO' ? 'ghost' : 'danger'} className="w-full py-4 text-lg bg-red-600 text-white" disabled={loading || status === 'FINALIZADO'} onClick={() => updateStatus('FINALIZADO')}>{status === 'FINALIZADO' ? 'Ruta Terminada Oficialmente' : 'Finalizar Ruta (Drop-off)'}</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  // --- 3. MÓDULO DE TRANSPORTE (ADMIN/CREW) ---
+  const TransportView = () => {
+    const [transports, setTransports] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isCreating, setIsCreating] = useState(false);
+    const [form, setForm] = useState({ title: '', date: '', time: '', origin: '', dest: '' });
+    const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
+
+    const fetchTransports = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getTransportes' }) });
+        const json = await res.json();
+        if (json.status === 'success') setTransports(json.data);
+      } catch(e) {}
+      setLoading(false);
+    };
+    useEffect(() => { fetchTransports(); }, []);
+
+    const handleCreate = async (e) => {
+      e.preventDefault(); setLoading(true);
+      try {
+        await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'createTransporte', payload: form }) });
+        showToast("Ruta creada. Token generado."); setIsCreating(false); fetchTransports();
+      } catch(e) { showToast("Error al crear ruta."); setLoading(false); }
+    };
+
+    return (
+      <div className="space-y-6 animate-fade-in pb-24 max-w-5xl mx-auto">
+        <header className="border-b border-slate-800 pb-4 flex justify-between items-end">
+          <div><h1 className="text-2xl font-black text-white flex items-center gap-3"><Truck className="text-emerald-500" size={28}/> Logística de Transportes</h1><p className="text-sm text-slate-400 mt-1">Gestión de Pick-ups y traslados.</p></div>
+          {canCreate && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Nueva Ruta</Button>}
+        </header>
+
+        {isCreating && (
+          <Card className="p-6 border-emerald-500 mb-6">
+            <h2 className="text-lg font-bold text-white mb-4">Crear Nueva Ruta (Generar Token)</h2>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div><label className="text-xs text-slate-400 block mb-1">Título / Vehículo</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" placeholder="Ej: Van Equipo Sonido" onChange={e=>setForm({...form, title: e.target.value})} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, date: e.target.value})} /></div>
+                <div><label className="text-xs text-slate-400 block mb-1">Hora Pick-up</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, time: e.target.value})} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="text-xs text-slate-400 block mb-1">Origen (Hotel/Aeropuerto)</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, origin: e.target.value})} /></div>
+                <div><label className="text-xs text-slate-400 block mb-1">Destino (Venue)</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, dest: e.target.value})} /></div>
+              </div>
+              <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1">Guardar Ruta</Button></div>
+            </form>
+          </Card>
+        )}
+
+        {loading ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {transports.map((t, idx) => {
+              const statusColors = { 'PENDING': 'bg-slate-700', 'LLEGUE': 'bg-amber-500 animate-pulse', 'EN RUTA': 'bg-blue-500', 'FINALIZADO': 'bg-emerald-600' };
+              return (
+                <Card key={idx} className="p-5 flex flex-col justify-between border-l-4" style={{borderLeftColor: t.status === 'LLEGUE' ? '#f59e0b' : t.status === 'EN RUTA' ? '#3b82f6' : t.status === 'FINALIZADO' ? '#10b981' : '#334155'}}>
+                  <div className="flex justify-between items-start mb-4">
+                    <div><h3 className="font-bold text-white text-lg">{t.title}</h3><p className="text-sm text-slate-400">{t.date} • {t.time}</p></div>
+                    <div className={`px-3 py-1 rounded text-[10px] font-black text-white ${statusColors[t.status] || 'bg-slate-700'}`}>{t.status}</div>
+                  </div>
+                  <div className="space-y-2 text-sm text-slate-300 mb-4 bg-slate-900 p-3 rounded">
+                    <p className="flex gap-2"><MapPin size={14} className="text-red-400"/> A: {t.origin}</p>
+                    <p className="flex gap-2"><MapPin size={14} className="text-emerald-400"/> B: {t.dest}</p>
+                  </div>
+                  {canCreate && (
+                    <div className="border-t border-slate-700 pt-3 text-center">
+                      <p className="text-xs text-slate-400">Token Conductor: <span className="font-mono text-emerald-400 font-bold tracking-widest text-sm">{t.token}</span></p>
+                    </div>
+                  )}
+                </Card>
+              )
+            })}
+            {transports.length === 0 && <div className="col-span-full text-center p-10 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay transportes agendados.</div>}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // --- 4. MÓDULO RIDERS TÉCNICOS CON PLANTILLAS (NUEVO) ---
+  const RidersView = () => {
+    const [riders, setRiders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    
+    const [form, setForm] = useState({ id: null, title: '', type: 'SONIDO', content: '' });
+
+    const fetchRiders = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getRiders' }) });
+        const json = await res.json();
+        if (json.status === 'success') setRiders(json.data);
+      } catch(e) {}
+      setLoading(false);
+    };
+    useEffect(() => { fetchRiders(); }, []);
+
+    // Plantillas Inteligentes según el tipo seleccionado
+    const loadTemplate = (type) => {
+      if (type === 'SONIDO') return "=========================================\nRIDER TÉCNICO - SONIDO\n=========================================\n\n1. SISTEMA DE AUDIO (FOH)\n- Sistema Line Array capaz de 110 dB SPL en FOH (40Hz - 20kHz).\n- Consola FOH: DiGiCo (SD10/Quantum) o A&H dLive (NO Presonus/X32).\n- Procesador de Sistema: Lake LM 26 (Ubicado en FOH).\n- Front Fills obligatorios.\n\n2. MONITORES\n- Consola Mon: DiGiCo o Avid S6L. (Min 32 Outputs). Ubicada en Stage Left.\n- 07 Transmisores IEM (Shure P10T) y 18 Receptores (P10R+).\n- RF: 04 Sistemas Inalámbricos Inst. / 06 Micrófonos de Mano (Shure Axient/ULXD).\n- Coordinación de RF obligatoria. Pilas nuevas.\n\n3. BACKLINE BÁSICO\n- Batería: Yamaha (Absolute/Recording). Toms 10,12,16, Bombo 22.\n- Piano: Korg Kronos 73 o Yamaha Motif XF88.\n- Percusión: Congas/Bongó LP (No series básicas).\n- 11 Atriles de partitura.\n\n4. INPUT LIST (Resumen)\nCH 01 - Kick In (Beta 91)\nCH 02 - Kick Out (Beta 52)\nCH 03 - Snare Top (Beta 57)\n...\nCH 32 - Voz Principal (Axient SE V7)\n\n5. ESCENARIO Y TARIMAS\n- 03 Tarimas de 2.50 x 2.50 x 0.40m (Batería, Coros, Percusión).\n- Escenario mínimo 15x10m.\n- 2 Stagehands obligatorios.";
+      if (type === 'ILUMINACIÓN') return "=========================================\nRIDER DE ILUMINACIÓN Y VISUALES\n=========================================\n\n1. CONSOLA\n- GrandMA2 o GrandMA3 (Full Size o Light).\n\n2. PANTALLA LED\n- 1 Pantalla Central de 6 mts x 4 mts (P3.9).\n- Procesador de pantalla independiente (NO tarjetas directas a pantalla).\n- Conexión HDMI disponible en control central.\n\n3. EFECTOS ESPECIALES (SFX)\n- 02 Confetti Estadio (1 tiro) color blanco/rojo.\n- 06 Sparkular (Larga duración).\n- 02 Streamers (2 tiros por máquina).\n- Control SFX ubicado en Stage Right.";
+      if (type === 'STAGEPLOT') return "=========================================\nSTAGEPLOT & REQUERIMIENTOS DE ESCENARIO\n=========================================\n\n1. DIMENSIONES\n- Ancho mínimo libre: 15 metros.\n- Fondo mínimo: 10 metros.\n- Altura mínima escenario a techo: 12 metros.\n\n2. ÁREAS DE TRABAJO\n- Área para Monitores: 4x4 metros fuera del escenario (Stage Left).\n- Áreas laterales: 3x3 metros a cada lado.\n\n3. ENERGÍA\n- 4 Salidas de potencia 220 VAC separadas.\n- Cada salida con un multicontacto de 4 puntos mínimo.\n\n4. OBSERVACIONES\n- Superficie limpia, cubierta por alfombra negra o pintada.\n- Acceso mediante rampa y escalera.";
+      return "";
+    };
+
+    const handleTypeChange = (e) => {
+      const newType = e.target.value;
+      setForm(prev => {
+        // Solo sobrescribe con la plantilla si el contenido está vacío o es una plantilla existente
+        const currentIsTemplate = Object.values(['SONIDO', 'ILUMINACIÓN', 'STAGEPLOT']).some(t => prev.content === loadTemplate(t));
+        return { ...prev, type: newType, content: (prev.content === '' || currentIsTemplate) ? loadTemplate(newType) : prev.content };
+      });
+    };
+
+    const handleSave = async (e) => {
+      e.preventDefault(); setLoading(true);
+      try {
+        const action = form.id ? 'updateRider' : 'createRider';
+        await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action, payload: form }) });
+        showToast("Rider guardado correctamente."); setIsEditing(false); fetchRiders();
+      } catch(e) { showToast("Error al guardar rider."); setLoading(false); }
+    };
+
+    const openEditor = (rider = null) => {
+      if (rider) setForm(rider);
+      else setForm({ id: null, title: 'Nuevo Rider Téc.', type: 'SONIDO', content: loadTemplate('SONIDO') });
+      setIsEditing(true);
+    };
+
+    const icons = { 'SONIDO': Mic2, 'ILUMINACIÓN': Lightbulb, 'STAGEPLOT': MapIcon };
+
+    return (
+      <div className="space-y-6 animate-fade-in pb-24 max-w-5xl mx-auto">
+        <header className="border-b border-slate-800 pb-4 flex justify-between items-end">
+          <div><h1 className="text-2xl font-black text-white flex items-center gap-3"><FileText className="text-emerald-500" size={28}/> Riders Técnicos</h1><p className="text-sm text-slate-400 mt-1">Especificaciones de Sonido, Luces y Escenario.</p></div>
+          {!isEditing && <Button icon={Plus} onClick={() => openEditor(null)}>Crear Rider</Button>}
+        </header>
+
+        {isEditing ? (
+          <Card className="p-6 border-emerald-500">
+            <h2 className="text-lg font-bold text-white mb-4">{form.id ? 'Editar Rider' : 'Generar Nuevo Rider'}</h2>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label className="text-xs text-slate-400 block mb-1">Título del Documento</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} /></div>
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">Área / Tipo (Carga plantilla automática)</label>
+                  <select className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white font-bold" value={form.type} onChange={handleTypeChange}>
+                    <option value="SONIDO">SONIDO (PA, Monitores, Backline)</option>
+                    <option value="ILUMINACIÓN">ILUMINACIÓN (Luces, SFX, Pantallas)</option>
+                    <option value="STAGEPLOT">STAGEPLOT (Escenario, Energía)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Contenido Técnico (Editable)</label>
+                <textarea required className="w-full bg-slate-900 border-slate-700 rounded p-4 text-emerald-400 font-mono text-sm min-h-[400px] leading-relaxed focus:border-emerald-500 focus:outline-none" value={form.content} onChange={e=>setForm({...form, content: e.target.value})} />
+              </div>
+              <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1" onClick={()=>setIsEditing(false)}>Cancelar</Button><Button type="submit" className="flex-1" icon={Save}>Guardar Documento</Button></div>
+            </form>
+          </Card>
+        ) : loading ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> : (
+          <div className="grid grid-cols-1 gap-4">
+            {riders.map((r, idx) => {
+              const IconType = icons[r.type] || FileText;
+              return (
+                <Card key={idx} className="p-5 border-l-4 border-l-emerald-500">
+                  <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-900 rounded-lg flex justify-center items-center"><IconType className="text-emerald-500" size={20}/></div>
+                      <div><h3 className="font-bold text-white text-lg">{r.title}</h3><span className="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded border border-slate-700 font-bold">{r.type}</span></div>
+                    </div>
+                    <Button variant="secondary" icon={Edit3} onClick={() => openEditor(r)}>Modificar</Button>
+                  </div>
+                  <pre className="text-xs text-slate-300 font-mono overflow-x-auto p-4 bg-slate-900 rounded-lg whitespace-pre-wrap">{r.content}</pre>
+                </Card>
+              )
+            })}
+            {riders.length === 0 && <div className="text-center p-10 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay Riders creados aún.</div>}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // --- 5. DIRECTORIO STAFF ---
   const StaffDirectory = () => {
     const [directory, setDirectory] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -175,7 +426,7 @@ export default function App() {
     }, []);
 
     return (
-      <div className="space-y-6 animate-fade-in pb-24">
+      <div className="space-y-6 animate-fade-in pb-24 max-w-5xl mx-auto">
         <header className="border-b border-slate-800 pb-4">
           <h1 className="text-2xl font-black text-white flex items-center gap-3"><Users className="text-emerald-500" size={28} /> Directorio del Crew</h1>
           <p className="text-sm text-slate-400 mt-1">{[ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) ? 'Lista completa del personal activo.' : 'Contactos de emergencia y Tour Managers asignados.'}</p>
@@ -196,7 +447,7 @@ export default function App() {
     );
   };
 
-  // --- 3. MENSAJES (CHAT) ---
+  // --- 6. MENSAJES CHAT ---
   const ChatView = () => {
     const [messages, setMessages] = useState([
       { id: 1, sender: 'Producción Central', role: ROLES.ADMIN, text: 'Bienvenidos al canal de comunicación oficial. Por favor confirmen recepción de los mensajes importantes.', time: '09:00 AM', readBy: [] }
@@ -247,33 +498,33 @@ export default function App() {
     );
   };
 
-  // --- 4. TIMING (HORARIOS) ---
+  // --- 7. TIMING (HORARIOS) ---
   const TimingView = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
       const timer = setInterval(() => setCurrentTime(new Date()), 1000);
       return () => clearInterval(timer);
     }, []);
 
-    const scheduleEvents = useMemo(() => {
-      const now = new Date();
-      const createEvent = (id, title, location, addHours) => {
-        const target = new Date(now.getTime() + addHours * 60 * 60 * 1000);
-        return {
-          id, title, location,
-          date: target.toLocaleDateString(),
-          time: target.toTimeString().substring(0, 5),
-          fullDate: target
-        };
+    useEffect(() => {
+      const fetchEvents = async () => {
+        try {
+          const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getEventos' }) });
+          const json = await res.json();
+          if (json.status === 'success') {
+            const parsedEvents = json.data.map(ev => {
+              const dateObj = new Date(`${ev.date}T${ev.time}:00`);
+              return { ...ev, fullDate: isNaN(dateObj.getTime()) ? null : dateObj };
+            });
+            setEvents(parsedEvents.filter(e => e.fullDate !== null).sort((a,b) => a.fullDate - b.fullDate));
+          }
+        } catch (error) {}
+        setLoading(false);
       };
-
-      return [
-        createEvent(1, 'Llegada Crew / Load-in', 'Estadio Nacional - Puerta 4', -2),
-        createEvent(2, 'Prueba de Sonido (Soundcheck)', 'Main Stage', 1.5),
-        createEvent(3, 'Apertura de Puertas (Doors)', 'Accesos Principales', 18),
-        createEvent(4, 'Show Principal', 'Main Stage', 48)
-      ];
+      fetchEvents();
     }, []);
 
     const getStatus = (targetDate) => {
@@ -304,32 +555,60 @@ export default function App() {
     return (
       <div className="space-y-6 animate-fade-in pb-24 max-w-4xl mx-auto">
         <header className="border-b border-slate-800 pb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div><h1 className="text-2xl font-black text-white flex items-center gap-3"><Clock className="text-emerald-500" size={28} /> Run of Show (Timing)</h1><p className="text-sm text-slate-400 mt-1">Horarios sincronizados en tiempo real.</p></div>
-          <div className="bg-slate-900 border border-slate-700 px-6 py-3 rounded-xl flex items-center gap-3 shadow-inner"><Timer className="text-emerald-500 animate-pulse" size={20} /><div className="text-2xl font-black text-white tracking-widest font-mono">{currentTime.toLocaleTimeString()}</div></div>
+          <div>
+            <h1 className="text-2xl font-black text-white flex items-center gap-3"><Clock className="text-emerald-500" size={28} /> Run of Show (Timing)</h1>
+            <p className="text-sm text-slate-400 mt-1">Horarios sincronizados directamente con la Base de Datos.</p>
+          </div>
+          <div className="bg-slate-900 border border-slate-700 px-6 py-3 rounded-xl flex items-center gap-3 shadow-inner">
+            <Timer className="text-emerald-500 animate-pulse" size={20} />
+            <div className="text-2xl font-black text-white tracking-widest font-mono">{currentTime.toLocaleTimeString()}</div>
+          </div>
         </header>
 
-        <div className="space-y-4">
-          {scheduleEvents.map((event) => {
-            const status = getStatus(event.fullDate);
-            return (
-              <div key={event.id} className={`p-5 rounded-xl border transition-all duration-500 ${status.bg} ${status.border}`}>
-                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1"><span className={`w-3 h-3 rounded-full ${status.dot} ${status.pulse ? 'animate-pulse' : ''}`}></span><span className={`text-xs font-black uppercase tracking-wider ${status.textClass}`}>{status.text}</span></div>
-                    <h3 className="text-xl font-bold text-white mb-1">{event.title}</h3>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 font-bold"><span className="flex items-center gap-1"><Calendar size={14}/> {event.date}</span><span className="flex items-center gap-1 text-emerald-400"><Clock size={14}/> {event.time}</span><span className="flex items-center gap-1"><MapPin size={14}/> {event.location}</span></div>
+        {loading ? (
+           <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div>
+        ) : events.length === 0 ? (
+          <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50">
+            <CalendarPlus className="mx-auto text-slate-600 mb-4" size={48} />
+            <h3 className="text-xl font-bold text-white mb-2">No hay eventos programados</h3>
+            <p className="text-slate-400 text-sm max-w-md mx-auto">
+              La agenda está libre. Producción aún no ha cargado los horarios en la pestaña "Timing" de la Base de Datos.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {events.map((event) => {
+              const status = getStatus(event.fullDate);
+              return (
+                <div key={event.id} className={`p-5 rounded-xl border transition-all duration-500 ${status.bg} ${status.border}`}>
+                  <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`w-3 h-3 rounded-full ${status.dot} ${status.pulse ? 'animate-pulse' : ''}`}></span>
+                        <span className={`text-xs font-black uppercase tracking-wider ${status.textClass}`}>{status.text}</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-1">{event.title}</h3>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 font-bold">
+                        <span className="flex items-center gap-1"><Calendar size={14}/> {event.date}</span>
+                        <span className="flex items-center gap-1 text-emerald-400"><Clock size={14}/> {event.time}</span>
+                        <span className="flex items-center gap-1"><MapPin size={14}/> {event.location}</span>
+                      </div>
+                    </div>
+                    <div className={`shrink-0 flex items-center gap-2 px-4 py-3 rounded-lg border bg-slate-900 ${status.border} ${status.textClass} font-mono font-black text-lg tracking-wider`}>
+                      <Hourglass size={18} className={status.pulse ? 'animate-spin-slow' : ''} />
+                      {status.timeText}
+                    </div>
                   </div>
-                  <div className={`shrink-0 flex items-center gap-2 px-4 py-3 rounded-lg border bg-slate-900 ${status.border} ${status.textClass} font-mono font-black text-lg tracking-wider`}><Hourglass size={18} className={status.pulse ? 'animate-spin-slow' : ''} />{status.timeText}</div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
 
-  // --- 5. PANEL DE ADMINISTRADOR ---
+  // --- 8. PANEL DE ADMINISTRADOR ---
   const AdminPanel = () => {
     const [dbUsers, setDbUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -450,7 +729,7 @@ export default function App() {
     );
   };
 
-  // --- 6. MI PERFIL ---
+  // --- 9. MI PERFIL ---
   const ProfileView = () => {
     const [pPhone, setPPhone] = useState(currentUser.phone || '');
     const [pTalla, setPTalla] = useState(currentUser.talla || 'M');
@@ -555,26 +834,36 @@ export default function App() {
     );
   };
 
-  // --- DASHBOARD (INICIO) ---
   const Dashboard = () => (
     <div className="flex flex-col items-center justify-center h-[60vh] text-slate-500 animate-fade-in text-center px-4">
       <Music size={48} className="mb-4 text-emerald-500/50" />
       <h2 className="text-2xl font-black text-white mb-2">Bienvenido, {currentUser.name.split(' ')[0]}</h2>
-      <p>Navega a través del menú para revisar el Timing, los Mensajes o actualizar tu Perfil.</p>
+      <p>Navega a través del menú lateral para gestionar la producción.</p>
     </div>
   );
 
   // --- RENDERIZADO PRINCIPAL ---
   if (!currentUser) return <AuthRouter />;
+  
+  if (currentUser.role === 'CONDUCTOR') {
+    return (
+      <div className="min-h-screen bg-slate-950 font-sans">
+        {toastMessage && <div className="fixed top-4 right-4 z-[100] bg-blue-500 text-white px-4 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-fade-in"><CheckCircle2 size={20} /><span className="font-bold text-sm">{toastMessage}</span></div>}
+        <div className="p-4 flex justify-between items-center bg-slate-900 border-b border-slate-800">
+          <div className="flex items-center gap-2"><Truck className="text-blue-500"/><span className="text-white font-bold tracking-widest">CONDUCTOR</span></div>
+          <Button variant="ghost" className="text-red-400" onClick={() => setCurrentUser(null)} icon={LogOut}>Salir</Button>
+        </div>
+        <ConductorView />
+      </div>
+    );
+  }
+
   const menuOptions = getMenuOptions();
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans">
-      {toastMessage && (
-        <div className="fixed top-4 right-4 z-[100] bg-emerald-500 text-white px-4 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-fade-in"><CheckCircle2 size={20} /><span className="font-bold text-sm">{toastMessage}</span></div>
-      )}
+      {toastMessage && <div className="fixed top-4 right-4 z-[100] bg-emerald-500 text-white px-4 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-fade-in"><CheckCircle2 size={20} /><span className="font-bold text-sm">{toastMessage}</span></div>}
 
-      {/* SIDEBAR DESKTOP */}
       <aside className="bg-slate-900 border-r border-slate-800 w-64 shrink-0 hidden md:flex flex-col h-screen sticky top-0">
         <div className="p-5 flex items-center gap-3 border-b border-slate-800"><Music className="text-emerald-500" size={24} /><h1 className="text-xl font-black text-white tracking-widest">ESQUEMAS</h1></div>
         <div className="p-4 flex-1 space-y-2 overflow-y-auto">
@@ -591,7 +880,6 @@ export default function App() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
       <main className="flex-1 relative overflow-y-auto h-screen bg-slate-950">
         <div className="p-4 md:p-8">
           {currentView === 'DASHBOARD' && <Dashboard />}
@@ -600,10 +888,11 @@ export default function App() {
           {currentView === 'STAFF' && <StaffDirectory />}
           {currentView === 'CHAT' && <ChatView />}
           {currentView === 'TIMING' && <TimingView />}
+          {currentView === 'TRANSPORT' && <TransportView />}
+          {currentView === 'RIDERS' && <RidersView />}
         </div>
       </main>
       
-      {/* BOTTOM NAV MOBILE */}
       <nav className="md:hidden fixed bottom-0 w-full bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-between px-2 pb-safe z-50 overflow-x-auto hide-scrollbar">
          {menuOptions.map(opt => (
             <button key={opt.id} onClick={() => setCurrentView(opt.id)} className={`flex flex-col items-center justify-center gap-1 p-2 min-w-[70px] flex-1 transition-colors ${currentView === opt.id ? 'text-emerald-400' : 'text-slate-400 hover:text-white'}`}>
