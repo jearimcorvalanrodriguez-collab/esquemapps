@@ -731,6 +731,16 @@ export default function App() {
       } catch(e) { showToast("Error al crear ruta."); setLoading(false); }
     };
 
+    const handleGetLocation = (field) => {
+      if ("geolocation" in navigator) {
+        showToast("Obteniendo ubicación GPS...");
+        navigator.geolocation.getCurrentPosition((position) => {
+          setForm(prev => ({ ...prev, [field]: `${position.coords.latitude}, ${position.coords.longitude}` }));
+          showToast("Ubicación capturada.");
+        }, () => showToast("Error al obtener GPS."));
+      }
+    };
+
     return (
       <div className="space-y-6 animate-fade-in pb-24 max-w-5xl mx-auto">
         <header className="border-b border-slate-800 pb-4 flex justify-between items-end">
@@ -744,12 +754,20 @@ export default function App() {
             <form onSubmit={handleCreate} className="space-y-4">
               <div><label className="text-xs text-slate-400 block mb-1">Título / Vehículo</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" placeholder="Ej: Van Equipo Sonido" onChange={e=>setForm({...form, title: e.target.value})} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, date: e.target.value})} /></div>
-                <div><label className="text-xs text-slate-400 block mb-1">Hora Pick-up</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, time: e.target.value})} /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="text-xs text-slate-400 block mb-1">Origen (Hotel/Aeropuerto)</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, origin: e.target.value})} /></div>
-                <div><label className="text-xs text-slate-400 block mb-1">Destino (Venue)</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" onChange={e=>setForm({...form, dest: e.target.value})} /></div>
+                <div>
+                  <label className="text-xs text-slate-400 flex justify-between items-center mb-1">
+                    <span>Origen (Hotel)</span>
+                    <button type="button" onClick={() => handleGetLocation('origin')} className="text-blue-500 hover:text-blue-400 font-bold flex items-center gap-1 text-[10px]"><MapPin size={10}/> GPS</button>
+                  </label>
+                  <input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" value={form.origin} onChange={e=>setForm({...form, origin: e.target.value})} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 flex justify-between items-center mb-1">
+                    <span>Destino (Venue)</span>
+                    <button type="button" onClick={() => handleGetLocation('dest')} className="text-emerald-500 hover:text-emerald-400 font-bold flex items-center gap-1 text-[10px]"><MapPin size={10}/> GPS</button>
+                  </label>
+                  <input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-white" value={form.dest} onChange={e=>setForm({...form, dest: e.target.value})} />
+                </div>
               </div>
               <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1">Guardar Ruta</Button></div>
             </form>
