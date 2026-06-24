@@ -364,10 +364,18 @@ export default function App() {
     const [talla, setTalla] = useState(currentUser.talla || 'M');
     const [dieta, setDieta] = useState(currentUser.dieta || 'OMNÍVORA');
     const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [saving, setSaving] = useState(false);
 
     const handleSaveProfile = async (e) => {
       e.preventDefault();
+      
+      // Validación de contraseñas
+      if (newPassword && newPassword !== confirmPassword) {
+        showToast("Error: Las contraseñas no coinciden.");
+        return;
+      }
+
       setSaving(true);
       try {
         const res = await fetch('/.netlify/functions/api', {
@@ -380,7 +388,8 @@ export default function App() {
         if (json.status === 'success') {
           setCurrentUser({...currentUser, phone, talla, dieta});
           setNewPassword(''); 
-          showToast("¡Tu perfil ha sido actualizado!");
+          setConfirmPassword('');
+          showToast("¡Tu perfil y seguridad han sido actualizados exitosamente!");
         } else { showToast("Error: " + json.message); }
       } catch(e) { showToast("Error de conexión al guardar."); }
       setSaving(false);
@@ -442,9 +451,15 @@ export default function App() {
 
             <div className="pt-4 border-t border-slate-800">
                <h3 className="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2"><Lock size={16}/> Seguridad</h3>
-               <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-1">Nueva Contraseña (Opcional)</label>
-                  <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="Dejar en blanco para mantener la actual" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500 placeholder:text-slate-600" />
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div>
+                    <label className="block text-xs font-bold text-slate-400 mb-1">Nueva Contraseña (Opcional)</label>
+                    <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="Dejar en blanco para no cambiar" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500 placeholder:text-slate-600" />
+                 </div>
+                 <div>
+                    <label className="block text-xs font-bold text-slate-400 mb-1">Confirmar Contraseña</label>
+                    <input type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} placeholder="Repite tu nueva contraseña" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm outline-none focus:border-emerald-500 placeholder:text-slate-600" />
+                 </div>
                </div>
             </div>
 
