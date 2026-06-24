@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   MapPin, Calendar, Clock, Users, Bell, MessageSquare, 
   Truck, Music, CheckCircle2, XCircle, LogOut, Plus, 
@@ -77,13 +77,13 @@ export default function App() {
     if (r === ROLES.MANAGER) return [ { id: 'DASHBOARD', label: 'Proyectos', icon: Navigation }, time, transport, riders, chat, dir, profile ];
     if (r === ROLES.TOUR_MANAGER) return [ { id: 'DASHBOARD', label: 'Giras', icon: Music }, time, transport, riders, chat, dir, profile ];
     
-    // Técnicos, APV y Traslados (Asegurado que esté Transportes y Perfil)
+    // Técnicos, APV y Traslados SIEMPRE ven transportes
     return [ { id: 'DASHBOARD', label: 'Mis Shows', icon: Calendar }, time, transport, chat, dir, profile ];
   };
 
   // --- 1. AUTENTICACIÓN ---
   const AuthRouter = () => {
-    const [mode, setMode] = useState('LOGIN'); // LOGIN, REGISTER, CONDUCTOR
+    const [mode, setMode] = useState('LOGIN'); 
     const [email, setEmail] = useState(''); 
     const [pass, setPass] = useState('');
     const [driverToken, setDriverToken] = useState('');
@@ -101,7 +101,7 @@ export default function App() {
         const data = await response.json();
         if (data.status === 'success') setCurrentUser(data.user); 
         else setError(data.message);
-      } catch (err) { setError("Error de red conectando al servidor."); }
+      } catch (err) { setError("Error de red conectando al servidor proxy."); }
       setLoading(false);
     };
 
@@ -114,7 +114,7 @@ export default function App() {
           setCurrentUser(data.user);
           setCurrentView('CONDUCTOR_VIEW');
         } else setError(data.message);
-      } catch (err) { setError("Error de red."); }
+      } catch (err) { setError("Error de red al verificar token."); }
       setLoading(false);
     };
 
@@ -123,9 +123,9 @@ export default function App() {
       try {
         const response = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'solicitarAcceso', payload: { name: regName, email, phone: regPhone, role: regRole } }) });
         const result = await response.json();
-        if (result.status === 'success') { setMode('LOGIN'); alert("Solicitud enviada."); } 
+        if (result.status === 'success') { setMode('LOGIN'); alert("Solicitud enviada exitosamente."); } 
         else setError(result.message);
-      } catch (err) { setError('Error de red.'); }
+      } catch (err) { setError('Error de red al enviar la solicitud.'); }
       setLoading(false);
     };
 
@@ -192,7 +192,7 @@ export default function App() {
       try {
         await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'updateTransportStatus', payload: { token: r.token, newStatus } }) });
         setStatus(newStatus); showToast("Ruta actualizada: " + newStatus);
-      } catch (e) { showToast("Error al actualizar."); }
+      } catch (e) { showToast("Error de red al actualizar ruta."); }
       setLoading(false);
     };
 
@@ -221,17 +221,21 @@ export default function App() {
   const TransportView = () => {
     const [transports, setTransports] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [form, setForm] = useState({ title: '', date: '', time: '', origin: '', dest: '' });
     const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
 
     const fetchTransports = async () => {
       setLoading(true);
+      setFetchError(false);
       try {
         const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getTransportes' }) });
         const json = await res.json();
         if (json.status === 'success') setTransports(json.data);
-      } catch(e) {}
+      } catch(e) {
+        setFetchError(true);
+      }
       setLoading(false);
     };
     useEffect(() => { fetchTransports(); }, []);
@@ -269,7 +273,13 @@ export default function App() {
           </Card>
         )}
 
-        {loading ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> : (
+        {fetchError && (
+          <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3">
+            <AlertCircle size={20} /> Hubo un error de conexión al cargar los transportes.
+          </div>
+        )}
+
+        {loading && !fetchError ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {transports.map((t, idx) => {
               const statusColors = { 'PENDING': 'bg-slate-700', 'LLEGUE': 'bg-amber-500 animate-pulse', 'EN RUTA': 'bg-blue-500', 'FINALIZADO': 'bg-emerald-600' };
@@ -291,7 +301,7 @@ export default function App() {
                 </Card>
               )
             })}
-            {transports.length === 0 && <div className="col-span-full text-center p-10 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay transportes agendados.</div>}
+            {!fetchError && transports.length === 0 && <div className="col-span-full text-center p-10 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay transportes agendados.</div>}
           </div>
         )}
       </div>
@@ -302,17 +312,21 @@ export default function App() {
   const RidersView = () => {
     const [riders, setRiders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     
     const [form, setForm] = useState({ id: null, title: '', type: 'SONIDO', content: '' });
 
     const fetchRiders = async () => {
       setLoading(true);
+      setFetchError(false);
       try {
         const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getRiders' }) });
         const json = await res.json();
         if (json.status === 'success') setRiders(json.data);
-      } catch(e) {}
+      } catch(e) {
+        setFetchError(true);
+      }
       setLoading(false);
     };
     useEffect(() => { fetchRiders(); }, []);
@@ -378,6 +392,10 @@ export default function App() {
               <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1" onClick={()=>setIsEditing(false)}>Cancelar</Button><Button type="submit" className="flex-1" icon={Save}>Guardar Documento</Button></div>
             </form>
           </Card>
+        ) : fetchError ? (
+          <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3">
+            <AlertCircle size={20} /> Error al cargar Riders. Revisa tu conexión.
+          </div>
         ) : loading ? <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> : (
           <div className="grid grid-cols-1 gap-4">
             {riders.map((r, idx) => {
@@ -406,6 +424,7 @@ export default function App() {
   const StaffDirectory = () => {
     const [directory, setDirectory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
 
     useEffect(() => {
       const fetchDirectory = async () => {
@@ -418,7 +437,9 @@ export default function App() {
             if (canSeeEveryone) setDirectory(activeUsers);
             else setDirectory(activeUsers.filter(u => u.role === ROLES.TOUR_MANAGER));
           }
-        } catch(e) {}
+        } catch(e) {
+          setFetchError(true);
+        }
         setLoading(false);
       };
       fetchDirectory();
@@ -430,7 +451,14 @@ export default function App() {
           <h1 className="text-2xl font-black text-white flex items-center gap-3"><Users className="text-emerald-500" size={28} /> Directorio del Crew</h1>
           <p className="text-sm text-slate-400 mt-1">{[ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) ? 'Lista completa del personal activo.' : 'Contactos de emergencia y Tour Managers asignados.'}</p>
         </header>
-        {loading ? ( <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> ) : (
+        
+        {fetchError && (
+          <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3">
+            <AlertCircle size={20} /> Hubo un error de conexión al cargar el directorio.
+          </div>
+        )}
+
+        {loading && !fetchError ? ( <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {directory.map((user, idx) => (
               <Card key={idx} className="p-5 flex flex-col justify-between">
@@ -439,7 +467,7 @@ export default function App() {
                 <div className="flex flex-row gap-2 mt-auto border-t border-slate-700 pt-4"><Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700" icon={Mail} onClick={() => openEmail(user.email)}>Correo</Button><Button variant="primary" className="flex-1" icon={MessageSquare} onClick={() => openWhatsApp(user.phone)}>WhatsApp</Button></div>
               </Card>
             ))}
-            {directory.length === 0 && ( <div className="col-span-full text-center p-10 border border-slate-800 border-dashed rounded-xl text-slate-500">No se encontraron contactos asignados.</div> )}
+            {!fetchError && directory.length === 0 && ( <div className="col-span-full text-center p-10 border border-slate-800 border-dashed rounded-xl text-slate-500">No se encontraron contactos asignados.</div> )}
           </div>
         )}
       </div>
@@ -502,6 +530,7 @@ export default function App() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
     const [form, setForm] = useState({ title: '', location: '', date: '', time: '' });
     const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
@@ -513,18 +542,25 @@ export default function App() {
 
     const fetchEvents = async () => {
       setLoading(true);
+      setFetchError(null);
       try {
         const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getEventos' }) });
         const json = await res.json();
+        
         if (json.status === 'success') {
           const parsedEvents = json.data.map(ev => {
             const dateObj = new Date(`${ev.date}T${ev.time}:00`);
             return { ...ev, fullDate: isNaN(dateObj.getTime()) ? null : dateObj };
           });
           setEvents(parsedEvents.filter(e => e.fullDate !== null).sort((a,b) => a.fullDate - b.fullDate));
+        } else {
+          setFetchError(json.message || "Error desconocido en el servidor");
         }
-      } catch (error) {}
-      setLoading(false);
+      } catch (error) {
+        setFetchError("Problema de conexión al obtener Timing. Verifica tu red o el Proxy.");
+      } finally {
+        setLoading(false);
+      }
     };
 
     useEffect(() => { fetchEvents(); }, []);
@@ -596,15 +632,21 @@ export default function App() {
           </Card>
         )}
 
-        {loading ? (
+        {fetchError && (
+          <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3">
+            <AlertCircle size={20} /> {fetchError}
+          </div>
+        )}
+
+        {loading && !fetchError ? (
            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div>
-        ) : events.length === 0 ? (
+        ) : !fetchError && events.length === 0 ? (
           <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50">
             <CalendarPlus className="mx-auto text-slate-600 mb-4" size={48} />
             <h3 className="text-xl font-bold text-white mb-2">No hay eventos programados</h3>
             <p className="text-slate-400 text-sm max-w-md mx-auto">La agenda está libre. Producción aún no ha cargado los horarios en el Timing.</p>
           </div>
-        ) : (
+        ) : !fetchError && (
           <div className="space-y-4">
             {events.map((event) => {
               const status = getStatus(event.fullDate);
@@ -646,6 +688,7 @@ export default function App() {
   const AdminPanel = () => {
     const [dbUsers, setDbUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const [activeTab, setActiveTab] = useState('PENDIENTES');
     const [processingId, setProcessingId] = useState(null);
     
@@ -657,11 +700,14 @@ export default function App() {
 
     const fetchUsers = async () => {
       setLoading(true);
+      setFetchError(false);
       try {
         const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getUsuarios' }) });
         const json = await res.json();
         if (json.status === 'success') setDbUsers(json.data.filter(u => u.name));
-      } catch(e) { }
+      } catch(e) { 
+        setFetchError(true);
+      }
       setLoading(false);
     };
 
@@ -676,7 +722,7 @@ export default function App() {
         const json = await res.json();
         if (json.status === 'success') { showToast("Usuario aprobado. Clave enviada por correo."); fetchUsers(); } 
         else { showToast("Error: " + json.message); }
-      } catch(e) { showToast("Error de conexión."); }
+      } catch(e) { showToast("Error de conexión al aprobar."); }
       setProcessingId(null);
     };
 
@@ -712,8 +758,14 @@ export default function App() {
           <Button variant={activeTab === 'DIRECTORIO' ? 'primary' : 'secondary'} onClick={() => setActiveTab('DIRECTORIO')} icon={Users}>Directorio y Edición</Button>
           <Button variant={activeTab === 'INVITAR' ? 'primary' : 'secondary'} onClick={() => setActiveTab('INVITAR')} icon={UserPlus}>Invitar Integrante</Button>
         </div>
+        
+        {fetchError && (
+          <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3">
+            <AlertCircle size={20} /> Hubo un error de conexión al cargar la data.
+          </div>
+        )}
 
-        {loading ? ( <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> ) : (
+        {loading && !fetchError ? ( <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div> ) : !fetchError && (
           <>
             {activeTab === 'PENDIENTES' && (
               <div className="space-y-4">
@@ -873,16 +925,20 @@ export default function App() {
     const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
     const [proyectos, setProyectos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [form, setForm] = useState({ name: '', type: 'Gira Musical' });
 
     const fetchProyectos = async () => {
       setLoading(true);
+      setFetchError(false);
       try {
         const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'getProyectos' }) });
         const json = await res.json();
         if (json.status === 'success') setProyectos(json.data);
-      } catch (e) {}
+      } catch (e) {
+        setFetchError(true);
+      }
       setLoading(false);
     };
 
@@ -943,7 +999,11 @@ export default function App() {
 
         <div>
           <h2 className="text-lg font-bold text-slate-300 mb-4 flex items-center gap-2"><Navigation size={20}/> Proyectos Activos</h2>
-          {loading ? (
+          {fetchError ? (
+             <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3">
+               <AlertCircle size={20} /> Error de conexión al cargar proyectos.
+             </div>
+          ) : loading ? (
              <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div>
           ) : proyectos.length === 0 ? (
             <div className="text-center p-10 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay proyectos activos registrados.</div>
