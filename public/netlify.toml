@@ -1,0 +1,19 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Previene el "Clickjacking" (evita que clonen tu app dentro de un iframe en otra web)
+    X-Frame-Options = "DENY"
+    # Bloquea inyecciones de código malicioso (XSS)
+    X-XSS-Protection = "1; mode=block"
+    # Evita que el navegador "adivine" tipos de archivos (previene ejecución de scripts ocultos)
+    X-Content-Type-Options = "nosniff"
+    # Protege la información de la URL de origen cuando el usuario hace clic en links externos
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Fuerza al navegador a conectarse SIEMPRE por HTTPS (Capa de seguridad extrema)
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+[[redirects]]
+  # Necesario para aplicaciones React (Single Page Applications)
+  from = "/*"
+  to = "/index.html"
+  status = 200
