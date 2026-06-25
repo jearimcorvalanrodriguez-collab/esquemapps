@@ -64,6 +64,7 @@ export default function App() {
   };
   const closeConfirm = () => setConfirmState({ ...confirmState, isOpen: false });
 
+  // Función global para GPS
   const handleGPS = (setterFn) => {
     if (!navigator.geolocation) return showToast("Tu navegador no soporta GPS.");
     showToast("Obteniendo ubicación GPS...");
@@ -95,6 +96,7 @@ export default function App() {
     const admin = { id: 'ADMIN_PANEL', label: 'Admin Panel', icon: ShieldCheck };
     const profile = { id: 'PROFILE', label: 'Mi Perfil', icon: User };
     
+    // ORDEN ESPECÍFICO SEGÚN NUEVO REQUERIMIENTO
     if (r === ROLES.ADMIN) return [ proy, time, riders, transport, chat, dir, admin, profile ];
     if (r === ROLES.MANAGER) return [ proy, time, riders, transport, chat, dir, profile ];
     if (r === ROLES.TOUR_MANAGER) return [ proy, time, riders, transport, chat, dir, profile ];
