@@ -202,6 +202,60 @@ export default function App() {
     );
   };
 
+  const ConductorView = () => {
+    const r = currentUser.routeInfo;
+    const [status, setStatus] = useState(r.status);
+    const [loading, setLoading] = useState(false);
+
+    const updateStatus = async (newStatus) => {
+      setLoading(true);
+      try {
+        await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'updateTransportStatus', payload: { token: r.token, newStatus } }) });
+        setStatus(newStatus); showToast("Ruta actualizada: " + newStatus);
+      } catch (e) { showToast("Error de red al actualizar ruta."); }
+      setLoading(false);
+    };
+
+    const wazeUrl = (addr) => `https://waze.com/ul?q=${encodeURIComponent(addr)}`;
+    const mapsUrl = (addr) => `https://maps.google.com/?q=${encodeURIComponent(addr)}`;
+
+    return (
+      <div className="max-w-md mx-auto space-y-6 pt-10 px-4 pb-24">
+        <div className="text-center mb-8"><Truck className="mx-auto text-blue-500 mb-4" size={56} /><h1 className="text-3xl font-black text-white">Panel de Ruta</h1><p className="text-slate-400">Token: <span className="text-blue-400 font-mono font-bold">{r.token}</span></p></div>
+        <Card className="p-6 border-blue-500/30 text-center space-y-4">
+          <h2 className="text-xl font-bold text-white">{r.title}</h2>
+          <div className="bg-slate-900 p-4 rounded-lg flex flex-col gap-2 text-sm text-slate-300">
+             <div className="flex justify-between border-b border-slate-700 pb-2"><span>Fecha:</span><span className="font-bold text-white">{r.date}</span></div>
+             <div className="flex justify-between border-b border-slate-700 pb-2"><span>Hora Pick-Up:</span><span className="font-bold text-blue-400">{r.time}</span></div>
+             
+             <div className="flex flex-col text-left pt-2 pb-3 border-b border-slate-700">
+               <span className="text-xs text-slate-500">Origen</span>
+               <span className="font-bold text-white mb-2">{r.origin}</span>
+               <div className="flex gap-2">
+                 <Button variant="secondary" className="flex-1 py-1.5 text-xs bg-slate-800" onClick={() => window.open(wazeUrl(r.origin))} icon={MapIcon}>Waze</Button>
+                 <Button variant="secondary" className="flex-1 py-1.5 text-xs bg-slate-800" onClick={() => window.open(mapsUrl(r.origin))} icon={MapPin}>Google Maps</Button>
+               </div>
+             </div>
+             
+             <div className="flex flex-col text-left pt-2">
+               <span className="text-xs text-slate-500">Destino</span>
+               <span className="font-bold text-white mb-2">{r.dest}</span>
+               <div className="flex gap-2">
+                 <Button variant="secondary" className="flex-1 py-1.5 text-xs bg-slate-800" onClick={() => window.open(wazeUrl(r.dest))} icon={MapIcon}>Waze</Button>
+                 <Button variant="secondary" className="flex-1 py-1.5 text-xs bg-slate-800" onClick={() => window.open(mapsUrl(r.dest))} icon={MapPin}>Google Maps</Button>
+               </div>
+             </div>
+          </div>
+          <div className="pt-6 space-y-3">
+             <Button variant={status === 'LLEGUE' ? 'ghost' : 'blue'} className="w-full py-4 text-lg" disabled={loading || status !== 'PENDING'} onClick={() => updateStatus('LLEGUE')}>{status === 'LLEGUE' ? '✓ Ya marcaste Llegada' : 'Llegué al Punto (Esperando)'}</Button>
+             <Button variant={status === 'EN RUTA' ? 'ghost' : 'primary'} className="w-full py-4 text-lg bg-emerald-600" disabled={loading || status === 'EN RUTA' || status === 'FINALIZADO'} onClick={() => updateStatus('EN RUTA')}>{status === 'EN RUTA' ? '✓ Ruta en progreso' : 'Comenzar Ruta'}</Button>
+             <Button variant={status === 'FINALIZADO' ? 'ghost' : 'danger'} className="w-full py-4 text-lg bg-red-600 text-white" disabled={loading || status === 'FINALIZADO'} onClick={() => updateStatus('FINALIZADO')}>{status === 'FINALIZADO' ? 'Ruta Terminada Oficialmente' : 'Finalizar Ruta (Drop-off)'}</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
   const Dashboard = () => {
     const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
     const [proyectos, setProyectos] = useState([]);
@@ -358,6 +412,8 @@ export default function App() {
               return { ...ev, fullDate: isNaN(dateObj.getTime()) ? null : dateObj };
             });
           setHitos(parsedHitos.filter(e => e.fullDate !== null).sort((a,b) => a.fullDate - b.fullDate));
+        } else {
+          showToast("Error del servidor: " + (json.message || "No se pudo obtener hitos."));
         }
       } catch (error) {}
       setLoading(false);
@@ -368,27 +424,41 @@ export default function App() {
     const handleCreateHito = async (e) => {
       e.preventDefault(); setLoading(true);
       try {
-        await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'createHito', payload: { ...form, proyectoId: p.id } }) });
-        showToast("Hito agregado al Proyecto."); setIsCreating(false); setForm({ title: '', location: '', date: '', time: '' }); fetchHitos();
-      } catch(e) { showToast("Error al crear hito."); setLoading(false); }
+        const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'createHito', payload: { ...form, proyectoId: p.id } }) });
+        const json = await res.json();
+        if(json.status === 'success') {
+           showToast("Hito agregado al Proyecto."); setIsCreating(false); setForm({ title: '', location: '', date: '', time: '' }); fetchHitos();
+        } else {
+           showToast("Error BD: " + (json.message || json.error));
+           setLoading(false);
+        }
+      } catch(e) { showToast("Error de conexión al crear hito."); setLoading(false); }
     };
 
     const executeDeleteHito = async (id) => {
       setLoading(true);
       try {
-        await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'deleteHito', payload: { id } }) });
-        showToast("Hito eliminado."); fetchHitos();
-      } catch(e) { showToast("Error al eliminar."); setLoading(false); }
+        const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'deleteHito', payload: { id } }) });
+        const json = await res.json();
+        if (json.status === 'success') {
+          showToast("Hito eliminado."); fetchHitos();
+        } else {
+          showToast("Error BD: " + json.message); setLoading(false);
+        }
+      } catch(e) { showToast("Error de conexión al eliminar."); setLoading(false); }
     };
 
     const handleAssignCrew = async (hitoId, newAssignados) => {
       setLoading(true);
       try {
-         await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'updateHitoAsignaciones', payload: { id: hitoId, asignados: newAssignados } }) });
-         showToast("Equipo técnico asignado al hito.");
-         setAssigningHito(null);
-         fetchHitos();
-      } catch(e) { showToast("Error al asignar."); setLoading(false); }
+         const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify({ action: 'updateHitoAsignaciones', payload: { id: hitoId, asignados: newAssignados } }) });
+         const json = await res.json();
+         if(json.status === 'success') {
+           showToast("Equipo técnico asignado al hito.");
+           setAssigningHito(null);
+           fetchHitos();
+         } else { showToast("Error: " + json.message); setLoading(false); }
+      } catch(e) { showToast("Error de red al asignar."); setLoading(false); }
     };
 
     const getStatus = (targetDate) => {
@@ -496,7 +566,6 @@ export default function App() {
                         <span className="flex items-center gap-1"><MapPin size={14}/> {hito.location}</span>
                       </div>
 
-                      {/* Sección de Asignaciones */}
                       <div className="border-t border-slate-700/50 pt-3">
                         <p className="text-xs text-slate-500 mb-2 font-bold">CREW ASIGNADO</p>
                         {assigningHito === hito.id ? (
