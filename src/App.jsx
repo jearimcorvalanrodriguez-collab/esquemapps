@@ -65,6 +65,64 @@ const LiveClock = () => {
   return <div className="text-lg md:text-xl font-black text-white tracking-widest font-mono">{time.toLocaleTimeString()}</div>;
 };
 
+// Componente Helper: Textarea que crece automáticamente
+const AutoResizeTextarea = ({ value, onChange, placeholder, className = "" }) => {
+  const textareaRef = useRef(null);
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [value]);
+  return (
+    <textarea
+      ref={textareaRef}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={`resize-none overflow-hidden min-h-[30px] ${className}`}
+      rows={1}
+    />
+  );
+};
+
+// Componente Helper: Menú desplegable MIC/DI con opción "OTRO"
+const MicDiSelect = ({ value, onChange }) => {
+  const isCustom = !['', 'MIC', 'DI'].includes(value) && value !== 'OTRO';
+  const [customMode, setCustomMode] = useState(isCustom);
+
+  useEffect(() => { setCustomMode(!['', 'MIC', 'DI'].includes(value) && value !== 'OTRO'); }, [value]);
+
+  if (customMode) {
+    return (
+      <div className="flex items-center gap-1">
+        <input autoFocus className="w-full bg-slate-950 border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={value === 'OTRO' ? '' : value} onChange={e => onChange(e.target.value)} placeholder="Especificar..." />
+        <button type="button" onClick={() => { setCustomMode(false); onChange(''); }} className="text-slate-500 hover:text-red-500"><X size={12}/></button>
+      </div>
+    );
+  }
+
+  return (
+    <select 
+      className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" 
+      value={value} 
+      onChange={e => {
+        if (e.target.value === 'OTRO') {
+          setCustomMode(true);
+          onChange('');
+        } else {
+          onChange(e.target.value);
+        }
+      }}
+    >
+      <option value=""></option>
+      <option value="MIC">MIC</option>
+      <option value="DI">DI</option>
+      <option value="OTRO">OTRO...</option>
+    </select>
+  );
+};
+
 // --- 1. AUTENTICACIÓN ---
 const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   const [mode, setMode] = useState('LOGIN'); 
@@ -267,7 +325,6 @@ const TransportView = ({ currentUser, setCurrentView, setSelectedProject, showTo
   );
 };
 
-// --- 3.1 DETALLES DE TRANSPORTE POR PROYECTO ---
 const TransportDetailsView = ({ currentUser, setCurrentView, selectedProject, showToast }) => {
   const p = selectedProject;
   const [transports, setTransports] = useState([]);
@@ -378,70 +435,7 @@ const TransportDetailsView = ({ currentUser, setCurrentView, selectedProject, sh
     </div>
   );
 };
-// --- 3.1 DETALLES DE TRANSPORTE POR PROYECTO ---
-/* ... existing code ... */
-      )}
-    </div>
-  );
-};
 
-// Helper para Textareas Auto-ajustables
-const AutoResizeTextarea = ({ value, onChange, placeholder, className = "" }) => {
-  const textareaRef = useRef(null);
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [value]);
-  return (
-    <textarea
-      ref={textareaRef}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className={`resize-none overflow-hidden min-h-[30px] ${className}`}
-      rows={1}
-    />
-  );
-};
-
-// Helper para Selector MIC/DI con opción "OTRO"
-const MicDiSelect = ({ value, onChange }) => {
-  const isCustom = !['', 'MIC', 'DI'].includes(value) && value !== 'OTRO';
-  const [customMode, setCustomMode] = useState(isCustom);
-
-  useEffect(() => { setCustomMode(!['', 'MIC', 'DI'].includes(value) && value !== 'OTRO'); }, [value]);
-
-  if (customMode) {
-    return (
-      <div className="flex items-center gap-1">
-        <input autoFocus className="w-full bg-slate-950 border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={value === 'OTRO' ? '' : value} onChange={e => onChange(e.target.value)} placeholder="Especificar..." />
-        <button type="button" onClick={() => { setCustomMode(false); onChange(''); }} className="text-slate-500 hover:text-red-500"><X size={12}/></button>
-      </div>
-    );
-  }
-
-  return (
-    <select 
-      className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" 
-      value={value} 
-      onChange={e => {
-        if (e.target.value === 'OTRO') {
-          setCustomMode(true);
-          onChange('');
-        } else {
-          onChange(e.target.value);
-        }
-      }}
-    >
-      <option value=""></option>
-      <option value="MIC">MIC</option>
-      <option value="DI">DI</option>
-      <option value="OTRO">OTRO...</option>
-    </select>
-  );
-};
 // --- 4. MÓDULO RIDERS TÉCNICOS (Exportable / Print Ready) ---
 const RidersView = ({ currentUser, showToast, requestConfirm }) => {
   const [riders, setRiders] = useState([]);
@@ -463,7 +457,6 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
     visuals: [{ col1: '', col2: '', col3: '', col4: '' }]
   };
 
-  // Textos estándar para agilizar la carga del Rider
   const templatesTexto = {
     importante: "Toda la información técnica detallada en este rider es exclusiva y confidencial. Cualquier cambio, sustitución de equipos o modificaciones de marca deben ser consultadas y aprobadas por escrito por la producción con al menos 15 días de anticipación al evento. De lo contrario, no se aceptará la alternativa en terreno.",
     soundcheck: "El sistema de P.A. debe estar 100% operativo, ruteado, alineado y libre de ruidos al menos 1 hora antes de la llegada de nuestro equipo técnico (Load In). El escenario debe estar despejado, limpio y con todos los requerimientos de backline listos para pruebas.",
@@ -1670,8 +1663,8 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
           <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 uppercase font-bold tracking-wider mb-1.5 inline-block">PROYECTO</span>
           <h1 className="text-xl md:text-2xl font-black text-white leading-tight">{p.name}</h1>
           <div className="mt-1.5 space-y-1">
-            <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5"><Calendar size={12}/> {projectDateStr}</p>
-            <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5"><User size={12}/> {p.manager}</p>
+            <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5"><Calendar size={12}/> Inicio: {projectDateStr}</p>
+            <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5"><User size={12}/> Liderado por: {p.manager}</p>
           </div>
         </div>
       </header>
@@ -1696,7 +1689,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] md:text-xs text-slate-400 block mb-1 uppercase font-bold">Título del Hito</label>
-                <input list="hitos-list" required className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" placeholder="Ej: Soundcheck..." value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
+                <input list="hitos-list" required className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" placeholder="Ej: Soundcheck, Load In..." value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
                 <datalist id="hitos-list"><option value="Load In (Montaje)" /><option value="Soundcheck (Prueba de Sonido)" /><option value="Puertas (Apertura al público)" /><option value="Show Telonero" /><option value="Show Principal" /><option value="Load Out (Desmontaje)" /></datalist>
               </div>
               <div>
@@ -1743,7 +1736,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
           <Card className="w-full max-w-md p-4 md:p-6 bg-slate-900 border-emerald-500 flex flex-col max-h-[80vh]">
             <div className="flex justify-between items-center mb-3 border-b border-slate-800 pb-3">
-              <h2 className="text-base md:text-lg font-bold text-white">Asignar Crew</h2>
+              <h2 className="text-base md:text-lg font-bold text-white">Asignar Crew al Hito</h2>
               <button onClick={() => setAssigningHito(null)} className="text-slate-400 hover:text-white"><X size={20}/></button>
             </div>
             <p className="text-xs md:text-sm text-emerald-400 font-bold mb-3">{assigningHito.title}</p>
