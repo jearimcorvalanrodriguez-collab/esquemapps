@@ -7,7 +7,7 @@ import {
   Phone, Mail, CheckCheck, Send, Timer, Hourglass,
   Shield, CalendarPlus, FileText, Mic2, Lightbulb, Map as MapIcon, Save,
   Trash2, FolderPlus, RefreshCw, ChevronLeft, CheckSquare, Square, Printer, Utensils, CalendarDays,
-  RotateCw
+  RotateCw, Maximize, Minimize
 } from 'lucide-react';
 
 const ROLES = {
@@ -65,96 +65,89 @@ const LiveClock = () => {
   return <div className="text-lg md:text-xl font-black text-white tracking-widest font-mono">{time.toLocaleTimeString()}</div>;
 };
 
+// --- MOTOR GRÁFICO STAGEPLOT ---
 const STAGE_ITEMS = {
   DRUMS: {
-    label: "Batería",
-    width: 14, height: 14,
+    label: "Batería", width: 16, height: 16, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        <rect x="5" y="5" width="90" height="90" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" rx="4"/> {/* Tarima */}
-        <circle cx="50" cy="55" r="22" fill="#cbd5e1" stroke="#334155" strokeWidth="3"/> {/* Kick */}
-        <circle cx="30" cy="35" r="12" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Snare */}
-        <circle cx="70" cy="40" r="14" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Floor Tom */}
-        <circle cx="40" cy="30" r="10" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Tom 1 */}
-        <circle cx="60" cy="30" r="10" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Tom 2 */}
-        <circle cx="15" cy="20" r="15" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1"/> {/* Cymbal L */}
-        <circle cx="85" cy="20" r="15" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1"/> {/* Cymbal R */}
-        <rect x="40" y="80" width="20" height="12" fill="#334155" rx="3"/> {/* Silla */}
+        <rect x="5" y="5" width="90" height="90" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" rx="4"/> 
+        <circle cx="50" cy="55" r="22" fill="#cbd5e1" stroke="#334155" strokeWidth="3"/> 
+        <circle cx="30" cy="35" r="12" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> 
+        <circle cx="70" cy="40" r="14" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> 
+        <circle cx="40" cy="30" r="10" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> 
+        <circle cx="60" cy="30" r="10" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> 
+        <circle cx="15" cy="20" r="15" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1"/> 
+        <circle cx="85" cy="20" r="15" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1"/> 
+        <rect x="40" y="80" width="20" height="12" fill="#334155" rx="3"/> 
       </svg>
     )
   },
   GUITAR: {
-    label: "Guitarra",
-    width: 8, height: 8,
+    label: "Guitarra", width: 10, height: 10, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        <rect x="20" y="40" width="60" height="20" rx="10" fill="#64748b"/> {/* Hombros */}
-        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
-        <rect x="30" y="30" width="60" height="8" transform="rotate(-30 50 50)" fill="#1e293b" rx="2"/> {/* Guitarra */}
-        <rect x="30" y="80" width="40" height="15" fill="#475569" rx="2"/> {/* Pedalboard */}
+        <rect x="20" y="40" width="60" height="20" rx="10" fill="#64748b"/>
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2"/>
+        <rect x="30" y="30" width="60" height="8" transform="rotate(-30 50 50)" fill="#1e293b" rx="2"/> 
+        <rect x="30" y="80" width="40" height="15" fill="#475569" rx="2"/>
       </svg>
     )
   },
   BASS: {
-    label: "Bajo",
-    width: 8, height: 8,
+    label: "Bajo", width: 10, height: 10, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        <rect x="20" y="40" width="60" height="20" rx="10" fill="#475569"/> {/* Hombros */}
-        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
-        <rect x="20" y="35" width="70" height="6" transform="rotate(-20 50 50)" fill="#94a3b8" stroke="#1e293b" strokeWidth="1" rx="2"/> {/* Bajo */}
+        <rect x="20" y="40" width="60" height="20" rx="10" fill="#475569"/>
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> 
+        <rect x="20" y="35" width="70" height="6" transform="rotate(-20 50 50)" fill="#94a3b8" stroke="#1e293b" strokeWidth="1" rx="2"/> 
       </svg>
     )
   },
   KEYS: {
-    label: "Teclados",
-    width: 12, height: 10,
+    label: "Teclados", width: 14, height: 12, defaultRotation: 180,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        <rect x="10" y="30" width="80" height="25" fill="#1e293b" rx="2"/> {/* Sintetizador */}
-        <rect x="15" y="35" width="70" height="15" fill="#f8fafc"/> {/* Teclas */}
-        <rect x="30" y="65" width="40" height="15" rx="7" fill="#64748b"/> {/* Hombros */}
-        <circle cx="50" cy="70" r="14" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
+        <rect x="10" y="30" width="80" height="25" fill="#1e293b" rx="2"/> 
+        <rect x="15" y="35" width="70" height="15" fill="#f8fafc"/> 
+        <rect x="30" y="65" width="40" height="15" rx="7" fill="#64748b"/> 
+        <circle cx="50" cy="70" r="14" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> 
       </svg>
     )
   },
   VOCALS: {
-    label: "Voz Principal",
-    width: 7, height: 7,
+    label: "Cantante / Coros", width: 8, height: 8, defaultRotation: 180,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        <rect x="25" y="45" width="50" height="16" rx="8" fill="#3b82f6"/> {/* Hombros */}
-        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#1e3a8a" strokeWidth="2"/> {/* Cabeza */}
-        <circle cx="50" cy="20" r="6" fill="#475569"/> {/* Mic */}
+        <rect x="25" y="45" width="50" height="16" rx="8" fill="#3b82f6"/> 
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#1e3a8a" strokeWidth="2"/> 
+        <circle cx="50" cy="20" r="6" fill="#475569"/> 
       </svg>
     )
   },
   HORNS: {
-    label: "Vientos",
-    width: 7, height: 7,
+    label: "Vientos", width: 8, height: 8, defaultRotation: 180,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        <rect x="25" y="45" width="50" height="16" rx="8" fill="#eab308"/> {/* Hombros */}
-        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#713f12" strokeWidth="2"/> {/* Cabeza */}
-        <path d="M50,40 L45,10 L55,10 Z" fill="#eab308"/> {/* Campana */}
+        <rect x="25" y="45" width="50" height="16" rx="8" fill="#eab308"/> 
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#713f12" strokeWidth="2"/> 
+        <path d="M50,40 L45,10 L55,10 Z" fill="#eab308"/> 
       </svg>
     )
   },
   PERC: {
-    label: "Percusión",
-    width: 10, height: 10,
+    label: "Percusión", width: 12, height: 12, defaultRotation: 180,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        <circle cx="35" cy="35" r="14" fill="#fcd34d" stroke="#854d0e" strokeWidth="2"/> {/* Conga L */}
-        <circle cx="65" cy="35" r="14" fill="#fcd34d" stroke="#854d0e" strokeWidth="2"/> {/* Conga R */}
-        <rect x="30" y="60" width="40" height="15" rx="7" fill="#64748b"/> {/* Hombros */}
-        <circle cx="50" cy="65" r="14" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
+        <circle cx="35" cy="35" r="14" fill="#fcd34d" stroke="#854d0e" strokeWidth="2"/> 
+        <circle cx="65" cy="35" r="14" fill="#fcd34d" stroke="#854d0e" strokeWidth="2"/> 
+        <rect x="30" y="60" width="40" height="15" rx="7" fill="#64748b"/> 
+        <circle cx="50" cy="65" r="14" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> 
       </svg>
     )
   },
   MONITOR: {
-    label: "Monitor (Wedge)",
-    width: 8, height: 5,
+    label: "Monitor", width: 8, height: 5, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
         <polygon points="10,20 90,20 80,80 20,80" fill="#1e293b" stroke="#0f172a" strokeWidth="3"/>
@@ -163,8 +156,7 @@ const STAGE_ITEMS = {
     )
   },
   AMP: {
-    label: "Amp / Cabezal",
-    width: 8, height: 5,
+    label: "Amp / Cab", width: 8, height: 5, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
         <rect x="5" y="10" width="90" height="80" fill="#334155" stroke="#0f172a" strokeWidth="4" rx="2"/>
@@ -174,8 +166,7 @@ const STAGE_ITEMS = {
     )
   },
   POWER: {
-    label: "220V",
-    width: 4, height: 4,
+    label: "Toma 220V", width: 5, height: 5, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full">
         <rect x="5" y="5" width="90" height="90" fill="#ef4444" rx="10"/>
@@ -184,8 +175,7 @@ const STAGE_ITEMS = {
     )
   },
   DI: {
-    label: "D.I. Box",
-    width: 4, height: 3,
+    label: "D.I. Box", width: 5, height: 4, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full">
         <rect x="10" y="20" width="80" height="60" fill="#3b82f6" stroke="#1e3a8a" strokeWidth="4" rx="5"/>
@@ -194,22 +184,22 @@ const STAGE_ITEMS = {
     )
   },
   MIC_STAND: {
-    label: "Mic. Atril",
-    width: 4, height: 4,
+    label: "Mic. Atril", width: 5, height: 5, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        <circle cx="50" cy="50" r="25" fill="#64748b"/> {/* Base */}
-        <line x1="50" y1="50" x2="50" y2="10" stroke="#cbd5e1" strokeWidth="4"/> {/* Atril */}
-        <circle cx="50" cy="5" r="8" fill="#334155"/> {/* Mic */}
+        <circle cx="50" cy="50" r="25" fill="#64748b"/> 
+        <line x1="50" y1="50" x2="50" y2="10" stroke="#cbd5e1" strokeWidth="4"/> 
+        <circle cx="50" cy="5" r="8" fill="#334155"/> 
       </svg>
     )
   }
 };
 
-const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
+const StageplotBuilder = ({ items, onChange, config, onConfigChange, readOnly = false }) => {
   const canvasRef = useRef(null);
   const [draggedId, setDraggedId] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handlePointerDown = (e, id) => {
     if (readOnly) return;
@@ -223,11 +213,9 @@ const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
     if (!draggedId || readOnly || !canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     
-    // Coordenadas en porcentaje (0 a 100)
     let x = ((e.clientX - rect.left) / rect.width) * 100;
     let y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    // Clamp para no salir del canvas
     x = Math.max(0, Math.min(100, x));
     y = Math.max(0, Math.min(100, y));
 
@@ -247,9 +235,9 @@ const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
       id: Date.now().toString(),
       type: typeKey,
       label: defaultItem.label,
-      x: 50, // Center
+      x: 50, 
       y: 50,
-      rotation: 0
+      rotation: defaultItem.defaultRotation || 0
     };
     onChange([...items, newItem]);
     setSelectedId(newItem.id);
@@ -264,59 +252,70 @@ const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
     setSelectedId(null);
   };
 
-  const selectedItem = items.find(i => i.id === selectedId);
+  const containerClasses = isFullscreen 
+    ? "fixed inset-0 md:inset-4 z-[200] bg-slate-900 border border-slate-700 md:rounded-xl shadow-2xl p-2 md:p-4 flex flex-col md:flex-row gap-4"
+    : "flex flex-col md:flex-row gap-4 h-full print:block";
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 h-full print:block">
+    <div className={containerClasses}>
       
-      {/* PALETA (Oculta al imprimir) */}
+      {/* PALETA DE CONTROLES (Oculta al imprimir) */}
       {!readOnly && (
-        <div className="w-full md:w-48 bg-slate-900 border border-slate-700 rounded-xl p-3 shrink-0 print:hidden flex flex-col gap-3">
-          <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Caja de Equipos</h3>
-          <div className="grid grid-cols-3 md:grid-cols-2 gap-2 overflow-y-auto custom-scrollbar max-h-[150px] md:max-h-[500px]">
+        <div className="w-full md:w-56 bg-slate-950 md:bg-slate-900 border border-slate-800 md:border-slate-700 rounded-xl p-3 shrink-0 print:hidden flex flex-col gap-3 h-auto max-h-[35vh] md:max-h-none overflow-y-auto">
+          <div className="flex justify-between items-center mb-1">
+            <h3 className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Equipos</h3>
+            <Button variant="ghost" className="px-1 py-1" onClick={() => setIsFullscreen(!isFullscreen)}>
+              {isFullscreen ? <Minimize size={16}/> : <Maximize size={16}/>}
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-4 md:grid-cols-2 gap-2 flex-1 overflow-y-auto custom-scrollbar">
             {Object.entries(STAGE_ITEMS).map(([key, def]) => (
               <button 
                 key={key} type="button" onClick={() => addItem(key)}
-                className="flex flex-col items-center gap-1.5 p-2 rounded-lg border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 transition-colors"
+                className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-lg border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 transition-colors"
               >
-                <div className="w-8 h-8 pointer-events-none">{def.render()}</div>
-                <span className="text-[9px] font-bold text-slate-300 leading-tight text-center">{def.label}</span>
+                <div className="w-6 h-6 pointer-events-none">{def.render()}</div>
+                <span className="text-[8px] font-bold text-slate-300 leading-tight text-center">{def.label}</span>
               </button>
             ))}
           </div>
 
-          {selectedItem && (
-            <div className="mt-auto pt-3 border-t border-slate-800 space-y-2 animate-slide-up">
-              <h4 className="text-[10px] font-black text-emerald-400 uppercase">Item Seleccionado</h4>
-              <input 
-                type="text" value={selectedItem.label} onChange={(e) => updateSelected({ label: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-emerald-500"
-              />
-              <div className="flex gap-2">
-                <Button variant="secondary" className="flex-1 px-0 py-1 text-xs" onClick={() => updateSelected({ rotation: (selectedItem.rotation + 45) % 360 })} icon={RotateCw}>Girar</Button>
-                <Button variant="danger" className="flex-1 px-0 py-1 text-xs" onClick={removeSelected} icon={Trash2}>Borrar</Button>
+          <div className="pt-3 border-t border-slate-800 space-y-2 mt-auto">
+            <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Dimensiones Stage</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[9px] text-slate-500 font-bold uppercase">Ancho (m)</label>
+                <input type="number" min="2" max="50" className="w-full bg-slate-800 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-emerald-500" value={config.width} onChange={e=>onConfigChange({...config, width: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[9px] text-slate-500 font-bold uppercase">Fondo (m)</label>
+                <input type="number" min="2" max="50" className="w-full bg-slate-800 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-emerald-500" value={config.depth} onChange={e=>onConfigChange({...config, depth: e.target.value})} />
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
       {/* CANVAS DEL ESCENARIO */}
-      <div className="flex-1 bg-slate-800 p-2 md:p-4 rounded-xl border border-slate-700 print:bg-white print:border-none print:p-0">
+      <div className="flex-1 bg-slate-800 p-2 md:p-4 rounded-xl border border-slate-700 print:bg-white print:border-none print:p-0 flex items-center justify-center overflow-hidden">
         <div 
           ref={canvasRef}
-          className="relative w-full aspect-[4/3] md:aspect-[16/9] print:aspect-[4/3] bg-slate-950 print:bg-white rounded border-2 border-slate-700 print:border-black overflow-hidden touch-none"
+          className={`relative w-full max-h-full bg-slate-950 print:bg-white border-2 border-slate-700 print:border-black touch-none shadow-inner`}
+          style={{ 
+            aspectRatio: `${config.width} / ${config.depth}`,
+            maxHeight: isFullscreen ? '90vh' : 'auto'
+          }}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
-          onClick={() => !draggedId && setSelectedId(null)} // Deselect if clicking empty space
+          onClick={() => !draggedId && setSelectedId(null)} 
         >
-          {/* Rejilla de fondo visual */}
+          {/* Rejilla */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:5%_5%] opacity-20 print:opacity-10 pointer-events-none"></div>
           
-          {/* Texto FRONT OF STAGE */}
           <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
-            <span className="text-[10px] md:text-xs font-black tracking-widest text-slate-500 print:text-black uppercase">Público / Front of Stage</span>
+            <span className="text-[9px] md:text-xs font-black tracking-widest text-slate-500 print:text-black uppercase">Público / Front of Stage</span>
           </div>
 
           {items.map(item => {
@@ -329,11 +328,26 @@ const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
                 style={{ 
                   left: `${item.x}%`, top: `${item.y}%`, 
                   width: `${def.width}%`, height: `${def.height}%`,
-                  transform: `translate(-50%, -50%)`, // Centrar en X, Y
+                  transform: `translate(-50%, -50%)`, 
                   zIndex: isSelected ? 50 : 10
                 }}
                 onPointerDown={(e) => handlePointerDown(e, item.id)}
               >
+                {/* Menú Flotante Inline (Aparece sobre el ítem al seleccionarlo) */}
+                {isSelected && (
+                  <div className="absolute top-[-55px] left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl p-1.5 flex items-center gap-1.5 z-[60] pointer-events-auto"
+                       onPointerDown={e => e.stopPropagation()}>
+                    <input 
+                      className="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-[10px] text-white w-24 outline-none focus:border-emerald-500" 
+                      value={item.label} 
+                      onChange={e => updateSelected({ label: e.target.value })}
+                      placeholder="Nombre..."
+                    />
+                    <button type="button" onClick={() => updateSelected({ rotation: (item.rotation + 45) % 360 })} className="p-1.5 bg-slate-700 hover:bg-emerald-600 rounded text-white transition-colors" title="Girar 45º"><RotateCw size={12}/></button>
+                    <button type="button" onClick={removeSelected} className="p-1.5 bg-slate-700 hover:bg-red-600 rounded text-white transition-colors" title="Eliminar"><Trash2 size={12}/></button>
+                  </div>
+                )}
+
                 {/* Elemento Renderizado con Rotación */}
                 <div 
                   className={`w-full h-full transition-transform ${isSelected ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-slate-950 rounded-sm' : ''} print:ring-0`}
@@ -341,8 +355,9 @@ const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
                 >
                   {def.render()}
                 </div>
-                {/* Etiqueta */}
-                {item.label && (
+                
+                {/* Etiqueta (Si no está seleccionado o en impresión) */}
+                {item.label && !isSelected && (
                   <div className="absolute top-[105%] left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/80 print:bg-transparent print:text-black px-1.5 py-0.5 rounded text-[8px] md:text-[10px] font-bold text-white text-center pointer-events-none">
                     {item.label}
                   </div>
@@ -352,7 +367,6 @@ const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
           })}
         </div>
       </div>
-
     </div>
   );
 };
@@ -494,6 +508,7 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   );
 };
 
+// --- 2. VISTA EXCLUSIVA CONDUCTOR ---
 const ConductorView = ({ currentUser, showToast }) => {
   const r = currentUser.routeInfo;
   const [status, setStatus] = useState(r.status);
@@ -529,6 +544,7 @@ const ConductorView = ({ currentUser, showToast }) => {
   );
 };
 
+// --- 3. MÓDULO DE TRANSPORTE (ADMIN/CREW) ---
 const TransportView = ({ currentUser, setCurrentView, setSelectedProject, showToast }) => {
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -578,13 +594,19 @@ const TransportView = ({ currentUser, setCurrentView, setSelectedProject, showTo
                   <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><Truck className="text-emerald-500" size={20} /></div>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded block w-fit text-emerald-500 bg-emerald-500/10">{proyecto.status}</span>
                 </div>
+                
                 <h2 className="text-lg font-bold text-white leading-tight mb-1.5">{proyecto.name}</h2>
                 <div className="space-y-1 mb-3">
-                  <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5"><Calendar size={12}/> {formattedProjectDate}</p>
+                  <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5">
+                    <Calendar size={12}/> {formattedProjectDate}
+                  </p>
                   <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5"><User size={12}/> {proyecto.manager}</p>
                 </div>
+                
                 <div className="border-t border-slate-700 pt-3 mt-3">
-                  <Button variant="ghost" className="w-full bg-slate-900 border border-slate-700 hover:text-emerald-400 text-xs py-1.5" icon={Navigation}>Ver Rutas</Button>
+                  <Button variant="ghost" className="w-full bg-slate-900 border border-slate-700 hover:text-emerald-400 text-xs py-1.5" icon={Navigation}>
+                    Ver Rutas
+                  </Button>
                 </div>
               </Card>
             )
@@ -672,7 +694,9 @@ const TransportDetailsView = ({ currentUser, setCurrentView, selectedProject, sh
       )}
 
       {fetchError ? (
-        <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm"><AlertCircle size={18} /> Error de conexión.</div>
+        <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm">
+          <AlertCircle size={18} /> Error de conexión.
+        </div>
       ) : loading && transports.length === 0 ? (
         <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div>
       ) : (
@@ -722,7 +746,8 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
     inputs: [{ ch: '1', name: '', mic: '', v48: '', stand: '', position: '', obs: '' }],
     backline: [{ col1: '', col2: '', col3: '', col4: '' }],
     visuals: [{ col1: '', col2: '', col3: '', col4: '' }],
-    stageplot: [] // Array of items
+    stageplot: [],
+    stageplotConfig: { width: 10, depth: 8 }
   };
 
   const templatesTexto = {
@@ -742,8 +767,8 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
           let parsedContent;
           try { 
             parsedContent = JSON.parse(r.content); 
-            // Retro-compatibilidad para riders antiguos sin stageplot
             if(!parsedContent.stageplot) parsedContent.stageplot = [];
+            if(!parsedContent.stageplotConfig) parsedContent.stageplotConfig = { width: 10, depth: 8 };
           } 
           catch(e) { parsedContent = { ...defaultContent, importante: r.content }; }
           return { ...r, content: parsedContent };
@@ -865,7 +890,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-slate-950 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-slate-950 custom-scrollbar relative">
             {editTab === 'GENERAL' && (
               <div className="space-y-4 md:space-y-6">
                 <div>
@@ -934,7 +959,12 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
 
             {editTab === 'STAGEPLOT' && activeTabs.includes('STAGEPLOT') && (
               <div className="h-full min-h-[400px]">
-                 <StageplotBuilder items={form.content.stageplot || []} onChange={updateStageplot} />
+                 <StageplotBuilder 
+                   items={form.content.stageplot || []} 
+                   onChange={updateStageplot} 
+                   config={form.content.stageplotConfig || { width: 10, depth: 8 }}
+                   onConfigChange={(newCfg) => setForm(prev => ({...prev, content: {...prev.content, stageplotConfig: newCfg}}))}
+                 />
               </div>
             )}
           </div>
@@ -1079,9 +1109,17 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
                   {/* Render Stageplot in View Mode */}
                   {r.content.stageplot && r.content.stageplot.length > 0 && (
                      <div className="mt-3 md:mt-4 break-inside-avoid">
-                        <h4 className="text-slate-400 print:text-black text-[10px] md:text-xs font-black mb-1.5 uppercase">STAGEPLOT</h4>
+                        <h4 className="text-slate-400 print:text-black text-[10px] md:text-xs font-black mb-1.5 uppercase">
+                           STAGEPLOT ({r.content.stageplotConfig?.width || 10}m x {r.content.stageplotConfig?.depth || 8}m)
+                        </h4>
                         <div className="w-full rounded border-2 border-slate-700 print:border-black overflow-hidden bg-white">
-                           <StageplotBuilder items={r.content.stageplot} onChange={()=>{}} readOnly={true} />
+                           <StageplotBuilder 
+                              items={r.content.stageplot} 
+                              config={r.content.stageplotConfig || {width: 10, depth: 8}} 
+                              onChange={()=>{}} 
+                              onConfigChange={()=>{}} 
+                              readOnly={true} 
+                           />
                         </div>
                      </div>
                   )}
@@ -1507,548 +1545,6 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm }) => {
             </Card>
           )}
         </>
-      )}
-    </div>
-  );
-};
-
-// --- 9. MI PERFIL ---
-const ProfileView = ({ currentUser, setCurrentUser, showToast }) => {
-  const [pPhone, setPPhone] = useState(currentUser.phone || '');
-  const [pTalla, setPTalla] = useState(currentUser.talla || 'M');
-  const [pDieta, setPDieta] = useState(currentUser.dieta || 'OMNÍVORA');
-  
-  const [oldPass, setOldPass] = useState('');
-  const [newPass, setNewPass] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
-  const [saving, setSaving] = useState(false);
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    if (newPass && newPass !== confirmPass) return showToast("Las contraseñas no coinciden.");
-
-    setSaving(true);
-    try {
-      const payload = { email: currentUser.email, phone: pPhone, talla: pTalla, dieta: pDieta };
-      if (newPass && oldPass) { payload.oldPassword = oldPass; payload.newPassword = newPass; }
-      const res = await apiFetch('updateProfile', payload);
-      if (res.status === 'success') {
-        setCurrentUser({ ...currentUser, phone: pPhone, talla: pTalla, dieta: pDieta });
-        setOldPass(''); setNewPass(''); setConfirmPass('');
-        showToast(newPass ? "¡Perfil y Contraseña actualizados!" : "¡Perfil actualizado!");
-      } else { showToast(res.message); }
-    } catch (err) { showToast("Error al guardar."); }
-    setSaving(false);
-  };
-
-  return (
-    <div className="max-w-xl mx-auto animate-fade-in pb-24">
-      <header className="mb-4 md:mb-6"><h1 className="text-2xl font-black text-white flex items-center gap-2 md:gap-3"><User className="text-emerald-500" size={24}/> Mi Perfil</h1></header>
-      <Card className="p-4 md:p-6">
-        <form onSubmit={handleUpdate} className="space-y-4">
-          <div className="pb-3 border-b border-slate-700"><label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Nombre</label><input type="text" value={currentUser.name} disabled className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-500 text-sm cursor-not-allowed" /></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div><label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Teléfono</label><input type="text" value={pPhone} onChange={e=>setPPhone(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500" required /></div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Talla (Merch)</label>
-              <select value={pTalla} onChange={e=>setPTalla(e.target.value)} className="w-full max-w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500 break-words whitespace-normal">
-                <option value="XS">XS - Extra Pequeño</option><option value="S">S - Pequeño</option><option value="M">M - Mediano</option><option value="L">L - Grande</option><option value="XL">XL - Extra Grande</option><option value="XXL">XXL - Doble Extra Grande</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Preferencia Alimentación</label>
-            <select value={pDieta} onChange={e=>setPDieta(e.target.value)} className="w-full max-w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500 break-words whitespace-normal">
-              <option value="OMNÍVORA">Omnívora (Estándar)</option><option value="VEGETARIANA">Vegetariana</option><option value="VEGANA">Vegana</option><option value="CRUDÍVORA">Crudívora</option><option value="FLEXITARIANA">Flexitariana</option><option value="SIN GLUTEN">Sin Gluten</option><option value="BAJA EN FODMAP">Baja en FODMAP</option><option value="HIPOSÓDICA">Hiposódica</option><option value="DIABÉTICA">Diabética</option><option value="KETO">Keto</option><option value="MEDITERRÁNEA">Mediterránea</option>
-            </select>
-          </div>
-          <div className="bg-slate-800/80 border border-slate-700 rounded-lg p-2.5 flex gap-2.5 items-start mt-1">
-            <Shield size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-            <p className="text-[10px] md:text-xs text-slate-400 leading-relaxed font-bold">Datos usados solo para logística de producción.</p>
-          </div>
-          <div className="pt-3 border-t border-slate-700 mt-3 space-y-2.5">
-            <h3 className="text-xs md:text-sm font-bold text-emerald-400 flex items-center gap-1.5"><Key size={14}/> Cambiar Contraseña (Opcional)</h3>
-            <input type="password" placeholder="Contraseña Actual" value={oldPass} onChange={e=>setOldPass(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500" />
-            <input type="password" placeholder="Nueva Contraseña" value={newPass} onChange={e=>setNewPass(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500" />
-            <input type="password" placeholder="Confirmar Contraseña" value={confirmPass} onChange={e=>setConfirmPass(e.target.value)} className={`w-full bg-slate-900 border rounded-lg p-2.5 text-white text-sm outline-none ${confirmPass && newPass !== confirmPass ? 'border-red-500' : 'border-slate-700 focus:border-emerald-500'}`} />
-            {confirmPass && newPass !== confirmPass && <p className="text-[10px] text-red-500 font-bold">Las contraseñas no coinciden</p>}
-          </div>
-          <Button type="submit" variant="primary" className="w-full py-3 mt-4" disabled={saving || (confirmPass && newPass !== confirmPass)}>{saving ? <Loader2 className="animate-spin"/> : 'Guardar Cambios'}</Button>
-        </form>
-      </Card>
-    </div>
-  );
-};
-
-// --- 10. DASHBOARD PRINCIPAL (MÓDULO DE PROYECTOS) ---
-const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast, directory }) => {
-  const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
-  const [proyectos, setProyectos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [form, setForm] = useState({ name: '', type: 'Gira Musical' });
-  const [assigningProject, setAssigningProject] = useState(null);
-
-  const fetchProyectos = async () => {
-    setFetchError(false);
-    try {
-      const res = await apiFetch('getProyectos');
-      if (res.status === 'success') {
-        const parsed = res.data.map(p => ({ ...p, asignados: Array.isArray(p.asignados) ? p.asignados : [] }));
-        setProyectos(parsed);
-      }
-      else setFetchError(res.message || "Error al obtener proyectos");
-    } catch (e) { setFetchError("No se pudo conectar al servidor."); }
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchProyectos(); }, []);
-
-  const handleCreateProyecto = async (e) => {
-    e.preventDefault(); 
-    try {
-      const payload = { ...form, manager: currentUser.name };
-      const res = await apiFetch('createProyecto', payload);
-      if (res.status === 'success') {
-        showToast("Proyecto creado exitosamente."); setIsCreating(false); setForm({ name: '', type: 'Gira Musical' }); fetchProyectos();
-      } else {
-        showToast(res.message);
-      }
-    } catch(e) { showToast("Error al crear proyecto."); }
-  };
-
-  const handleUpdateStatus = async (e, id, currentStatus) => {
-    e.stopPropagation(); 
-    const newStatus = currentStatus === 'ACTIVO' ? 'FINALIZADO' : 'ACTIVO';
-    try {
-      await apiFetch('updateProyectoStatus', { id, status: newStatus });
-      showToast("Estado actualizado."); fetchProyectos();
-    } catch(e) { showToast("Error al actualizar."); }
-  };
-
-  const toggleAssignProject = (email) => {
-    setAssigningProject(prev => {
-      const isAssigned = prev.asignados.includes(email);
-      const newAsignados = isAssigned ? prev.asignados.filter(e => e !== email) : [...prev.asignados, email];
-      return { ...prev, asignados: newAsignados };
-    });
-  };
-
-  const saveProjectAsignaciones = async () => {
-    try {
-      await apiFetch('updateProyectoAsignaciones', { id: assigningProject.id, asignados: assigningProject.asignados });
-      showToast("Asignaciones de proyecto guardadas."); setAssigningProject(null); fetchProyectos();
-    } catch(e) { showToast("Error al guardar."); }
-  };
-
-  return (
-    <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-6xl mx-auto">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-slate-800 pb-4">
-        <div><h1 className="text-2xl md:text-3xl font-black text-white leading-tight">Hola, {currentUser.name.split(' ')[0]}</h1><p className="text-emerald-400 text-xs md:text-sm font-black uppercase tracking-wider">{currentUser.role}</p></div>
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          {canCreate && !isCreating && <Button icon={FolderPlus} variant="primary" className="flex-1 sm:flex-none" onClick={() => setIsCreating(true)}>Nuevo Proyecto</Button>}
-        </div>
-      </header>
-
-      {isCreating && (
-        <Card className="p-4 md:p-6 border-emerald-500 mb-4 max-w-2xl">
-          <h2 className="text-base md:text-lg font-bold text-white mb-3">Iniciar Nuevo Proyecto / Gira</h2>
-          <form onSubmit={handleCreateProyecto} className="space-y-3">
-            <div><label className="text-[10px] md:text-xs font-bold text-slate-400 block mb-1 uppercase">Nombre del Proyecto</label><input required className="w-full bg-slate-900 border border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} /></div>
-            <div>
-              <label className="text-[10px] md:text-xs font-bold text-slate-400 block mb-1 uppercase">Tipo de Producción</label>
-              <select className="w-full max-w-full bg-slate-900 border border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500 break-words" value={form.type} onChange={e=>setForm({...form, type: e.target.value})}>
-                <option value="Gira Musical">Gira Musical (Tour)</option><option value="Festival">Festival</option><option value="Show Único">Show Único (One-Off)</option><option value="Evento Corporativo">Evento Corporativo</option>
-              </select>
-            </div>
-            <div className="flex gap-2 pt-1"><Button variant="secondary" className="flex-1 py-2 md:py-2.5" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1 py-2 md:py-2.5">Guardar Proyecto</Button></div>
-          </form>
-        </Card>
-      )}
-
-      <div>
-        <h2 className="text-base md:text-lg font-bold text-slate-300 mb-3 flex items-center gap-1.5"><Navigation size={18}/> Proyectos Activos</h2>
-        
-        {fetchError ? (
-          <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm"><AlertCircle size={18} /> {fetchError}</div>
-        ) : loading && proyectos.length === 0 ? (
-          <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div>
-        ) : proyectos.length === 0 ? (
-          <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm">No hay proyectos activos.</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {proyectos.map(proyecto => {
-              const projectDate = new Date(Number(proyecto.id));
-              const formattedProjectDate = `${String(projectDate.getDate()).padStart(2, '0')}/${String(projectDate.getMonth() + 1).padStart(2, '0')}/${projectDate.getFullYear()}`;
-
-              return (
-                <Card 
-                  key={proyecto.id} 
-                  onClick={() => { setSelectedProject(proyecto); setCurrentView('PROJECT_DETAILS'); }}
-                  className={`group cursor-pointer ${proyecto.status === 'ACTIVO' ? 'hover:border-emerald-500' : 'opacity-70 grayscale hover:grayscale-0'}`}
-                >
-                  <div className="p-3 md:p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><Music className="text-emerald-500" size={20} /></div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded block w-fit ${proyecto.status === 'ACTIVO' ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-400 bg-slate-800 border border-slate-700'}`}>{proyecto.status}</span>
-                        <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-2 py-0.5 rounded border border-slate-700 uppercase font-bold tracking-wider">{proyecto.type}</span>
-                      </div>
-                    </div>
-                    
-                    <h2 className="text-lg font-bold text-white leading-tight mb-2">{proyecto.name}</h2>
-                    <div className="space-y-1 mb-3">
-                      <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5">
-                        <Calendar size={12}/> {formattedProjectDate}
-                      </p>
-                      <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5"><User size={12}/> Liderado por: {proyecto.manager}</p>
-                    </div>
-                    
-                    <div className="flex flex-col gap-1.5 border-t border-slate-700 pt-3">
-                      {canCreate && (
-                        <Button variant="ghost" className="w-full bg-slate-900 border border-slate-700 hover:text-white text-[10px] md:text-xs py-1.5 mb-1" icon={Users} onClick={(e) => { e.stopPropagation(); setAssigningProject(proyecto); }}>
-                          Asignar Equipo ({proyecto.asignados.length})
-                        </Button>
-                      )}
-                      {canCreate && (
-                        <div className="flex gap-1.5">
-                          <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 hover:text-white text-[10px] md:text-xs py-1.5" onClick={(e) => { e.stopPropagation(); showToast("Para editar nombre hazlo desde la BD."); }}>Editar</Button>
-                          <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 hover:text-emerald-400 text-[10px] md:text-xs py-1.5" onClick={(e) => handleUpdateStatus(e, proyecto.id, proyecto.status)}>
-                            {proyecto.status === 'ACTIVO' ? 'Finalizar' : 'Reactivar'}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      {assigningProject && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
-          <Card className="w-full max-w-md p-4 md:p-6 bg-slate-900 border-emerald-500 flex flex-col max-h-[80vh]">
-            <div className="flex justify-between items-center mb-3 border-b border-slate-800 pb-3">
-              <h2 className="text-base md:text-lg font-bold text-white">Asignar Equipo</h2>
-              <button onClick={() => setAssigningProject(null)} className="text-slate-400 hover:text-white"><X size={20}/></button>
-            </div>
-            <p className="text-xs md:text-sm text-emerald-400 font-bold mb-3">{assigningProject.name}</p>
-            
-            <div className="flex-1 overflow-y-auto space-y-1.5 mb-3 pr-2 custom-scrollbar">
-              {directory.length === 0 ? <p className="text-slate-500 text-xs md:text-sm text-center">Cargando directorio...</p> : directory.map(u => {
-                const isChecked = assigningProject.asignados.includes(u.email);
-                return (
-                  <button key={u.email} onClick={() => toggleAssignProject(u.email)} className={`w-full flex items-center justify-between p-2.5 rounded-lg border transition-colors ${isChecked ? 'bg-emerald-500/10 border-emerald-500/50 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}>
-                    <div className="flex items-center gap-2.5">
-                      {isChecked ? <CheckSquare className="text-emerald-500" size={18}/> : <Square size={18}/>}
-                      <div className="text-left"><p className="font-bold text-xs md:text-sm">{u.name}</p><p className="text-[9px] uppercase tracking-wider">{u.role}</p></div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <Button onClick={saveProjectAsignaciones} className="w-full py-2.5 md:py-3 text-xs md:text-sm">Guardar Asignaciones</Button>
-          </Card>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Función helper para estado de Hitos
-const getEventStatus = (targetDate, currentTime) => {
-  if (targetDate.getTime() === 0) return { border: 'border-slate-700', bg: 'bg-slate-800/50', dot: 'bg-slate-500', text: 'Fecha inválida', timeText: '--:--', pulse: false, textClass: 'text-slate-500' };
-  const diffMs = targetDate - currentTime;
-  if (diffMs <= 0) return { border: 'border-slate-700', bg: 'bg-slate-800/50', dot: 'bg-slate-500', text: 'Finalizado', timeText: '00h 00m 00s', pulse: false, textClass: 'text-slate-500' };
-  const diffSec = Math.floor(diffMs / 1000);
-  const hours = Math.floor(diffSec / 3600);
-  const minutes = Math.floor((diffSec % 3600) / 60);
-  const seconds = diffSec % 60;
-  const hh = String(hours).padStart(2, '0');
-  const mm = String(minutes).padStart(2, '0');
-  const ss = String(seconds).padStart(2, '0');
-  const timeText = `Faltan ${hh}h ${mm}m ${ss}s`;
-
-  if (hours < 2) return { border: 'border-red-500/50', bg: 'bg-red-500/10', dot: 'bg-red-500', text: '¡INMINENTE!', timeText, pulse: true, textClass: 'text-red-500' };
-  else if (hours < 24) return { border: 'border-amber-500/50', bg: 'bg-amber-500/10', dot: 'bg-amber-500', text: 'En preparación', timeText, pulse: false, textClass: 'text-amber-500' };
-  else return { border: 'border-emerald-500/50', bg: 'bg-emerald-500/10', dot: 'bg-emerald-500', text: 'Agendado', timeText, pulse: false, textClass: 'text-emerald-500' };
-};
-
-// Componente Micro-Aislado para los Hitos
-const EventCard = ({ event, canManage, handleDeleteHito, setAssigningHito, currentUser, requestConfirm }) => {
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const status = getEventStatus(event.fullDate, now);
-  const isAssignedToMe = event.asignados.includes(currentUser.email);
-
-  let formattedDate = 'Fecha Inválida';
-  let dRaw = String(event.date);
-  if (dRaw.includes('T')) dRaw = dRaw.split('T')[0];
-  const matchISO = dRaw.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (matchISO) {
-    formattedDate = `${matchISO[3]}/${matchISO[2]}/${matchISO[1]}`;
-  } else {
-    const matchLoc = dRaw.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-    if(matchLoc) formattedDate = `${matchLoc[1]}/${matchLoc[2]}/${matchLoc[3]}`;
-  }
-  
-  const timeMatch = String(event.time).match(/\d{2}:\d{2}/);
-  const formattedTime = timeMatch ? `${timeMatch[0]} h` : '--:-- h';
-
-  return (
-    <div className={`p-3 md:p-4 rounded-xl border transition-all duration-500 relative group ${status.bg} ${status.border}`}>
-      {canManage && (
-        <button onClick={() => requestConfirm("¿Eliminar este Hito de forma permanente?", () => handleDeleteHito(event.id))} className="absolute top-3 right-3 text-slate-500 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"><Trash2 size={16} /></button>
-      )}
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 md:gap-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-bold text-white mb-1.5 pr-8">{event.title}</h3>
-          
-          <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs font-bold mb-2">
-            <span className="flex items-center gap-1 text-slate-300"><Calendar size={12}/> {formattedDate}</span>
-            <span className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20"><Clock size={12}/> {formattedTime}</span>
-          </div>
-          
-          <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 underline decoration-blue-500/30 underline-offset-2 flex items-center gap-1 w-fit mb-3">
-            <MapPin size={12}/> {event.location}
-          </a>
-
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ${status.dot} ${status.pulse ? 'animate-pulse' : ''}`}></span>
-            <span className={`text-[10px] font-black uppercase tracking-wider ${status.textClass}`}>{status.text}</span>
-            {isAssignedToMe && <span className="ml-1.5 text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider border border-blue-500/50">Asignado a ti</span>}
-          </div>
-
-          {canManage && (
-            <Button variant="ghost" className="bg-slate-900 border border-slate-700 py-1 px-2 text-[10px]" icon={Users} onClick={() => setAssigningHito(event)}>
-              Asignado ({event.asignados.length})
-            </Button>
-          )}
-        </div>
-        <div className={`shrink-0 flex items-center gap-1.5 px-3 py-2 md:py-2.5 rounded-lg border bg-slate-900 ${status.border} ${status.textClass} font-mono font-black text-xs md:text-sm tracking-wider mt-2 md:mt-0`}>
-          <Hourglass size={14} className={status.pulse ? 'animate-spin-slow' : ''} />{status.timeText}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- 11. DETALLES DEL PROYECTO (HITOS INTERNOS) ---
-const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, showToast, directory, requestConfirm }) => {
-  const p = selectedProject;
-  const canManage = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
-  const [hitos, setHitos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [form, setForm] = useState({ title: '', location: '', date: '', time: '' });
-  const [assigningHito, setAssigningHito] = useState(null);
-
-  const fetchHitos = async () => {
-    setFetchError(false);
-    try {
-      const res = await apiFetch('getHitos');
-      if (res.status === 'success') {
-        const projectHitos = res.data.filter(ev => String(ev.proyectoId) === String(p.id));
-        const parsedEvents = projectHitos.map(ev => {
-          let fullDate = new Date(0); 
-          try {
-              let dStr = '';
-              let dRaw = String(ev.date);
-              if (dRaw.includes('T')) dRaw = dRaw.split('T')[0];
-              const matchISO = dRaw.match(/(\d{4})-(\d{2})-(\d{2})/);
-              if (matchISO) dStr = matchISO[0];
-              else {
-                  const matchLoc = dRaw.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-                  if(matchLoc) dStr = `${matchLoc[3]}-${matchLoc[2]}-${matchLoc[1]}`;
-              }
-              
-              let tStr = '00:00';
-              const timeMatch = String(ev.time).match(/\d{2}:\d{2}/);
-              if(timeMatch) tStr = timeMatch[0];
-
-              const dateObj = new Date(`${dStr}T${tStr}:00`);
-              if(!isNaN(dateObj.getTime())) fullDate = dateObj;
-          } catch(e) { console.error("Error parseando fecha", e); }
-          return { ...ev, fullDate, asignados: Array.isArray(ev.asignados) ? ev.asignados : [] };
-        });
-        setHitos(parsedEvents.sort((a,b) => a.fullDate - b.fullDate));
-      } else setFetchError(res.message || "Error al obtener hitos");
-    } catch(e) { setFetchError("Fallo de red al obtener hitos."); }
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchHitos(); }, []);
-
-  const firstHito = hitos.length > 0 ? hitos[0] : null;
-  let projectDateStr = "Sin hitos";
-  let showClock = false;
-
-  if (firstHito && firstHito.fullDate && firstHito.fullDate.getTime() !== 0) {
-    const fd = firstHito.fullDate;
-    projectDateStr = `${String(fd.getDate()).padStart(2, '0')}/${String(fd.getMonth() + 1).padStart(2, '0')}/${fd.getFullYear()} - ${String(fd.getHours()).padStart(2, '0')}:${String(fd.getMinutes()).padStart(2, '0')} h`;
-    
-    const diffMs = fd.getTime() - new Date().getTime();
-    const hoursDiff = diffMs / (1000 * 60 * 60);
-    if (hoursDiff <= 72) {
-      showClock = true;
-    }
-  }
-
-  const handleCreateHito = async (e) => {
-    e.preventDefault(); 
-    try {
-      const payload = { ...form, proyectoId: p.id };
-      const res = await apiFetch('createHito', payload);
-      if (res.status === 'success') {
-        showToast("Hito agendado."); setIsCreating(false); setForm({ title: '', location: '', date: '', time: '' }); fetchHitos();
-      } else {
-        showToast("Error: " + res.message); 
-      }
-    } catch(e) { showToast("Error al crear hito."); }
-  };
-
-  const handleDeleteHito = async (id) => {
-    try {
-      await apiFetch('deleteHito', { id });
-      showToast("Hito eliminado."); fetchHitos();
-    } catch(e) { showToast("Error al eliminar."); }
-  };
-
-  const captureGPS = () => {
-    if(navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        setForm(prev => ({...prev, location: `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`}));
-        showToast("GPS Capturado correctamente");
-      }, () => showToast("Error al obtener GPS. Activa los permisos."));
-    } else showToast("Tu navegador no soporta GPS.");
-  };
-
-  const toggleAssign = (email) => {
-    setAssigningHito(prev => {
-      const isAssigned = prev.asignados.includes(email);
-      const newAsignados = isAssigned ? prev.asignados.filter(e => e !== email) : [...prev.asignados, email];
-      return { ...prev, asignados: newAsignados };
-    });
-  };
-
-  const saveAsignaciones = async () => {
-    try {
-      await apiFetch('updateHitoAsignaciones', { id: assigningHito.id, asignados: assigningHito.asignados });
-      showToast("Asignaciones guardadas."); setAssigningHito(null); fetchHitos();
-    } catch(e) { showToast("Error al guardar."); }
-  };
-
-  return (
-    <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-4xl mx-auto">
-      <button onClick={() => setCurrentView('DASHBOARD')} className="flex items-center gap-1.5 text-xs md:text-sm text-slate-400 hover:text-white transition-colors mb-2"><ChevronLeft size={16}/> Volver a Proyectos</button>
-      
-      <header className="border-b border-slate-800 pb-4 flex flex-col items-start gap-2">
-        <div>
-          <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 uppercase font-bold tracking-wider mb-1.5 inline-block">PROYECTO</span>
-          <h1 className="text-xl md:text-2xl font-black text-white leading-tight">{p.name}</h1>
-          <div className="mt-1.5 space-y-1">
-            <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5"><Calendar size={12}/> Inicio: {projectDateStr}</p>
-            <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5"><User size={12}/> Liderado por: {p.manager}</p>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 mb-3 gap-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2"><Clock className="text-emerald-500" size={18}/> Timing</h2>
-          {showClock && (
-            <div className="bg-slate-900 border border-slate-700 px-3 py-1 rounded-lg flex items-center gap-2 shadow-sm animate-fade-in">
-              <Timer className="text-emerald-500 animate-pulse" size={14} />
-              <LiveClock />
-            </div>
-          )}
-        </div>
-        {canManage && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)} className="py-1.5 px-3 text-xs md:text-sm">Nuevo Hito</Button>}
-      </div>
-
-      {isCreating && (
-        <Card className="p-4 md:p-6 border-emerald-500 mb-4">
-          <h2 className="text-base font-bold text-white mb-3">Agendar Hito</h2>
-          <form onSubmit={handleCreateHito} className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="text-[10px] md:text-xs text-slate-400 block mb-1 uppercase font-bold">Título del Hito</label>
-                <input list="hitos-list" required className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" placeholder="Ej: Soundcheck, Load In..." value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
-                <datalist id="hitos-list"><option value="Load In (Montaje)" /><option value="Soundcheck (Prueba de Sonido)" /><option value="Puertas (Apertura al público)" /><option value="Show Telonero" /><option value="Show Principal" /><option value="Load Out (Desmontaje)" /></datalist>
-              </div>
-              <div>
-                <label className="text-[10px] md:text-xs text-slate-400 block mb-1 uppercase font-bold">Ubicación</label>
-                <div className="flex items-center gap-2">
-                  <input required className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" placeholder="Ej: Escenario Principal" value={form.location} onChange={e=>setForm({...form, location: e.target.value})} />
-                  <Button type="button" variant="secondary" icon={MapPin} onClick={captureGPS} title="Usar GPS" className="px-3" />
-                </div>
-              </div>
-              <div><label className="text-[10px] md:text-xs text-slate-400 block mb-1 uppercase font-bold">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" onChange={e=>setForm({...form, date: e.target.value})} /></div>
-              <div><label className="text-[10px] md:text-xs text-slate-400 block mb-1 uppercase font-bold">Hora</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" onChange={e=>setForm({...form, time: e.target.value})} /></div>
-            </div>
-            <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1 py-2 md:py-2.5" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1 py-2 md:py-2.5">Guardar Hito</Button></div>
-          </form>
-        </Card>
-      )}
-
-      {fetchError ? (
-        <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm"><AlertCircle size={18} /> {fetchError}</div>
-      ) : loading && hitos.length === 0 ? (
-        <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div>
-      ) : hitos.length === 0 ? (
-        <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl bg-slate-900/50">
-          <CalendarPlus className="mx-auto text-slate-600 mb-3" size={40} />
-          <p className="text-slate-400 text-xs md:text-sm">Aún no hay hitos agendados en este proyecto.</p>
-        </div>
-      ) : (
-        <div className="space-y-3 md:space-y-4">
-          {hitos.map((event) => (
-            <EventCard 
-               key={event.id} 
-               event={event} 
-               canManage={canManage} 
-               handleDeleteHito={handleDeleteHito} 
-               setAssigningHito={setAssigningHito} 
-               currentUser={currentUser} 
-               requestConfirm={requestConfirm} 
-            />
-          ))}
-        </div>
-      )}
-
-      {assigningHito && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
-          <Card className="w-full max-w-md p-4 md:p-6 bg-slate-900 border-emerald-500 flex flex-col max-h-[80vh]">
-            <div className="flex justify-between items-center mb-3 border-b border-slate-800 pb-3">
-              <h2 className="text-base md:text-lg font-bold text-white">Asignar Crew al Hito</h2>
-              <button onClick={() => setAssigningHito(null)} className="text-slate-400 hover:text-white"><X size={20}/></button>
-            </div>
-            <p className="text-xs md:text-sm text-emerald-400 font-bold mb-3">{assigningHito.title}</p>
-            
-            <div className="flex-1 overflow-y-auto space-y-1.5 mb-3 pr-2 custom-scrollbar">
-              {directory.length === 0 ? <p className="text-slate-500 text-xs text-center">Cargando directorio...</p> : directory.map(u => {
-                const isChecked = assigningHito.asignados.includes(u.email);
-                return (
-                  <button key={u.email} onClick={() => toggleAssign(u.email)} className={`w-full flex items-center justify-between p-2.5 rounded-lg border transition-colors ${isChecked ? 'bg-emerald-500/10 border-emerald-500/50 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}>
-                    <div className="flex items-center gap-2.5">
-                      {isChecked ? <CheckSquare className="text-emerald-500" size={18}/> : <Square size={18}/>}
-                      <div className="text-left"><p className="font-bold text-xs md:text-sm">{u.name}</p><p className="text-[9px] uppercase tracking-wider">{u.role}</p></div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <Button onClick={saveAsignaciones} className="w-full py-2.5 md:py-3 text-xs md:text-sm">Guardar Asignaciones</Button>
-          </Card>
-        </div>
       )}
     </div>
   );
