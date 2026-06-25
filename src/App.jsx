@@ -6,7 +6,8 @@ import {
   UserCheck, Edit3, X, Key, AlertCircle, Loader2,
   Phone, Mail, CheckCheck, Send, Timer, Hourglass,
   Shield, CalendarPlus, FileText, Mic2, Lightbulb, Map as MapIcon, Save,
-  Trash2, FolderPlus, RefreshCw, ChevronLeft, CheckSquare, Square, Printer, Utensils, CalendarDays
+  Trash2, FolderPlus, RefreshCw, ChevronLeft, CheckSquare, Square, Printer, Utensils, CalendarDays,
+  RotateCw
 } from 'lucide-react';
 
 const ROLES = {
@@ -20,7 +21,6 @@ const ROLES = {
 
 const ESQUEMAS_MASTER_SECRET = 'Tk9fTWVfSGFja2VlczIwMjYhQCM='; 
 
-//// Wrapper para Fetch que inyecta el Secret automáticamente
 const apiFetch = async (action, payload = {}) => {
   const response = await fetch('/.netlify/functions/api', {
     method: 'POST',
@@ -65,7 +65,298 @@ const LiveClock = () => {
   return <div className="text-lg md:text-xl font-black text-white tracking-widest font-mono">{time.toLocaleTimeString()}</div>;
 };
 
-// Componente Helper: Textarea que crece automáticamente
+const STAGE_ITEMS = {
+  DRUMS: {
+    label: "Batería",
+    width: 14, height: 14,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        <rect x="5" y="5" width="90" height="90" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" rx="4"/> {/* Tarima */}
+        <circle cx="50" cy="55" r="22" fill="#cbd5e1" stroke="#334155" strokeWidth="3"/> {/* Kick */}
+        <circle cx="30" cy="35" r="12" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Snare */}
+        <circle cx="70" cy="40" r="14" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Floor Tom */}
+        <circle cx="40" cy="30" r="10" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Tom 1 */}
+        <circle cx="60" cy="30" r="10" fill="#e2e8f0" stroke="#334155" strokeWidth="2"/> {/* Tom 2 */}
+        <circle cx="15" cy="20" r="15" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1"/> {/* Cymbal L */}
+        <circle cx="85" cy="20" r="15" fill="#f8fafc" stroke="#94a3b8" strokeWidth="1"/> {/* Cymbal R */}
+        <rect x="40" y="80" width="20" height="12" fill="#334155" rx="3"/> {/* Silla */}
+      </svg>
+    )
+  },
+  GUITAR: {
+    label: "Guitarra",
+    width: 8, height: 8,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        <rect x="20" y="40" width="60" height="20" rx="10" fill="#64748b"/> {/* Hombros */}
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
+        <rect x="30" y="30" width="60" height="8" transform="rotate(-30 50 50)" fill="#1e293b" rx="2"/> {/* Guitarra */}
+        <rect x="30" y="80" width="40" height="15" fill="#475569" rx="2"/> {/* Pedalboard */}
+      </svg>
+    )
+  },
+  BASS: {
+    label: "Bajo",
+    width: 8, height: 8,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        <rect x="20" y="40" width="60" height="20" rx="10" fill="#475569"/> {/* Hombros */}
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
+        <rect x="20" y="35" width="70" height="6" transform="rotate(-20 50 50)" fill="#94a3b8" stroke="#1e293b" strokeWidth="1" rx="2"/> {/* Bajo */}
+      </svg>
+    )
+  },
+  KEYS: {
+    label: "Teclados",
+    width: 12, height: 10,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        <rect x="10" y="30" width="80" height="25" fill="#1e293b" rx="2"/> {/* Sintetizador */}
+        <rect x="15" y="35" width="70" height="15" fill="#f8fafc"/> {/* Teclas */}
+        <rect x="30" y="65" width="40" height="15" rx="7" fill="#64748b"/> {/* Hombros */}
+        <circle cx="50" cy="70" r="14" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
+      </svg>
+    )
+  },
+  VOCALS: {
+    label: "Voz Principal",
+    width: 7, height: 7,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        <rect x="25" y="45" width="50" height="16" rx="8" fill="#3b82f6"/> {/* Hombros */}
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#1e3a8a" strokeWidth="2"/> {/* Cabeza */}
+        <circle cx="50" cy="20" r="6" fill="#475569"/> {/* Mic */}
+      </svg>
+    )
+  },
+  HORNS: {
+    label: "Vientos",
+    width: 7, height: 7,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        <rect x="25" y="45" width="50" height="16" rx="8" fill="#eab308"/> {/* Hombros */}
+        <circle cx="50" cy="50" r="16" fill="#f8fafc" stroke="#713f12" strokeWidth="2"/> {/* Cabeza */}
+        <path d="M50,40 L45,10 L55,10 Z" fill="#eab308"/> {/* Campana */}
+      </svg>
+    )
+  },
+  PERC: {
+    label: "Percusión",
+    width: 10, height: 10,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        <circle cx="35" cy="35" r="14" fill="#fcd34d" stroke="#854d0e" strokeWidth="2"/> {/* Conga L */}
+        <circle cx="65" cy="35" r="14" fill="#fcd34d" stroke="#854d0e" strokeWidth="2"/> {/* Conga R */}
+        <rect x="30" y="60" width="40" height="15" rx="7" fill="#64748b"/> {/* Hombros */}
+        <circle cx="50" cy="65" r="14" fill="#f8fafc" stroke="#334155" strokeWidth="2"/> {/* Cabeza */}
+      </svg>
+    )
+  },
+  MONITOR: {
+    label: "Monitor (Wedge)",
+    width: 8, height: 5,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
+        <polygon points="10,20 90,20 80,80 20,80" fill="#1e293b" stroke="#0f172a" strokeWidth="3"/>
+        <rect x="30" y="35" width="40" height="30" fill="#334155" rx="2"/>
+      </svg>
+    )
+  },
+  AMP: {
+    label: "Amp / Cabezal",
+    width: 8, height: 5,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
+        <rect x="5" y="10" width="90" height="80" fill="#334155" stroke="#0f172a" strokeWidth="4" rx="2"/>
+        <circle cx="30" cy="50" r="18" fill="#1e293b"/>
+        <circle cx="70" cy="50" r="18" fill="#1e293b"/>
+      </svg>
+    )
+  },
+  POWER: {
+    label: "220V",
+    width: 4, height: 4,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <rect x="5" y="5" width="90" height="90" fill="#ef4444" rx="10"/>
+        <text x="50" y="65" fontSize="40" fill="white" fontWeight="bold" textAnchor="middle">⚡</text>
+      </svg>
+    )
+  },
+  DI: {
+    label: "D.I. Box",
+    width: 4, height: 3,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <rect x="10" y="20" width="80" height="60" fill="#3b82f6" stroke="#1e3a8a" strokeWidth="4" rx="5"/>
+        <text x="50" y="65" fontSize="35" fill="white" fontWeight="bold" textAnchor="middle">DI</text>
+      </svg>
+    )
+  },
+  MIC_STAND: {
+    label: "Mic. Atril",
+    width: 4, height: 4,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <circle cx="50" cy="50" r="25" fill="#64748b"/> {/* Base */}
+        <line x1="50" y1="50" x2="50" y2="10" stroke="#cbd5e1" strokeWidth="4"/> {/* Atril */}
+        <circle cx="50" cy="5" r="8" fill="#334155"/> {/* Mic */}
+      </svg>
+    )
+  }
+};
+
+const StageplotBuilder = ({ items, onChange, readOnly = false }) => {
+  const canvasRef = useRef(null);
+  const [draggedId, setDraggedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+
+  const handlePointerDown = (e, id) => {
+    if (readOnly) return;
+    e.stopPropagation();
+    e.target.setPointerCapture(e.pointerId);
+    setDraggedId(id);
+    setSelectedId(id);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!draggedId || readOnly || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    
+    // Coordenadas en porcentaje (0 a 100)
+    let x = ((e.clientX - rect.left) / rect.width) * 100;
+    let y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // Clamp para no salir del canvas
+    x = Math.max(0, Math.min(100, x));
+    y = Math.max(0, Math.min(100, y));
+
+    onChange(items.map(item => item.id === draggedId ? { ...item, x, y } : item));
+  };
+
+  const handlePointerUp = (e) => {
+    if (draggedId) {
+      e.target.releasePointerCapture(e.pointerId);
+      setDraggedId(null);
+    }
+  };
+
+  const addItem = (typeKey) => {
+    const defaultItem = STAGE_ITEMS[typeKey];
+    const newItem = {
+      id: Date.now().toString(),
+      type: typeKey,
+      label: defaultItem.label,
+      x: 50, // Center
+      y: 50,
+      rotation: 0
+    };
+    onChange([...items, newItem]);
+    setSelectedId(newItem.id);
+  };
+
+  const updateSelected = (updates) => {
+    onChange(items.map(item => item.id === selectedId ? { ...item, ...updates } : item));
+  };
+
+  const removeSelected = () => {
+    onChange(items.filter(item => item.id !== selectedId));
+    setSelectedId(null);
+  };
+
+  const selectedItem = items.find(i => i.id === selectedId);
+
+  return (
+    <div className="flex flex-col md:flex-row gap-4 h-full print:block">
+      
+      {/* PALETA (Oculta al imprimir) */}
+      {!readOnly && (
+        <div className="w-full md:w-48 bg-slate-900 border border-slate-700 rounded-xl p-3 shrink-0 print:hidden flex flex-col gap-3">
+          <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Caja de Equipos</h3>
+          <div className="grid grid-cols-3 md:grid-cols-2 gap-2 overflow-y-auto custom-scrollbar max-h-[150px] md:max-h-[500px]">
+            {Object.entries(STAGE_ITEMS).map(([key, def]) => (
+              <button 
+                key={key} type="button" onClick={() => addItem(key)}
+                className="flex flex-col items-center gap-1.5 p-2 rounded-lg border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 transition-colors"
+              >
+                <div className="w-8 h-8 pointer-events-none">{def.render()}</div>
+                <span className="text-[9px] font-bold text-slate-300 leading-tight text-center">{def.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {selectedItem && (
+            <div className="mt-auto pt-3 border-t border-slate-800 space-y-2 animate-slide-up">
+              <h4 className="text-[10px] font-black text-emerald-400 uppercase">Item Seleccionado</h4>
+              <input 
+                type="text" value={selectedItem.label} onChange={(e) => updateSelected({ label: e.target.value })}
+                className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-emerald-500"
+              />
+              <div className="flex gap-2">
+                <Button variant="secondary" className="flex-1 px-0 py-1 text-xs" onClick={() => updateSelected({ rotation: (selectedItem.rotation + 45) % 360 })} icon={RotateCw}>Girar</Button>
+                <Button variant="danger" className="flex-1 px-0 py-1 text-xs" onClick={removeSelected} icon={Trash2}>Borrar</Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CANVAS DEL ESCENARIO */}
+      <div className="flex-1 bg-slate-800 p-2 md:p-4 rounded-xl border border-slate-700 print:bg-white print:border-none print:p-0">
+        <div 
+          ref={canvasRef}
+          className="relative w-full aspect-[4/3] md:aspect-[16/9] print:aspect-[4/3] bg-slate-950 print:bg-white rounded border-2 border-slate-700 print:border-black overflow-hidden touch-none"
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+          onClick={() => !draggedId && setSelectedId(null)} // Deselect if clicking empty space
+        >
+          {/* Rejilla de fondo visual */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:5%_5%] opacity-20 print:opacity-10 pointer-events-none"></div>
+          
+          {/* Texto FRONT OF STAGE */}
+          <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
+            <span className="text-[10px] md:text-xs font-black tracking-widest text-slate-500 print:text-black uppercase">Público / Front of Stage</span>
+          </div>
+
+          {items.map(item => {
+            const def = STAGE_ITEMS[item.type];
+            const isSelected = selectedId === item.id && !readOnly;
+            return (
+              <div 
+                key={item.id}
+                className="absolute flex flex-col items-center justify-center cursor-move print:cursor-default"
+                style={{ 
+                  left: `${item.x}%`, top: `${item.y}%`, 
+                  width: `${def.width}%`, height: `${def.height}%`,
+                  transform: `translate(-50%, -50%)`, // Centrar en X, Y
+                  zIndex: isSelected ? 50 : 10
+                }}
+                onPointerDown={(e) => handlePointerDown(e, item.id)}
+              >
+                {/* Elemento Renderizado con Rotación */}
+                <div 
+                  className={`w-full h-full transition-transform ${isSelected ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-slate-950 rounded-sm' : ''} print:ring-0`}
+                  style={{ transform: `rotate(${item.rotation}deg)` }}
+                >
+                  {def.render()}
+                </div>
+                {/* Etiqueta */}
+                {item.label && (
+                  <div className="absolute top-[105%] left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/80 print:bg-transparent print:text-black px-1.5 py-0.5 rounded text-[8px] md:text-[10px] font-bold text-white text-center pointer-events-none">
+                    {item.label}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
 const AutoResizeTextarea = ({ value, onChange, placeholder, className = "" }) => {
   const textareaRef = useRef(null);
   useEffect(() => {
@@ -86,7 +377,6 @@ const AutoResizeTextarea = ({ value, onChange, placeholder, className = "" }) =>
   );
 };
 
-// Componente Helper: Menú desplegable MIC/DI con opción "OTRO"
 const MicDiSelect = ({ value, onChange }) => {
   const isCustom = !['', 'MIC', 'DI'].includes(value) && value !== 'OTRO';
   const [customMode, setCustomMode] = useState(isCustom);
@@ -103,18 +393,7 @@ const MicDiSelect = ({ value, onChange }) => {
   }
 
   return (
-    <select 
-      className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" 
-      value={value} 
-      onChange={e => {
-        if (e.target.value === 'OTRO') {
-          setCustomMode(true);
-          onChange('');
-        } else {
-          onChange(e.target.value);
-        }
-      }}
-    >
+    <select className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={value} onChange={e => { if (e.target.value === 'OTRO') { setCustomMode(true); onChange(''); } else { onChange(e.target.value); } }}>
       <option value=""></option>
       <option value="MIC">MIC</option>
       <option value="DI">DI</option>
@@ -123,7 +402,7 @@ const MicDiSelect = ({ value, onChange }) => {
   );
 };
 
-// --- 1. AUTENTICACIÓN ---
+// --- AUTENTICACIÓN (Resto de Vistas Base) ---
 const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   const [mode, setMode] = useState('LOGIN'); 
   const [email, setEmail] = useState(''); 
@@ -131,7 +410,6 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   const [driverToken, setDriverToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
   const [regName, setRegName] = useState('');
   const [regRole, setRegRole] = useState(ROLES.TECH);
   const [regPhone, setRegPhone] = useState('+569');
@@ -216,7 +494,6 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   );
 };
 
-// --- 2. VISTA EXCLUSIVA CONDUCTOR ---
 const ConductorView = ({ currentUser, showToast }) => {
   const r = currentUser.routeInfo;
   const [status, setStatus] = useState(r.status);
@@ -252,7 +529,6 @@ const ConductorView = ({ currentUser, showToast }) => {
   );
 };
 
-// --- 3. MÓDULO DE TRANSPORTE (ADMIN/CREW) ---
 const TransportView = ({ currentUser, setCurrentView, setSelectedProject, showToast }) => {
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -302,19 +578,13 @@ const TransportView = ({ currentUser, setCurrentView, setSelectedProject, showTo
                   <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><Truck className="text-emerald-500" size={20} /></div>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded block w-fit text-emerald-500 bg-emerald-500/10">{proyecto.status}</span>
                 </div>
-                
                 <h2 className="text-lg font-bold text-white leading-tight mb-1.5">{proyecto.name}</h2>
                 <div className="space-y-1 mb-3">
-                  <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5">
-                    <Calendar size={12}/> {formattedProjectDate}
-                  </p>
+                  <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5"><Calendar size={12}/> {formattedProjectDate}</p>
                   <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5"><User size={12}/> {proyecto.manager}</p>
                 </div>
-                
                 <div className="border-t border-slate-700 pt-3 mt-3">
-                  <Button variant="ghost" className="w-full bg-slate-900 border border-slate-700 hover:text-emerald-400 text-xs py-1.5" icon={Navigation}>
-                    Ver Rutas
-                  </Button>
+                  <Button variant="ghost" className="w-full bg-slate-900 border border-slate-700 hover:text-emerald-400 text-xs py-1.5" icon={Navigation}>Ver Rutas</Button>
                 </div>
               </Card>
             )
@@ -402,9 +672,7 @@ const TransportDetailsView = ({ currentUser, setCurrentView, selectedProject, sh
       )}
 
       {fetchError ? (
-        <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm">
-          <AlertCircle size={18} /> Error de conexión.
-        </div>
+        <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm"><AlertCircle size={18} /> Error de conexión.</div>
       ) : loading && transports.length === 0 ? (
         <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div>
       ) : (
@@ -436,7 +704,6 @@ const TransportDetailsView = ({ currentUser, setCurrentView, selectedProject, sh
   );
 };
 
-// --- 4. MÓDULO RIDERS TÉCNICOS (Exportable / Print Ready) ---
 const RidersView = ({ currentUser, showToast, requestConfirm }) => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -454,7 +721,8 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
     outputs: [{ mix: '', player: '', monitor: '', obs: '' }],
     inputs: [{ ch: '1', name: '', mic: '', v48: '', stand: '', position: '', obs: '' }],
     backline: [{ col1: '', col2: '', col3: '', col4: '' }],
-    visuals: [{ col1: '', col2: '', col3: '', col4: '' }]
+    visuals: [{ col1: '', col2: '', col3: '', col4: '' }],
+    stageplot: [] // Array of items
   };
 
   const templatesTexto = {
@@ -472,7 +740,11 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
       if (res.status === 'success') {
         const parsedRiders = res.data.map(r => {
           let parsedContent;
-          try { parsedContent = JSON.parse(r.content); } 
+          try { 
+            parsedContent = JSON.parse(r.content); 
+            // Retro-compatibilidad para riders antiguos sin stageplot
+            if(!parsedContent.stageplot) parsedContent.stageplot = [];
+          } 
           catch(e) { parsedContent = { ...defaultContent, importante: r.content }; }
           return { ...r, content: parsedContent };
         });
@@ -531,14 +803,18 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
     });
   };
 
+  const updateStageplot = (newItems) => {
+    setForm(prev => ({ ...prev, content: { ...prev.content, stageplot: newItems } }));
+  };
+
   const icons = { 'SONIDO': Mic2, 'ILUMINACIÓN': Lightbulb, 'STAGEPLOT': MapIcon, 'COMPLETO': FileText };
 
   const getTabsForType = (type) => {
     switch(type) {
-      case 'SONIDO': return ['GENERAL', 'AUDIO', 'BACKLINE'];
-      case 'ILUMINACIÓN': return ['GENERAL', 'VISUALES'];
-      case 'STAGEPLOT': return ['GENERAL', 'BACKLINE'];
-      default: return ['GENERAL', 'AUDIO', 'BACKLINE', 'VISUALES'];
+      case 'SONIDO': return ['GENERAL', 'AUDIO', 'BACKLINE', 'STAGEPLOT'];
+      case 'ILUMINACIÓN': return ['GENERAL', 'VISUALES', 'STAGEPLOT'];
+      case 'STAGEPLOT': return ['GENERAL', 'BACKLINE', 'STAGEPLOT'];
+      default: return ['GENERAL', 'AUDIO', 'BACKLINE', 'VISUALES', 'STAGEPLOT'];
     }
   };
   
@@ -653,6 +929,12 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
                 <div className="overflow-x-auto rounded border border-slate-700 bg-slate-900">
                   <table className="w-full text-left text-xs md:text-sm text-slate-300 min-w-[500px]"><thead className="bg-slate-800 text-[10px] md:text-xs border-b border-slate-700"><tr><th className="p-1.5 md:p-2">SISTEMA/EQUIPO</th><th className="p-1.5 md:p-2 w-16">CANT</th><th className="p-1.5 md:p-2">UBICACIÓN</th><th className="p-1.5 md:p-2">OBS</th><th className="p-1.5 md:p-2 w-10 text-center">X</th></tr></thead><tbody>{form.content.visuals.map((row, i) => (<tr key={i} className="border-b border-slate-800 last:border-0"><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col1} onChange={e=>updateTable('visuals', i, 'col1', e.target.value)} /></td><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 text-center outline-none focus:border-emerald-500 text-xs" value={row.col2} onChange={e=>updateTable('visuals', i, 'col2', e.target.value)} /></td><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col3} onChange={e=>updateTable('visuals', i, 'col3', e.target.value)} /></td><td className="p-1"><AutoResizeTextarea className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col4} onChange={e=>updateTable('visuals', i, 'col4', e.target.value)} /></td><td className="p-1 text-center"><button type="button" onClick={()=>removeRow('visuals', i)} className="text-red-500 p-1 hover:bg-red-500/20 rounded"><Trash2 size={12}/></button></td></tr>))}</tbody></table>
                 </div>
+              </div>
+            )}
+
+            {editTab === 'STAGEPLOT' && activeTabs.includes('STAGEPLOT') && (
+              <div className="h-full min-h-[400px]">
+                 <StageplotBuilder items={form.content.stageplot || []} onChange={updateStageplot} />
               </div>
             )}
           </div>
@@ -792,6 +1074,16 @@ const RidersView = ({ currentUser, showToast, requestConfirm }) => {
                         </table>
                       </div>
                     </div>
+                  )}
+
+                  {/* Render Stageplot in View Mode */}
+                  {r.content.stageplot && r.content.stageplot.length > 0 && (
+                     <div className="mt-3 md:mt-4 break-inside-avoid">
+                        <h4 className="text-slate-400 print:text-black text-[10px] md:text-xs font-black mb-1.5 uppercase">STAGEPLOT</h4>
+                        <div className="w-full rounded border-2 border-slate-700 print:border-black overflow-hidden bg-white">
+                           <StageplotBuilder items={r.content.stageplot} onChange={()=>{}} readOnly={true} />
+                        </div>
+                     </div>
                   )}
                 </div>
               </div>
