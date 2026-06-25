@@ -414,7 +414,7 @@ export default function App() {
             });
           setHitos(parsedHitos.filter(e => e.fullDate !== null).sort((a,b) => a.fullDate - b.fullDate));
         } else {
-          showConfirm("Error del servidor", json.message || "No se pudo obtener hitos.", () => {}, true);
+          showConfirm("Error del servidor", json.message || json.error || "No se pudo obtener hitos.", () => {}, true);
         }
       } catch (error) {
         showToast("Fallo de red al descargar hitos.");
