@@ -14,6 +14,7 @@ const ROLES = {
   ADMIN: 'ADMIN',
   MANAGER: 'MANAGER',
   TOUR_MANAGER: 'TOUR MANAGER',
+  TEC_JEFE: 'TEC. JEFE',
   TECH: 'TÉCNICO',
   TRASLADO: 'TRASLADO',
   APV: 'APV/CATERING'
@@ -820,6 +821,8 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
     } catch(e) { showToast("Error al guardar."); }
   };
 
+  const visibleProyectos = canCreate ? proyectos : proyectos.filter(p => p.asignados.includes(currentUser.email));
+
   return (
     <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-6xl mx-auto">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-slate-800 pb-4">
@@ -853,11 +856,13 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
           <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm"><AlertCircle size={18} /> {fetchError}</div>
         ) : loading && proyectos.length === 0 ? (
           <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div>
-        ) : proyectos.length === 0 ? (
-          <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm">No hay proyectos activos.</div>
+        ) : visibleProyectos.length === 0 ? (
+          <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm">
+            {canCreate ? "No hay proyectos activos." : "No tienes proyectos asignados en este momento."}
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {proyectos.map(proyecto => {
+            {visibleProyectos.map(proyecto => {
               const projectDate = new Date(Number(proyecto.id));
               const formattedProjectDate = `${String(projectDate.getDate()).padStart(2, '0')}/${String(projectDate.getMonth() + 1).padStart(2, '0')}/${projectDate.getFullYear()}`;
 
@@ -940,6 +945,7 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
 const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, showToast, directory, requestConfirm, setActiveRider }) => {
   const p = selectedProject;
   const canManage = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
+  const canManageRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE].includes(currentUser.role);
   const [hitos, setHitos] = useState([]);
   const [projectRiders, setProjectRiders] = useState([]);
   const [allRiders, setAllRiders] = useState([]);
@@ -1127,7 +1133,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
       {/* --- SECCIÓN RIDERS DEL PROYECTO --- */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 mb-3 gap-3">
         <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2"><FileText className="text-emerald-500" size={18}/> Documentos Técnicos (Riders)</h2>
-        {canManage && (
+        {canManageRiders && (
           <div className="flex gap-2">
             <Button icon={Link} onClick={() => setLinkingRider(true)} variant="secondary" className="py-1.5 px-3 text-xs md:text-sm">Vincular</Button>
             <Button icon={Plus} onClick={() => setCurrentView('RIDERS')} variant="primary" className="py-1.5 px-3 text-xs md:text-sm">Ir a Riders</Button>
@@ -1144,7 +1150,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
                   <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><FileText className="text-emerald-500" size={16} /></div>
                   <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 font-bold uppercase">{r.type}</span>
                 </div>
-                {canManage && (
+                {canManageRiders && (
                   <button onClick={(e) => { e.stopPropagation(); requestConfirm("¿Desvincular este documento del proyecto?", () => handleUnlinkRider(r)); }} className="text-slate-500 hover:text-red-500 transition-colors p-1" title="Desvincular">
                     <XCircle size={16} />
                   </button>
@@ -1293,7 +1299,8 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
   const [includeTiming, setIncludeTiming] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
   
-  const canManageRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TECH, ROLES.APV].includes(currentUser.role);
+  const canManageRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE].includes(currentUser.role);
+  const canManageProjects = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
 
   const defaultContent = {
     proyectoId: '',
@@ -1619,7 +1626,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
                 <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Vincular a Gira / Proyecto</label>
                 <select className="w-full bg-slate-800 border-slate-700 rounded p-2 text-xs md:text-sm text-white font-bold outline-none focus:border-emerald-500 max-w-full break-words" value={form.content.proyectoId || ''} onChange={e=>setForm({...form, content: {...form.content, proyectoId: e.target.value}})}>
                   <option value="">Documento General (Sin Asignar)</option>
-                  {proyectos.map(p => <option key={p.id} value={p.id}>🎤 {p.name}</option>)}
+                  {(canManageProjects ? proyectos : proyectos.filter(p => p.asignados.includes(currentUser.email))).map(p => <option key={p.id} value={p.id}>🎤 {p.name}</option>)}
                 </select>
               </div>
             </div>
@@ -2699,6 +2706,7 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState(null);
   const [directory, setDirectory] = useState([]); 
   const [activeRider, setActiveRider] = useState(null);
+  const [showPasswordAlert, setShowPasswordAlert] = useState(false);
 
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, text: '', onConfirm: null });
 
@@ -2758,6 +2766,10 @@ export default function App() {
   useEffect(() => {
     if (currentUser && currentUser.role !== 'CONDUCTOR') {
       fetchDirectoryGlobal();
+      if (!localStorage.getItem(`pwd_alert_${currentUser.email}`)) {
+        setShowPasswordAlert(true);
+        localStorage.setItem(`pwd_alert_${currentUser.email}`, 'true');
+      }
     }
   }, [currentUser]);
 
@@ -2803,6 +2815,17 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans print:bg-white print:text-black">
       <ConfirmModal />
+      {showPasswordAlert && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">
+          <Card className="w-full max-w-sm p-6 bg-slate-900 border-amber-500/50 text-center shadow-2xl">
+            <div className="mx-auto w-12 h-12 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center mb-4"><Key size={24} /></div>
+            <h2 className="text-lg md:text-xl font-black text-white mb-2">¡Aviso de Seguridad!</h2>
+            <p className="text-sm text-slate-300 mb-6">Por tu seguridad, te recomendamos ir a la sección "Mi Perfil" y cambiar la contraseña temporal por una personal.</p>
+            <Button variant="primary" className="w-full py-2.5" onClick={() => { setShowPasswordAlert(false); setCurrentView('PROFILE'); }}>Ir a Mi Perfil</Button>
+            <button onClick={() => setShowPasswordAlert(false)} className="mt-4 text-xs font-bold text-slate-500 hover:text-white transition-colors">Entendido, lo haré más tarde</button>
+          </Card>
+        </div>
+      )}
       {toastMessage && <div className="fixed top-4 right-4 z-[300] bg-emerald-500 text-white px-3 md:px-4 py-2.5 md:py-3 rounded-lg shadow-lg flex items-center gap-2.5 animate-fade-in print:hidden"><CheckCircle2 size={18} /><span className="font-bold text-xs md:text-sm">{toastMessage}</span></div>}
 
       <aside className="bg-slate-900 border-r border-slate-800 w-64 shrink-0 hidden md:flex flex-col h-screen sticky top-0 print:hidden">
