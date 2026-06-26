@@ -1617,6 +1617,8 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
   const canManage = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
   const [hitos, setHitos] = useState([]);
   const [projectRiders, setProjectRiders] = useState([]);
+  const [allRiders, setAllRiders] = useState([]);
+  const [linkingRider, setLinkingRider] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -1661,16 +1663,13 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
     try {
       const res = await apiFetch('getRiders');
       if (res.status === 'success') {
-        const pRiders = res.data.reduce((acc, r) => {
-          try {
-            const content = JSON.parse(r.content);
-            if (String(content.proyectoId) === String(p.id)) {
-              acc.push({ ...r, content });
-            }
-          } catch(e) {}
-          return acc;
-        }, []);
-        setProjectRiders(pRiders);
+        const parsedRiders = res.data.map(r => {
+          let content = {};
+          try { content = JSON.parse(r.content); } catch(e){}
+          return { ...r, content };
+        });
+        setAllRiders(parsedRiders);
+        setProjectRiders(parsedRiders.filter(r => String(r.content.proyectoId) === String(p.id)));
       }
     } catch(e) {}
   };
@@ -1736,6 +1735,45 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
     } catch(e) { showToast("Error al guardar."); }
   };
 
+  const handleLinkRider = async (riderId) => {
+    const riderToLink = allRiders.find(r => r.id === riderId);
+    if(!riderToLink) return;
+    const newContent = { ...riderToLink.content, proyectoId: p.id };
+    setLoading(true);
+    try {
+      await apiFetch('updateRider', { 
+        id: riderToLink.id, 
+        title: riderToLink.title, 
+        type: riderToLink.type, 
+        content: JSON.stringify(newContent) 
+      });
+      showToast("Rider vinculado al proyecto.");
+      setLinkingRider(false);
+      fetchProjectRiders(); 
+    } catch(e) { 
+      showToast("Error al vincular."); 
+      setLoading(false); 
+    }
+  };
+
+  const handleUnlinkRider = async (rider) => {
+    const newContent = { ...rider.content, proyectoId: '' };
+    setLoading(true);
+    try {
+      await apiFetch('updateRider', { 
+        id: rider.id, 
+        title: rider.title, 
+        type: rider.type, 
+        content: JSON.stringify(newContent) 
+      });
+      showToast("Documento desvinculado de la gira.");
+      fetchProjectRiders();
+    } catch(err) { 
+      showToast("Error al desvincular."); 
+      setLoading(false); 
+    }
+  };
+
   return (
     <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-4xl mx-auto">
       <button onClick={() => setCurrentView('DASHBOARD')} className="flex items-center gap-1.5 text-xs md:text-sm text-slate-400 hover:text-white transition-colors mb-2"><ChevronLeft size={16}/> Volver a Proyectos</button>
@@ -1754,7 +1792,12 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
       {/* --- SECCIÓN RIDERS DEL PROYECTO --- */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 mb-3 gap-3">
         <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2"><FileText className="text-emerald-500" size={18}/> Documentos Técnicos (Riders)</h2>
-        {canManage && <Button icon={Plus} onClick={() => setCurrentView('RIDERS')} variant="secondary" className="py-1.5 px-3 text-xs md:text-sm">Gestionar Riders</Button>}
+        {canManage && (
+          <div className="flex gap-2">
+            <Button icon={Link} onClick={() => setLinkingRider(true)} variant="secondary" className="py-1.5 px-3 text-xs md:text-sm">Vincular</Button>
+            <Button icon={Plus} onClick={() => setCurrentView('RIDERS')} variant="primary" className="py-1.5 px-3 text-xs md:text-sm">Ir a Riders</Button>
+          </div>
+        )}
       </div>
       
       {projectRiders.length > 0 ? (
@@ -1762,8 +1805,15 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
           {projectRiders.map(r => (
             <Card key={r.id} onClick={() => { setActiveRider(r); setCurrentView('RIDERS'); }} className="p-3 md:p-4 group cursor-pointer hover:border-emerald-500 transition-colors">
               <div className="flex justify-between items-start mb-2">
-                <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><FileText className="text-emerald-500" size={16} /></div>
-                <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 font-bold uppercase">{r.type}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><FileText className="text-emerald-500" size={16} /></div>
+                  <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 font-bold uppercase">{r.type}</span>
+                </div>
+                {canManage && (
+                  <button onClick={(e) => { e.stopPropagation(); requestConfirm("¿Desvincular este documento del proyecto?", () => handleUnlinkRider(r)); }} className="text-slate-500 hover:text-red-500 transition-colors p-1" title="Desvincular">
+                    <XCircle size={16} />
+                  </button>
+                )}
               </div>
               <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{r.title}</h3>
             </Card>
@@ -1841,27 +1891,27 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
 
       {assigningHito && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
-          <Card className="w-full max-w-md p-6 bg-slate-900 border-emerald-500 flex flex-col max-h-[80vh]">
-            <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-800">
-              <h2 className="text-lg font-bold text-white">Asignar Crew al Hito</h2>
-              <button onClick={() => setAssigningHito(null)} className="text-slate-400 hover:text-white"><X size={24}/></button>
+          <Card className="w-full max-w-md p-4 md:p-6 bg-slate-900 border-emerald-500 flex flex-col max-h-[80vh]">
+            <div className="flex justify-between items-center mb-3 border-b border-slate-800 pb-3">
+              <h2 className="text-base md:text-lg font-bold text-white">Asignar Crew al Hito</h2>
+              <button onClick={() => setAssigningHito(null)} className="text-slate-400 hover:text-white"><X size={20}/></button>
             </div>
-            <p className="text-sm text-emerald-400 font-bold mb-4">{assigningHito.title}</p>
+            <p className="text-xs md:text-sm text-emerald-400 font-bold mb-3">{assigningHito.title}</p>
             
-            <div className="flex-1 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
-              {directory.length === 0 ? <p className="text-slate-500 text-sm text-center">Cargando directorio...</p> : directory.map(u => {
+            <div className="flex-1 overflow-y-auto space-y-1.5 mb-3 pr-2 custom-scrollbar">
+              {directory.length === 0 ? <p className="text-slate-500 text-xs md:text-sm text-center">Cargando directorio...</p> : directory.map(u => {
                 const isChecked = assigningHito.asignados.includes(u.email);
                 return (
-                  <button key={u.email} onClick={() => toggleAssign(u.email)} className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${isChecked ? 'bg-emerald-500/10 border-emerald-500/50 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}>
-                    <div className="flex items-center gap-3">
-                      {isChecked ? <CheckSquare className="text-emerald-500" size={20}/> : <Square size={20}/>}
-                      <div className="text-left"><p className="font-bold text-sm">{u.name}</p><p className="text-[10px] uppercase tracking-wider">{u.role}</p></div>
+                  <button key={u.email} onClick={() => toggleAssign(u.email)} className={`w-full flex items-center justify-between p-2.5 rounded-lg border transition-colors ${isChecked ? 'bg-emerald-500/10 border-emerald-500/50 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}>
+                    <div className="flex items-center gap-2.5">
+                      {isChecked ? <CheckSquare className="text-emerald-500" size={18}/> : <Square size={18}/>}
+                      <div className="text-left"><p className="font-bold text-xs md:text-sm">{u.name}</p><p className="text-[9px] uppercase tracking-wider">{u.role}</p></div>
                     </div>
                   </button>
                 );
               })}
             </div>
-            <Button onClick={saveAsignaciones} className="w-full py-3">Guardar Asignaciones</Button>
+            <Button onClick={saveAsignaciones} className="w-full py-2.5 md:py-3 text-xs md:text-sm">Guardar Asignaciones</Button>
           </Card>
         </div>
       )}
