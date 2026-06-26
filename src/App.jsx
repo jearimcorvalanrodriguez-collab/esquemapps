@@ -585,6 +585,148 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   );
 };
 
+// --- COMPONENTES DE TRANSPORTE (NUEVOS) ---
+const TransportView = ({ currentUser, setCurrentView, showToast }) => {
+  const [transports, setTransports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [form, setForm] = useState({ title: '', date: '', time: '', origin: '', dest: '' });
+  const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role);
+
+  const fetchTransports = async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch('getTransportes');
+      if (res.status === 'success') setTransports(res.data);
+    } catch(e) {
+      showToast("Error al cargar transportes.");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchTransports(); }, []);
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await apiFetch('createTransporte', form);
+      if (res.status === 'success') {
+        showToast("Ruta creada con éxito.");
+        setIsCreating(false);
+        setForm({ title: '', date: '', time: '', origin: '', dest: '' });
+        fetchTransports();
+      }
+    } catch(e) {
+      showToast("Error al crear ruta.");
+    }
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 pb-24 animate-fade-in">
+      <header className="border-b border-slate-800 pb-4 flex justify-between items-end">
+        <div>
+          <h1 className="text-2xl font-black text-white flex items-center gap-2"><Truck className="text-emerald-500" size={24}/> Transportes</h1>
+          <p className="text-sm text-slate-400">Gestión de rutas y traslados.</p>
+        </div>
+        {canCreate && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Nueva Ruta</Button>}
+      </header>
+
+      {isCreating && (
+        <Card className="p-4 md:p-6 border-emerald-500 mb-6">
+          <h2 className="text-lg font-bold text-white mb-4">Crear Nueva Ruta</h2>
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div><label className="text-xs text-slate-400 block mb-1">Título de la Ruta</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} placeholder="Ej. Traslado Hotel - Recinto" /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></div>
+              <div><label className="text-xs text-slate-400 block mb-1">Hora</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.time} onChange={e=>setForm({...form, time: e.target.value})} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-xs text-slate-400 block mb-1">Origen</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.origin} onChange={e=>setForm({...form, origin: e.target.value})} /></div>
+              <div><label className="text-xs text-slate-400 block mb-1">Destino</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.dest} onChange={e=>setForm({...form, dest: e.target.value})} /></div>
+            </div>
+            <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1 py-2" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1 py-2">Guardar Ruta</Button></div>
+          </form>
+        </Card>
+      )}
+
+      {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div> : transports.length === 0 ? <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay transportes programados.</div> : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {transports.map(t => (
+            <Card key={t.id} className="p-4">
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="font-bold text-lg text-white">{t.title}</h3>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${t.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/50' : t.status === 'EN RUTA' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/50' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/50'}`}>{t.status}</span>
+              </div>
+              <div className="space-y-1 text-sm text-slate-300 mb-4">
+                <p className="flex items-center gap-2"><Calendar size={14}/> {t.date} {t.time}</p>
+                <p className="flex items-center gap-2"><MapPin size={14}/> Origen: {t.origin}</p>
+                <p className="flex items-center gap-2"><Navigation size={14}/> Destino: {t.dest}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-700 p-2 rounded flex justify-between items-center">
+                <span className="text-xs text-slate-400 uppercase font-bold">Token Piloto</span>
+                <span className="font-mono text-emerald-400 font-bold tracking-widest">{t.token}</span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TransportDetailsView = ({ currentUser, setCurrentView, showToast }) => {
+  return (
+    <div className="p-4 text-center text-slate-400 mt-10">
+      <h2 className="text-xl font-bold text-white mb-2">Detalles de Transporte</h2>
+      <p>Módulo de seguimiento en vivo en desarrollo.</p>
+      <Button variant="secondary" className="mx-auto mt-4" onClick={() => setCurrentView('TRANSPORT')}>Volver a Transportes</Button>
+    </div>
+  );
+};
+
+const ConductorView = ({ currentUser, showToast }) => {
+  const [routeInfo, setRouteInfo] = useState(currentUser.routeInfo || {});
+  const [loading, setLoading] = useState(false);
+
+  const updateStatus = async (newStatus) => {
+    setLoading(true);
+    try {
+      const res = await apiFetch('updateTransportStatus', { token: routeInfo.token, newStatus });
+      if (res.status === 'success') {
+        setRouteInfo({...routeInfo, status: newStatus});
+        showToast(`Estado actualizado a ${newStatus}`);
+      }
+    } catch(e) { showToast("Error al actualizar estado."); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="p-4 max-w-lg mx-auto animate-fade-in mt-4">
+      <Card className="p-6 border-blue-500/50">
+        <h2 className="text-xl font-black text-white mb-2">{routeInfo.title}</h2>
+        <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 mb-4 flex items-center justify-between">
+           <span className="text-xs text-slate-400 uppercase font-bold">Token Ruta</span>
+           <span className="font-mono text-emerald-400 font-bold tracking-widest text-lg">{routeInfo.token}</span>
+        </div>
+        <div className="space-y-3 text-sm text-slate-300 mb-6">
+          <p className="flex items-center gap-2"><Calendar size={16} className="text-blue-400"/> Fecha: {routeInfo.date} a las {routeInfo.time}</p>
+          <div className="p-3 bg-slate-900 rounded border border-slate-800">
+             <p className="flex items-center gap-2 mb-2 font-bold text-white"><MapPin size={16} className="text-amber-500"/> Origen: {routeInfo.origin}</p>
+             <p className="flex items-center gap-2 font-bold text-white"><Navigation size={16} className="text-emerald-500"/> Destino: {routeInfo.dest}</p>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <p className="text-xs text-slate-400 uppercase font-bold text-center">Actualizar Estado</p>
+          <Button variant="secondary" className="w-full py-3" onClick={()=>updateStatus('PENDING')} disabled={loading || routeInfo.status === 'PENDING'}>Marcar PENDIENTE</Button>
+          <Button variant="blue" className="w-full py-3" onClick={()=>updateStatus('EN RUTA')} disabled={loading || routeInfo.status === 'EN RUTA'}>Marcar EN RUTA</Button>
+          <Button variant="primary" className="w-full py-3" onClick={()=>updateStatus('FINALIZADO')} disabled={loading || routeInfo.status === 'FINALIZADO'}>Marcar FINALIZADO</Button>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
 // --- VISTAS PRINCIPALES ---
 const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast, directory }) => {
   const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
@@ -1408,7 +1550,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
 
       {/* --- VISTA: EDITOR --- */}
       {viewMode === 'EDIT' && (
-        <Card className="p-0 border-emerald-500 overflow-hidden flex flex-col h-[85vh]">
+        <Card className="p-0 border-emerald-500 flex flex-col">
           <div className="p-3 md:p-4 border-b border-slate-700 bg-slate-900 shrink-0">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-base md:text-lg font-bold text-white">{form.id ? 'Editar Documento' : 'Generar Nuevo Documento'}</h2>
@@ -1430,6 +1572,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
                 <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Vincular a Gira / Proyecto</label>
                 <select className="w-full bg-slate-800 border-slate-700 rounded p-2 text-xs md:text-sm text-white font-bold outline-none focus:border-emerald-500 max-w-full break-words" value={form.content.proyectoId || ''} onChange={e=>setForm({...form, content: {...form.content, proyectoId: e.target.value}})}>
                   <option value="">Documento General (Sin Asignar)</option>
+                  <option value="">Documento General (Sin Asignar)</option>
                   {proyectos.map(p => <option key={p.id} value={p.id}>🎤 {p.name}</option>)}
                 </select>
               </div>
@@ -1442,7 +1585,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-slate-950 custom-scrollbar relative">
+          <div className="p-3 md:p-6 bg-slate-950 relative">
             {editTab === 'GENERAL' && (
               <div className="space-y-4 md:space-y-6">
                 <div>
@@ -1495,7 +1638,28 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
               <div>
                 <div className="flex justify-between items-end mb-2"><h3 className="text-xs md:text-sm font-bold text-emerald-500">BACKLINE ({form.content.backline.length}/100)</h3><Button variant="secondary" className="py-1 px-2.5 text-[10px]" icon={Plus} onClick={() => addRow('backline', { col1: '', col2: '', col3: '', col4: '' })}>Fila</Button></div>
                 <div className="overflow-x-auto rounded border border-slate-700 bg-slate-900">
-                  <table className="w-full text-left text-xs md:text-sm text-slate-300 min-w-[500px]"><thead className="bg-slate-800 text-[10px] md:text-xs border-b border-slate-700"><tr><th className="p-1.5 md:p-2">ITEM</th><th className="p-1.5 md:p-2 w-16">CANT</th><th className="p-1.5 md:p-2">ESPECIFICACIONES</th><th className="p-1.5 md:p-2">OBS</th><th className="p-1.5 md:p-2 w-10 text-center">X</th></tr></thead><tbody>{form.content.backline.map((row, i) => (<tr key={i} className="border-b border-slate-800 last:border-0"><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col1} onChange={e=>updateTable('backline', i, 'col1', e.target.value)} /></td><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 text-center outline-none focus:border-emerald-500 text-xs" value={row.col2} onChange={e=>updateTable('backline', i, 'col2', e.target.value)} /></td><td className="p-1"><AutoResizeTextarea className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col3} onChange={e=>updateTable('backline', i, 'col3', e.target.value)} /></td><td className="p-1"><AutoResizeTextarea className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col4} onChange={e=>updateTable('backline', i, 'col4', e.target.value)} /></td><td className="p-1 text-center"><button type="button" onClick={()=>removeRow('backline', i)} className="text-red-500 p-1 hover:bg-red-500/20 rounded"><Trash2 size={12}/></button></td></tr>))}</tbody></table>
+                  <table className="w-full text-left text-xs md:text-sm text-slate-300 min-w-[500px]">
+                    <thead className="bg-slate-800 text-[10px] md:text-xs border-b border-slate-700">
+                      <tr>
+                        <th className="p-1.5 md:p-2 w-16">CANT</th>
+                        <th className="p-1.5 md:p-2">ITEM</th>
+                        <th className="p-1.5 md:p-2">ESPECIFICACIONES</th>
+                        <th className="p-1.5 md:p-2">OBS</th>
+                        <th className="p-1.5 md:p-2 w-10 text-center">X</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {form.content.backline.map((row, i) => (
+                        <tr key={i} className="border-b border-slate-800 last:border-0">
+                          <td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 text-center outline-none focus:border-emerald-500 text-xs" value={row.col2} onChange={e=>updateTable('backline', i, 'col2', e.target.value)} /></td>
+                          <td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col1} onChange={e=>updateTable('backline', i, 'col1', e.target.value)} /></td>
+                          <td className="p-1"><AutoResizeTextarea className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col3} onChange={e=>updateTable('backline', i, 'col3', e.target.value)} /></td>
+                          <td className="p-1"><AutoResizeTextarea className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col4} onChange={e=>updateTable('backline', i, 'col4', e.target.value)} /></td>
+                          <td className="p-1 text-center"><button type="button" onClick={()=>removeRow('backline', i)} className="text-red-500 p-1 hover:bg-red-500/20 rounded"><Trash2 size={12}/></button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -1504,7 +1668,28 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
               <div>
                 <div className="flex justify-between items-end mb-2"><h3 className="text-xs md:text-sm font-bold text-emerald-500">VISUAL / LIGHTS ({form.content.visuals.length}/100)</h3><Button variant="secondary" className="py-1 px-2.5 text-[10px]" icon={Plus} onClick={() => addRow('visuals', { col1: '', col2: '', col3: '', col4: '' })}>Fila</Button></div>
                 <div className="overflow-x-auto rounded border border-slate-700 bg-slate-900">
-                  <table className="w-full text-left text-xs md:text-sm text-slate-300 min-w-[500px]"><thead className="bg-slate-800 text-[10px] md:text-xs border-b border-slate-700"><tr><th className="p-1.5 md:p-2">SISTEMA/EQUIPO</th><th className="p-1.5 md:p-2 w-16">CANT</th><th className="p-1.5 md:p-2">UBICACIÓN</th><th className="p-1.5 md:p-2">OBS</th><th className="p-1.5 md:p-2 w-10 text-center">X</th></tr></thead><tbody>{form.content.visuals.map((row, i) => (<tr key={i} className="border-b border-slate-800 last:border-0"><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col1} onChange={e=>updateTable('visuals', i, 'col1', e.target.value)} /></td><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 text-center outline-none focus:border-emerald-500 text-xs" value={row.col2} onChange={e=>updateTable('visuals', i, 'col2', e.target.value)} /></td><td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col3} onChange={e=>updateTable('visuals', i, 'col3', e.target.value)} /></td><td className="p-1"><AutoResizeTextarea className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col4} onChange={e=>updateTable('visuals', i, 'col4', e.target.value)} /></td><td className="p-1 text-center"><button type="button" onClick={()=>removeRow('visuals', i)} className="text-red-500 p-1 hover:bg-red-500/20 rounded"><Trash2 size={12}/></button></td></tr>))}</tbody></table>
+                  <table className="w-full text-left text-xs md:text-sm text-slate-300 min-w-[500px]">
+                    <thead className="bg-slate-800 text-[10px] md:text-xs border-b border-slate-700">
+                      <tr>
+                        <th className="p-1.5 md:p-2 w-16">CANT</th>
+                        <th className="p-1.5 md:p-2">SISTEMA/EQUIPO</th>
+                        <th className="p-1.5 md:p-2">UBICACIÓN</th>
+                        <th className="p-1.5 md:p-2">OBS</th>
+                        <th className="p-1.5 md:p-2 w-10 text-center">X</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {form.content.visuals.map((row, i) => (
+                        <tr key={i} className="border-b border-slate-800 last:border-0">
+                          <td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 text-center outline-none focus:border-emerald-500 text-xs" value={row.col2} onChange={e=>updateTable('visuals', i, 'col2', e.target.value)} /></td>
+                          <td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col1} onChange={e=>updateTable('visuals', i, 'col1', e.target.value)} /></td>
+                          <td className="p-1"><input className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col3} onChange={e=>updateTable('visuals', i, 'col3', e.target.value)} /></td>
+                          <td className="p-1"><AutoResizeTextarea className="w-full bg-transparent border border-slate-700 rounded p-1 outline-none focus:border-emerald-500 text-xs" value={row.col4} onChange={e=>updateTable('visuals', i, 'col4', e.target.value)} /></td>
+                          <td className="p-1 text-center"><button type="button" onClick={()=>removeRow('visuals', i)} className="text-red-500 p-1 hover:bg-red-500/20 rounded"><Trash2 size={12}/></button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -1648,7 +1833,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
           </div>
 
           <div className="p-3 md:p-4 border-t border-slate-700 bg-slate-900 shrink-0 flex gap-2">
-            <Button variant="secondary" className="flex-1 py-2" onClick={() => { setIsEditing(false); if(!form.id) setViewMode('LIST'); else setViewMode('DETAIL'); }}>Cancelar</Button>
+            <Button variant="secondary" className="flex-1 py-2" onClick={() => { if(!form.id) setViewMode('LIST'); else setViewMode('DETAIL'); }}>Cancelar</Button>
             <Button variant="primary" className="flex-1 py-2" onClick={handleSave} icon={Save}>Guardar Documento</Button>
           </div>
         </Card>
@@ -1754,10 +1939,17 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
                  <div className="overflow-x-auto rounded border border-slate-700 print:border-black">
                    <table className="w-full text-left text-xs md:text-sm text-slate-300 print:text-black min-w-[400px]">
                      <thead className="bg-slate-800 print:bg-gray-200 text-[10px] md:text-xs uppercase text-slate-500 print:text-black border-b border-slate-700 print:border-black">
-                       <tr><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">ITEM</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0 w-12">CANT</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">ESPECIFICACIONES</th><th className="p-1.5 md:p-2">OBS</th></tr>
+                       <tr><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0 w-12">CANT</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">ITEM</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">ESPECIFICACIONES</th><th className="p-1.5 md:p-2">OBS</th></tr>
                      </thead>
                      <tbody>
-                       {activeRider.content.backline.map((row, i) => row.col1 && <tr key={i} className="border-b border-slate-800 print:border-black last:border-0"><td className="p-1.5 md:p-2 font-bold border-r border-slate-800 print:border-black">{row.col1}</td><td className="p-1.5 md:p-2 text-center border-r border-slate-800 print:border-black">{row.col2}</td><td className="p-1.5 md:p-2 border-r border-slate-800 print:border-black whitespace-pre-wrap">{row.col3}</td><td className="p-1.5 md:p-2 text-[10px] md:text-xs whitespace-pre-wrap">{row.col4}</td></tr>)}
+                       {activeRider.content.backline.map((row, i) => row.col1 && (
+                         <tr key={i} className="border-b border-slate-800 print:border-black last:border-0">
+                           <td className="p-1.5 md:p-2 text-center font-bold border-r border-slate-800 print:border-black">{row.col2}</td>
+                           <td className="p-1.5 md:p-2 font-bold border-r border-slate-800 print:border-black">{row.col1}</td>
+                           <td className="p-1.5 md:p-2 border-r border-slate-800 print:border-black whitespace-pre-wrap">{row.col3}</td>
+                           <td className="p-1.5 md:p-2 text-[10px] md:text-xs whitespace-pre-wrap">{row.col4}</td>
+                         </tr>
+                       ))}
                      </tbody>
                    </table>
                  </div>
@@ -1769,10 +1961,17 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
                  <div className="overflow-x-auto rounded border border-slate-700 print:border-black">
                    <table className="w-full text-left text-xs md:text-sm text-slate-300 print:text-black min-w-[400px]">
                      <thead className="bg-slate-800 print:bg-gray-200 text-[10px] md:text-xs uppercase text-slate-500 print:text-black border-b border-slate-700 print:border-black">
-                       <tr><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">SISTEMA/EQUIPO</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0 w-12">CANT</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">UBICACIÓN</th><th className="p-1.5 md:p-2">OBS</th></tr>
+                       <tr><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0 w-12">CANT</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">SISTEMA/EQUIPO</th><th className="p-1.5 md:p-2 border-r border-slate-700 print:border-black last:border-0">UBICACIÓN</th><th className="p-1.5 md:p-2">OBS</th></tr>
                      </thead>
                      <tbody>
-                       {activeRider.content.visuals.map((row, i) => row.col1 && <tr key={i} className="border-b border-slate-800 print:border-black last:border-0"><td className="p-1.5 md:p-2 font-bold border-r border-slate-800 print:border-black">{row.col1}</td><td className="p-1.5 md:p-2 text-center border-r border-slate-800 print:border-black">{row.col2}</td><td className="p-1.5 md:p-2 border-r border-slate-800 print:border-black">{row.col3}</td><td className="p-1.5 md:p-2 text-[10px] md:text-xs whitespace-pre-wrap">{row.col4}</td></tr>)}
+                       {activeRider.content.visuals.map((row, i) => row.col1 && (
+                         <tr key={i} className="border-b border-slate-800 print:border-black last:border-0">
+                           <td className="p-1.5 md:p-2 text-center font-bold border-r border-slate-800 print:border-black">{row.col2}</td>
+                           <td className="p-1.5 md:p-2 font-bold border-r border-slate-800 print:border-black">{row.col1}</td>
+                           <td className="p-1.5 md:p-2 border-r border-slate-800 print:border-black">{row.col3}</td>
+                           <td className="p-1.5 md:p-2 text-[10px] md:text-xs whitespace-pre-wrap">{row.col4}</td>
+                         </tr>
+                       ))}
                      </tbody>
                    </table>
                  </div>
@@ -1938,7 +2137,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
               {riders.map((r) => {
                 const IconType = icons[r.type] || FileText;
                 return (
-                  <Card key={r.id} onClick={() => { setActiveRider(r); setIsEditing(false); }} className="p-3 md:p-4 group cursor-pointer hover:border-emerald-500 transition-colors">
+                  <Card key={r.id} onClick={() => setActiveRider(r)} className="p-3 md:p-4 group cursor-pointer hover:border-emerald-500 transition-colors">
                     <div className="flex justify-between items-start mb-3">
                       <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><IconType className="text-emerald-500" size={20} /></div>
                       <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded block w-fit text-emerald-500 bg-emerald-500/10">{r.type}</span>
