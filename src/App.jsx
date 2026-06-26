@@ -2463,6 +2463,20 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm }) => {
     setProcessingId(null);
   };
 
+  const handleDeleteUser = async (email) => {
+    setProcessingId(email);
+    try {
+      const res = await apiFetch('eliminarUsuario', { email });
+      if (res.status === 'success') { 
+        showToast("Usuario eliminado y notificado."); 
+        clearCache('usuarios');
+        setDbUsers(prev => prev.filter(u => u.email !== email));
+      } 
+      else { showToast("Error: " + res.message); }
+    } catch(e) { showToast("Error de conexión al eliminar."); }
+    setProcessingId(null);
+  };
+
   const handleDirectInvite = async (e) => {
     e.preventDefault(); setProcessingId('inviting');
     try {
@@ -2575,7 +2589,10 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm }) => {
                           <h3 className="font-bold text-white text-base truncate">{u.name}</h3>
                           <span className="text-[9px] bg-slate-900 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 uppercase font-bold inline-block mt-0.5">{u.role}</span>
                         </div>
-                        {u.status === 'INACTIVO' && <span className="text-[9px] text-red-500 font-bold border border-red-500/50 px-1.5 py-0.5 rounded">BLOCK</span>}
+                        {u.status === 'INACTIVO' && <span className="text-[9px] text-red-500 font-bold border border-red-500/50 px-1.5 py-0.5 rounded mr-2">BLOCK</span>}
+                        <button onClick={() => requestConfirm(`¿Eliminar definitivamente a ${u.name} de la plataforma?`, () => handleDeleteUser(u.email))} disabled={processingId === u.email} className="text-slate-500 hover:text-red-500 transition-colors p-1" title="Eliminar Usuario">
+                          {processingId === u.email ? <Loader2 size={18} className="animate-spin" /> : <X size={18} />}
+                        </button>
                       </div>
                       <div className="flex flex-wrap gap-1 mb-3">
                         {(u.permisos || []).map(p => <span key={p} className="text-[8px] bg-slate-900 text-slate-400 border border-slate-700 px-1.5 py-0.5 rounded uppercase">{p}</span>)}
