@@ -601,31 +601,38 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
 // --- COMPONENTES DE TRANSPORTE (NUEVOS) ---
 const TransportView = ({ currentUser, setCurrentView, showToast }) => {
   const [transports, setTransports] = useState([]);
+  const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [form, setForm] = useState({ title: '', date: '', time: '', origin: '', dest: '' });
+  const [form, setForm] = useState({ title: '', date: '', time: '', origin: '', dest: '', proyectoId: '' });
   const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role);
 
-  const fetchTransports = async (force = false) => {
+  const fetchTransportsAndProjects = async (force = false) => {
     setLoading(true);
-    if (!force && CACHE.transportes) {
-       setTransports(CACHE.transportes);
-       setLoading(false);
-       return;
-    }
     try {
-      const res = await apiFetch('getTransportes');
-      if (res.status === 'success') {
-         CACHE.transportes = res.data;
-         setTransports(res.data);
+      let transData = CACHE.transportes;
+      if (force || !transData) {
+        const res = await apiFetch('getTransportes');
+        if (res.status === 'success') { transData = res.data; CACHE.transportes = res.data; }
       }
+      if (transData) setTransports(transData);
+
+      let projData = CACHE.proyectos;
+      if (force || !projData) {
+        const resP = await apiFetch('getProyectos');
+        if (resP.status === 'success') { 
+          projData = resP.data.map(p => ({ ...p, asignados: Array.isArray(p.asignados) ? p.asignados : [] })); 
+          CACHE.proyectos = projData; 
+        }
+      }
+      if (projData) setProyectos(projData.filter(p => p.status === 'ACTIVO'));
     } catch(e) {
       showToast("Error al cargar transportes.");
     }
     setLoading(false);
   };
 
-  useEffect(() => { fetchTransports(); }, []);
+  useEffect(() => { fetchTransportsAndProjects(); }, []);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -634,14 +641,21 @@ const TransportView = ({ currentUser, setCurrentView, showToast }) => {
       if (res.status === 'success') {
         showToast("Ruta creada con éxito.");
         setIsCreating(false);
-        setForm({ title: '', date: '', time: '', origin: '', dest: '' });
+        setForm({ title: '', date: '', time: '', origin: '', dest: '', proyectoId: '' });
         clearCache('transportes');
-        fetchTransports(true);
+        fetchTransportsAndProjects(true);
       }
     } catch(e) {
       showToast("Error al crear ruta.");
     }
   };
+
+  const canManageAll = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
+  const visibleTransports = canManageAll ? transports : transports.filter(t => {
+    if (!t.proyectoId) return true; // Rutas generales sin asignar
+    const p = proyectos.find(proj => String(proj.id) === String(t.proyectoId));
+    return p && p.asignados.includes(currentUser.email);
+  });
 
   return (
     <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 pb-24 animate-fade-in">
@@ -657,7 +671,16 @@ const TransportView = ({ currentUser, setCurrentView, showToast }) => {
         <Card className="p-4 md:p-6 border-emerald-500 mb-6">
           <h2 className="text-lg font-bold text-white mb-4">Crear Nueva Ruta</h2>
           <form onSubmit={handleCreate} className="space-y-4">
-            <div><label className="text-xs text-slate-400 block mb-1">Título de la Ruta</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} placeholder="Ej. Traslado Hotel - Recinto" /></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label className="text-xs text-slate-400 block mb-1">Título de la Ruta</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} placeholder="Ej. Traslado Hotel - Recinto" /></div>
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Vincular a Gira / Proyecto</label>
+                <select className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.proyectoId} onChange={e=>setForm({...form, proyectoId: e.target.value})}>
+                  <option value="">Ruta General (Sin asignar)</option>
+                  {(canManageAll ? proyectos : proyectos.filter(p => p.asignados.includes(currentUser.email))).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></div>
               <div><label className="text-xs text-slate-400 block mb-1">Hora</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.time} onChange={e=>setForm({...form, time: e.target.value})} /></div>
@@ -671,9 +694,9 @@ const TransportView = ({ currentUser, setCurrentView, showToast }) => {
         </Card>
       )}
 
-      {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div> : transports.length === 0 ? <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay transportes programados.</div> : (
+      {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div> : visibleTransports.length === 0 ? <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500">No tienes transportes asignados en este momento.</div> : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {transports.map(t => (
+          {visibleTransports.map(t => (
             <Card key={t.id} className="p-4">
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-bold text-lg text-white">{t.title}</h3>
@@ -1573,6 +1596,14 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
   const riderHitos = getRiderHitos();
   const displayRider = (viewMode === 'EDIT' && isPreview) ? form : activeRider;
 
+  const visibleRiders = canManageProjects 
+    ? riders 
+    : riders.filter(r => {
+        if (!r.content.proyectoId) return true; // Documentos Generales sin asignar
+        const proj = proyectos.find(p => String(p.id) === String(r.content.proyectoId));
+        return proj && proj.asignados.includes(currentUser.email);
+    });
+
   return (
     <div className="space-y-4 animate-fade-in pb-24 max-w-5xl mx-auto print:m-0 print:p-0 print:w-full print:max-w-none">
       
@@ -2195,13 +2226,13 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
             <div className="bg-red-500/10 border border-red-500/50 p-3 md:p-4 rounded-xl text-red-400 flex items-center gap-2 text-sm print:hidden">
               <AlertCircle size={18} /> Error al cargar Riders.
             </div>
-          ) : loading && riders.length === 0 ? (
+          ) : loading && visibleRiders.length === 0 ? (
             <div className="flex justify-center p-8 print:hidden"><Loader2 className="animate-spin text-emerald-500" size={28}/></div>
-          ) : riders.length === 0 ? (
-            <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm print:hidden">No hay Riders creados aún.</div>
+          ) : visibleRiders.length === 0 ? (
+            <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm print:hidden">No tienes Riders asignados para visualizar.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 print:hidden">
-              {riders.map((r) => {
+              {visibleRiders.map((r) => {
                 const IconType = icons[r.type] || FileText;
                 return (
                   <Card key={r.id} onClick={() => setActiveRider(r)} className="p-3 md:p-4 group cursor-pointer hover:border-emerald-500 transition-colors">
@@ -2234,21 +2265,36 @@ const StaffDirectory = ({ currentUser }) => {
   useEffect(() => {
     const fetchDirectory = async (force = false) => {
       setLoading(true);
-      if (!force && CACHE.usuarios) {
-         const activeUsers = CACHE.usuarios.filter(u => u.status === 'ACTIVO' && u.email !== currentUser.email);
-         const canSeeEveryone = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.APV].includes(currentUser.role);
-         setLocalDirectory(canSeeEveryone ? activeUsers : activeUsers.filter(u => u.role === ROLES.TOUR_MANAGER));
-         setLoading(false);
-         return;
-      }
       try {
-        const res = await apiFetch('getUsuarios');
-        if (res.status === 'success') {
-          CACHE.usuarios = res.data;
-          const activeUsers = res.data.filter(u => u.status === 'ACTIVO' && u.email !== currentUser.email);
-          const canSeeEveryone = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.APV].includes(currentUser.role);
-          if (canSeeEveryone) setLocalDirectory(activeUsers);
-          else setLocalDirectory(activeUsers.filter(u => u.role === ROLES.TOUR_MANAGER));
+        let users = CACHE.usuarios;
+        if (force || !users) {
+          const res = await apiFetch('getUsuarios');
+          if (res.status === 'success') { users = res.data; CACHE.usuarios = users; }
+          else { users = []; }
+        }
+        
+        let projs = CACHE.proyectos;
+        if (force || !projs) {
+          const resP = await apiFetch('getProyectos');
+          if (resP.status === 'success') { 
+            projs = resP.data.map(p => ({ ...p, asignados: Array.isArray(p.asignados) ? p.asignados : [] })); 
+            CACHE.proyectos = projs; 
+          } else { projs = []; }
+        }
+
+        const activeUsers = users.filter(u => u.status === 'ACTIVO' && u.email !== currentUser.email);
+        const canSeeEveryone = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.APV].includes(currentUser.role);
+        
+        let visibleEmails = new Set();
+        if (!canSeeEveryone) {
+           projs.forEach(p => {
+              if (p.asignados.includes(currentUser.email)) {
+                 p.asignados.forEach(e => visibleEmails.add(e));
+              }
+           });
+           setLocalDirectory(activeUsers.filter(u => visibleEmails.has(u.email)));
+        } else {
+           setLocalDirectory(activeUsers);
         }
       } catch(e) { setFetchError(true); }
       setLoading(false);
@@ -2509,6 +2555,12 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm }) => {
         showToast("Perfil de usuario actualizado."); 
         clearCache('usuarios');
         setDbUsers(prev => prev.map(u => u.email === editingUser.email ? editingUser : u));
+        
+        // Si el admin se edita a sí mismo, actualizar la sesión actual en vivo
+        if (currentUser.email === editingUser.email) {
+          setCurrentUser(prev => ({ ...prev, permisos: editingUser.permisos, role: editingUser.role, status: editingUser.status }));
+        }
+
         setEditingUser(null);
       } else {
         showToast("Error al guardar: " + res.message);
@@ -2572,12 +2624,19 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm }) => {
                          <div className="grid grid-cols-2 gap-2">
                            {MODULOS.map(mod => (
                              <label key={mod.id} className="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer">
-                               <input type="checkbox" checked={editingUser.permisos?.includes(mod.id)} 
+                               <input type="checkbox" 
+                                      checked={(editingUser.permisos || []).includes(mod.id)} 
                                       onChange={(e) => {
-                                        const newPerms = e.target.checked 
-                                          ? [...(editingUser.permisos || []), mod.id] 
-                                          : (editingUser.permisos || []).filter(p => p !== mod.id);
-                                        setEditingUser({...editingUser, permisos: newPerms});
+                                        const isChecked = e.target.checked;
+                                        setEditingUser(prev => {
+                                          const currentPerms = prev.permisos || [];
+                                          return {
+                                            ...prev,
+                                            permisos: isChecked 
+                                              ? [...currentPerms, mod.id] 
+                                              : currentPerms.filter(p => p !== mod.id)
+                                          };
+                                        });
                                       }}
                                       className="accent-emerald-500 rounded bg-slate-800 border-slate-600" />
                                {mod.label}
@@ -2852,8 +2911,8 @@ export default function App() {
           {currentView === 'PROFILE' && <ProfileView currentUser={currentUser} setCurrentUser={setCurrentUser} showToast={showToast} />}
           {currentView === 'STAFF' && <StaffDirectory currentUser={currentUser} />}
           {currentView === 'CHAT' && <ChatView currentUser={currentUser} showToast={showToast} />}
-          {currentView === 'TRANSPORT' && <TransportView currentUser={currentUser} setCurrentView={setCurrentView} setSelectedProject={setSelectedProject} showToast={showToast} />}
-          {currentView === 'TRANSPORT_DETAILS' && <TransportDetailsView currentUser={currentUser} setCurrentView={setCurrentView} selectedProject={selectedProject} showToast={showToast} />}
+          {currentView === 'TRANSPORT' && <TransportView currentUser={currentUser} setCurrentView={setCurrentView} showToast={showToast} />}
+          {currentView === 'TRANSPORT_DETAILS' && <TransportDetailsView currentUser={currentUser} setCurrentView={setCurrentView} showToast={showToast} />}
           {currentView === 'RIDERS' && <RidersView currentUser={currentUser} showToast={showToast} requestConfirm={requestConfirm} activeRider={activeRider} setActiveRider={setActiveRider} directory={directory} />}
         </div>
       </main>
