@@ -4339,13 +4339,24 @@ export default function App() {
 
           .light-mode .text-emerald-500 { color: #047857 !important; }
           .light-mode .text-emerald-400 { color: #059669 !important; }
+          .light-mode .text-emerald-300 { color: #047857 !important; }
+          .light-mode .text-emerald-200 { color: #065f46 !important; }
+          .light-mode .text-emerald-100 { color: #064e3b !important; }
+          .light-mode .text-emerald-50 { color: #022c22 !important; }
+          
           .light-mode .text-blue-500 { color: #1d4ed8 !important; }
           .light-mode .text-blue-400 { color: #2563eb !important; }
+          
           .light-mode .text-amber-500 { color: #b45309 !important; }
           .light-mode .text-amber-400 { color: #d97706 !important; }
+          
           .light-mode .text-red-500 { color: #b91c1c !important; }
           .light-mode .text-red-400 { color: #dc2626 !important; }
-          
+          .light-mode .text-red-300 { color: #b91c1c !important; }
+          .light-mode .text-red-200 { color: #991b1b !important; }
+          .light-mode .text-red-100 { color: #7f1d1d !important; }
+          .light-mode .text-red-50 { color: #450a0a !important; }
+
           .light-mode .bg-emerald-600 { background-color: #059669 !important; color: #ffffff !important; }
           .light-mode .bg-red-600 { background-color: #dc2626 !important; color: #ffffff !important; }
 
