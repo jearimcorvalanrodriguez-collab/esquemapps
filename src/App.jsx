@@ -682,156 +682,67 @@ const StageplotBuilder = ({ items, onChange, config, onConfigChange, readOnly = 
         {items.length === 0 ? (
           <div className="text-center p-6 text-xs text-slate-500 italic">No hay equipos agregados en el escenario.</div>
         ) : (
-          <>
-            {/* Desktop Legend Table */}
-            <div className="hidden md:block overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-wider">
-                    <th className="py-2 px-3 w-12 text-center">#</th>
-                    <th className="py-2 px-3 w-28">Tipo</th>
-                    <th className="py-2 px-3">Etiqueta / Nombre de Personaje</th>
-                    {!readOnly && (
-                      <>
-                        <th className="py-2 px-3 w-24 text-center">Rotación</th>
-                        <th className="py-2 px-3 w-16 text-center">Acción</th>
-                      </>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {items.map((item, idx) => {
-                    const def = STAGE_ITEMS[item.type];
-                    return (
-                      <tr 
-                        key={item.id} 
-                        className={`hover:bg-slate-850/50 transition-colors ${selectedId === item.id ? 'bg-emerald-500/5' : ''}`}
-                        onClick={() => !readOnly && setSelectedId(item.id)}
-                      >
-                        <td className="py-2 px-3 text-center">
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-[10px] border border-emerald-500/30">
-                            {idx + 1}
-                          </span>
-                        </td>
-                        <td className="py-2 px-3 font-bold text-white flex items-center gap-2">
-                          <div className="w-4 h-4 shrink-0 text-slate-400">{def.render()}</div>
-                          <span className="truncate">{def.label}</span>
-                        </td>
-                        <td className="py-2 px-3">
-                          {readOnly ? (
-                            <span className="text-slate-300 font-bold">{item.label || '-'}</span>
-                          ) : (
-                            <input 
-                              className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded px-2.5 py-0.5 text-xs text-white outline-none transition-colors"
-                              value={item.label}
-                              onChange={(e) => {
-                                onChange(items.map(it => it.id === item.id ? { ...it, label: e.target.value } : it));
-                              }}
-                              placeholder="Ej. Guitarra, Voz 1..."
-                            />
-                          )}
-                        </td>
-                        {!readOnly && (
-                          <>
-                            <td className="py-2 px-3 text-center">
-                              <button 
-                                type="button" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onChange(items.map(it => it.id === item.id ? { ...it, rotation: (it.rotation + 45) % 360 } : it));
-                                }} 
-                                className="p-1.5 bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 rounded text-[10px] font-bold inline-flex items-center justify-center transition-colors"
-                                title={`Rotar: ${item.rotation}°`}
-                              >
-                                <RotateCw size={10}/>
-                              </button>
-                            </td>
-                            <td className="py-2 px-3 text-center">
-                              <button 
-                                type="button" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onChange(items.filter(it => it.id !== item.id));
-                                  if (selectedId === item.id) setSelectedId(null);
-                                }} 
-                                className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
-                                title="Eliminar"
-                              >
-                                <Trash2 size={12}/>
-                              </button>
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Card list of Legend */}
-            <div className="block md:hidden space-y-2">
-              {items.map((item, idx) => {
-                const def = STAGE_ITEMS[item.type];
-                return (
-                  <div 
-                    key={item.id} 
-                    onClick={() => !readOnly && setSelectedId(item.id)}
-                    className={`p-3 rounded-lg border bg-slate-950/40 flex items-center justify-between gap-3 transition-colors ${selectedId === item.id ? 'border-emerald-500 bg-emerald-500/5' : 'border-slate-800'}`}
-                  >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-[10px] border border-emerald-500/30 shrink-0">
-                        {idx + 1}
-                      </span>
-                      <div className="w-5 h-5 shrink-0 text-slate-400">{def.render()}</div>
-                      <div className="flex-1 min-w-0 text-left">
-                        {readOnly ? (
-                          <p className="text-xs text-white font-bold truncate">{item.label || def.label}</p>
-                        ) : (
-                          <input 
-                            className="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500 rounded px-2.5 py-1 text-xs text-white outline-none transition-colors"
-                            value={item.label}
-                            onChange={(e) => {
-                              onChange(items.map(it => it.id === item.id ? { ...it, label: e.target.value } : it));
-                            }}
-                            placeholder={def.label}
-                          />
-                        )}
-                      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 print:grid-cols-3 gap-2 text-xs">
+            {items.map((item, idx) => {
+              const def = STAGE_ITEMS[item.type];
+              return (
+                <div 
+                  key={item.id} 
+                  onClick={() => !readOnly && setSelectedId(item.id)}
+                  className={`flex items-center justify-between gap-2 p-1.5 rounded-lg border transition-colors ${selectedId === item.id ? 'border-emerald-500 bg-emerald-500/5' : 'border-slate-800 bg-slate-950/20'} print:border-black print:bg-white`}
+                >
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-[10px] border border-emerald-500/30 shrink-0">
+                      {idx + 1}
+                    </span>
+                    <div className="w-4 h-4 shrink-0 text-slate-400">{def.render()}</div>
+                    <div className="flex-1 min-w-0 text-left">
+                      {readOnly ? (
+                        <p className="text-[11px] text-slate-300 font-bold truncate leading-none">{item.label || def.label}</p>
+                      ) : (
+                        <input 
+                          className="w-full bg-slate-900 border border-slate-800/80 focus:border-emerald-500 rounded px-1.5 py-0.5 text-[11px] text-white outline-none transition-colors leading-none"
+                          value={item.label}
+                          onChange={(e) => {
+                            onChange(items.map(it => it.id === item.id ? { ...it, label: e.target.value } : it));
+                          }}
+                          placeholder={def.label}
+                        />
+                      )}
                     </div>
-                    
-                    {!readOnly && (
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button 
-                          type="button" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onChange(items.map(it => it.id === item.id ? { ...it, rotation: (it.rotation + 45) % 360 } : it));
-                          }} 
-                          className="p-1.5 bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 rounded transition-colors"
-                          title={`Rotar: ${item.rotation}°`}
-                        >
-                          <RotateCw size={11}/>
-                        </button>
-                        <button 
-                          type="button" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onChange(items.filter(it => it.id !== item.id));
-                            if (selectedId === item.id) setSelectedId(null);
-                          }} 
-                          className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 size={12}/>
-                        </button>
-                      </div>
-                    )}
                   </div>
-                );
-              })}
-            </div>
-          </>
+                  
+                  {!readOnly && (
+                    <div className="flex items-center gap-1 shrink-0 print:hidden">
+                      <button 
+                        type="button" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onChange(items.map(it => it.id === item.id ? { ...it, rotation: (it.rotation + 45) % 360 } : it));
+                        }} 
+                        className="p-1 bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 rounded transition-colors"
+                        title={`Rotar: ${item.rotation}°`}
+                      >
+                        <RotateCw size={10}/>
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onChange(items.filter(it => it.id !== item.id));
+                          if (selectedId === item.id) setSelectedId(null);
+                        }} 
+                        className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={10}/>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
