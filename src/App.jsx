@@ -471,35 +471,160 @@ const EventCard = ({ event, canManage, handleDeleteHito, setAssigningHito, curre
   const formattedTime = timeMatch ? `${timeMatch[0]} h` : '--:-- h';
 
   return (
-    <div className={`p-3 md:p-4 rounded-xl border transition-all duration-500 relative group ${status.bg} ${status.border}`}>
-      {canManage && (
-        <button onClick={() => requestConfirm("¿Eliminar este Hito de forma permanente?", () => handleDeleteHito(event.id))} className="absolute top-3 right-3 text-slate-500 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"><Trash2 size={16} /></button>
-      )}
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 md:gap-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-bold text-white mb-1.5 pr-8">{event.title}</h3>
-          <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs font-bold mb-2">
-            <span className="flex items-center gap-1 text-slate-300"><Calendar size={12}/> {formattedDate}</span>
-            <span className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20"><Clock size={12}/> {formattedTime}</span>
+    <div className="relative pl-6 md:pl-8 group">
+      {/* Timeline dot */}
+      <div className={`absolute left-[1px] md:left-[5px] top-4 w-3 h-3 rounded-full ring-4 ring-slate-950 ${status.dot} ${status.pulse ? 'animate-pulse' : ''} z-10 print:ring-white`}></div>
+      
+      <div className={`p-2.5 md:p-3 rounded-lg border transition-all duration-500 bg-slate-900/50 hover:bg-slate-800 print:bg-transparent ${status.border} flex flex-col sm:flex-row justify-between sm:items-center gap-2 print:border-black`}>
+        
+        <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4">
+          <div className="shrink-0 text-left min-w-[70px]">
+             <span className={`block font-black text-sm md:text-base leading-none print:text-black ${status.textClass}`}>{formattedTime}</span>
+             <span className="text-[9px] text-slate-500 font-bold print:text-slate-700">{formattedDate}</span>
           </div>
-          <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 underline decoration-blue-500/30 underline-offset-2 flex items-center gap-1 w-fit mb-3">
-            <MapPin size={12}/> {event.location}
-          </a>
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ${status.dot} ${status.pulse ? 'animate-pulse' : ''}`}></span>
-            <span className={`text-[10px] font-black uppercase tracking-wider ${status.textClass}`}>{status.text}</span>
-            {isAssignedToMe && <span className="ml-1.5 text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider border border-blue-500/50">Asignado a ti</span>}
+          
+          <div className="flex-1 border-l-0 sm:border-l border-slate-700/50 print:border-black/30 sm:pl-3">
+            <div className="flex items-start justify-between">
+               <h3 className="text-sm font-bold text-white print:text-black">{event.title}</h3>
+               {canManage && (
+                 <button onClick={() => requestConfirm("¿Eliminar Hito permanentemente?", () => handleDeleteHito(event.id))} className="text-slate-500 hover:text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity print:hidden"><Trash2 size={14}/></button>
+               )}
+            </div>
+            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400 hover:text-blue-300 print:text-blue-700 flex items-center gap-1 w-fit mt-0.5">
+              <MapPin size={10}/> {event.location}
+            </a>
           </div>
-          {canManage && (
-            <Button variant="ghost" className="bg-slate-900 border border-slate-700 py-1 px-2 text-[10px]" icon={Users} onClick={() => setAssigningHito(event)}>
-              Asignado ({event.asignados.length})
-            </Button>
-          )}
         </div>
-        <div className={`shrink-0 flex items-center gap-1.5 px-3 py-2 md:py-2.5 rounded-lg border bg-slate-900 ${status.border} ${status.textClass} font-mono font-black text-xs md:text-sm tracking-wider mt-2 md:mt-0`}>
-          <Hourglass size={14} className={status.pulse ? 'animate-spin-slow' : ''} />{status.timeText}
+
+        <div className="shrink-0 flex items-center gap-2 border-t sm:border-t-0 border-slate-700/50 print:border-transparent pt-2 sm:pt-0 print:hidden">
+           {isAssignedToMe && <span className="text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase border border-blue-500/50">Tú</span>}
+           {canManage && (
+             <Button variant="ghost" className="bg-slate-900 border border-slate-700 py-0.5 px-1.5 text-[9px]" icon={Users} onClick={() => setAssigningHito(event)}>
+               {event.asignados.length}
+             </Button>
+           )}
+           <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded border bg-slate-950 ${status.border} ${status.textClass} font-mono font-bold text-[9px]`}>
+             <Hourglass size={10} className={status.pulse ? 'animate-spin-slow' : ''} />{status.timeText}
+           </div>
         </div>
+
       </div>
+    </div>
+  );
+};
+
+// --- CHAT LATERAL POR PROYECTO ---
+const ProjectChatSidebar = ({ currentUser, selectedProject, showToast }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMsg, setNewMsg] = useState('');
+  const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef(null);
+  const canSendMessages = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.APV].includes(currentUser.role);
+
+  const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); };
+
+  const fetchMessages = async (force = false, isBackground = false) => {
+    if (!isBackground) setLoading(true);
+    try {
+      let msgData = CACHE.mensajes;
+      if (force || !msgData) {
+        const res = await apiFetch('getMensajes');
+        if (res.status === 'success') { msgData = res.data; CACHE.mensajes = res.data; }
+      }
+      if (msgData) {
+        const isNew = CACHE.mensajes && CACHE.mensajes.length < msgData.length;
+        const projMsgs = msgData.filter(m => String(m.proyectoId) === String(selectedProject.id));
+        setMessages(projMsgs);
+        if (!isBackground || isNew) setTimeout(scrollToBottom, 100);
+      }
+    } catch (e) { if (!isBackground) showToast("Error al conectar con chat."); }
+    if (!isBackground) setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchMessages();
+    const interval = setInterval(() => fetchMessages(true, true), 10000);
+    return () => clearInterval(interval);
+  }, [selectedProject]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!newMsg.trim() || !canSendMessages) return;
+    
+    const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const tempId = Date.now();
+    const newMsgObj = { id: tempId, proyectoId: selectedProject.id, sender: currentUser.name, role: currentUser.role, text: newMsg, time: timeStr, readBy: [] };
+    
+    setMessages([...messages, newMsgObj]); 
+    setNewMsg('');
+    setTimeout(scrollToBottom, 100);
+
+    try {
+      await apiFetch('sendMensaje', { proyectoId: selectedProject.id, sender: currentUser.name, role: currentUser.role, text: newMsgObj.text, time: timeStr });
+      clearCache('mensajes');
+      fetchMessages(true, true);
+    } catch (e) { showToast("No se pudo enviar el mensaje."); }
+  };
+
+  const toggleReadReceipt = async (msgId) => {
+    setMessages(messages.map(m => {
+      if (m.id === msgId) {
+        const hasRead = m.readBy.includes(currentUser.name);
+        return { ...m, readBy: hasRead ? m.readBy : [...m.readBy, currentUser.name] };
+      }
+      return m;
+    }));
+    try {
+      await apiFetch('marcarLeido', { id: msgId, userName: currentUser.name });
+      clearCache('mensajes');
+    } catch (e) { showToast("Error al marcar como leído."); }
+  };
+
+  return (
+    <div className="flex flex-col h-[500px] lg:h-[calc(100vh-8rem)] bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg print:hidden">
+      <header className="p-3 bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="text-amber-500" size={18} />
+          <div>
+            <h2 className="font-black text-white text-sm leading-tight">Anuncios</h2>
+            <p className="text-[9px] text-amber-400 font-bold uppercase tracking-wider">Canal Oficial</p>
+          </div>
+        </div>
+        <Button variant="ghost" className="text-slate-400 hover:text-emerald-400 p-1 border border-slate-700 rounded" onClick={() => fetchMessages(true)} title="Actualizar Chat"><RefreshCw size={12} className={loading ? "animate-spin text-emerald-500" : ""}/></Button>
+      </header>
+
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+        {messages.length === 0 && !loading && <div className="text-center text-slate-500 mt-8 text-xs">No hay comunicados en esta gira.</div>}
+        
+        {messages.map(msg => {
+          const isMe = msg.sender === currentUser.name;
+          const hasRead = msg.readBy.includes(currentUser.name);
+          return (
+            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-slide-up`}>
+              <div className={`flex flex-col mb-1 ${isMe ? 'items-end' : 'items-start'}`}>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[10px] font-bold text-slate-300">{isMe ? 'Tú' : msg.sender}</span>
+                  <span className="text-[9px] text-slate-500">{msg.time}</span>
+                </div>
+                <span className="text-[8px] text-amber-500 uppercase font-black leading-none mt-0.5">{msg.role}</span>
+              </div>
+              <div className={`p-2 rounded-xl max-w-[85%] text-xs shadow-sm ${isMe ? 'bg-amber-600 text-white rounded-tr-none' : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-tl-none'}`}>{msg.text}</div>
+              {!isMe && ( <button onClick={() => toggleReadReceipt(msg.id)} disabled={hasRead} className={`mt-1 flex items-center gap-1 text-[9px] font-bold px-1.5 py-1 rounded transition-colors ${hasRead ? 'bg-blue-500/20 text-blue-400 cursor-default' : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'}`}><CheckCheck size={10} /> {hasRead ? 'Leído' : 'Marcar Leído'}</button> )}
+              {isMe && msg.readBy.length > 0 && ( <span className="text-[8px] text-blue-400 mt-1 font-bold flex items-center gap-1"><CheckCheck size={10} /> Visto por {msg.readBy.length}</span> )}
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+      
+      {canSendMessages ? (
+        <form onSubmit={handleSend} className="p-2 bg-slate-800 border-t border-slate-700 flex gap-2">
+          <input type="text" value={newMsg} onChange={e => setNewMsg(e.target.value)} placeholder="Escribe un anuncio..." className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors"/>
+          <Button type="submit" variant="primary" icon={Send} className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 border-amber-500 shadow-amber-900/30"></Button>
+        </form>
+      ) : (
+        <div className="p-2 bg-slate-800 border-t border-slate-700 text-center text-[9px] text-slate-400 font-bold uppercase tracking-wider">Solo Producción envía anuncios. Usa "Marcar Leído".</div>
+      )}
     </div>
   );
 };
@@ -625,14 +750,13 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
 // --- COMPONENTES DE TRANSPORTE ---
 const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject }) => {
   const [transports, setTransports] = useState([]);
-  const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState({ title: '', date: '', time: '', origin: '', dest: '', proyectoId: selectedProject?.id || '' });
   const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role);
   const canManageAll = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role);
 
-  const fetchTransportsAndProjects = async (force = false, isBackground = false) => {
+  const fetchTransports = async (force = false, isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
       let transData = CACHE.transportes;
@@ -641,17 +765,6 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
         if (res.status === 'success') { transData = res.data; CACHE.transportes = res.data; }
       }
       
-      let projData = CACHE.proyectos;
-      if (force || !projData) {
-        const resP = await apiFetch('getProyectos');
-        if (resP.status === 'success') { 
-          projData = resP.data.map(p => ({ ...p, asignados: Array.isArray(p.asignados) ? p.asignados : [] })); 
-          CACHE.proyectos = projData; 
-        }
-      }
-      
-      if (projData) setProyectos(projData.filter(p => p.status === 'ACTIVO'));
-
       if (transData) {
         if (isBackground) {
           const oldLen = transports.length;
@@ -667,8 +780,8 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
   };
 
   useEffect(() => { 
-    if(selectedProject) fetchTransportsAndProjects(); 
-    const interval = setInterval(() => fetchTransportsAndProjects(true, true), 30000);
+    if(selectedProject) fetchTransports(); 
+    const interval = setInterval(() => fetchTransports(true, true), 30000);
     return () => clearInterval(interval);
   }, [selectedProject]);
 
@@ -684,7 +797,7 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
         setIsCreating(false);
         setForm({ title: '', date: '', time: '', origin: '', dest: '', proyectoId: selectedProject.id });
         clearCache('transportes');
-        fetchTransportsAndProjects(true);
+        fetchTransports(true);
       }
     } catch(e) {
       showToast("Error al crear ruta.");
@@ -697,39 +810,39 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
       
       <header className="border-b border-slate-800 pb-4 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-2"><Truck className="text-emerald-500" size={24}/> Transportes</h1>
-          <p className="text-sm text-slate-400">Rutas del proyecto: {selectedProject.name}</p>
+          <h1 className="text-2xl font-black text-white flex items-center gap-2"><Truck className="text-blue-500" size={24}/> Transportes</h1>
+          <p className="text-sm text-slate-400">Rutas para: {selectedProject.name}</p>
         </div>
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          <Button variant="ghost" icon={RefreshCw} onClick={() => fetchTransportsAndProjects(true)} className="px-2 border border-slate-700 hover:text-emerald-400" title="Actualizar Transportes" />
+          <Button variant="ghost" icon={RefreshCw} onClick={() => fetchTransports(true)} className="px-2 border border-slate-700 hover:text-emerald-400" title="Actualizar Transportes" />
           {canCreate && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Nueva Ruta</Button>}
         </div>
       </header>
 
       {isCreating && (
-        <Card className="p-4 md:p-6 border-emerald-500 mb-6">
+        <Card className="p-4 md:p-6 border-blue-500 mb-6">
           <h2 className="text-lg font-bold text-white mb-4">Crear Nueva Ruta</h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-              <div><label className="text-xs text-slate-400 block mb-1">Título de la Ruta</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} placeholder="Ej. Traslado Hotel - Recinto" /></div>
+              <div><label className="text-xs text-slate-400 block mb-1">Título de la Ruta</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} placeholder="Ej. Traslado Hotel - Recinto" /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></div>
-              <div><label className="text-xs text-slate-400 block mb-1">Hora</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.time} onChange={e=>setForm({...form, time: e.target.value})} /></div>
+              <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500" value={form.date} onChange={e=>setForm({...form, date: e.target.value})} /></div>
+              <div><label className="text-xs text-slate-400 block mb-1">Hora</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500" value={form.time} onChange={e=>setForm({...form, time: e.target.value})} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-xs text-slate-400 block mb-1">Origen</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.origin} onChange={e=>setForm({...form, origin: e.target.value})} /></div>
-              <div><label className="text-xs text-slate-400 block mb-1">Destino</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-emerald-500" value={form.dest} onChange={e=>setForm({...form, dest: e.target.value})} /></div>
+              <div><label className="text-xs text-slate-400 block mb-1">Origen</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500" value={form.origin} onChange={e=>setForm({...form, origin: e.target.value})} /></div>
+              <div><label className="text-xs text-slate-400 block mb-1">Destino</label><input required className="w-full bg-slate-900 border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500" value={form.dest} onChange={e=>setForm({...form, dest: e.target.value})} /></div>
             </div>
-            <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1 py-2" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1 py-2">Guardar Ruta</Button></div>
+            <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1 py-2" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" variant="blue" className="flex-1 py-2">Guardar Ruta</Button></div>
           </form>
         </Card>
       )}
 
-      {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div> : transports.length === 0 ? <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500">No hay transportes programados en este proyecto.</div> : (
+      {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-blue-500" size={28}/></div> : transports.length === 0 ? <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50 text-slate-500">No hay transportes programados en este proyecto.</div> : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {transports.map(t => (
-            <Card key={t.id} className="p-4">
+            <Card key={t.id} className="p-4 border-l-4 border-l-blue-500">
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-bold text-lg text-white">{t.title}</h3>
                 <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${t.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/50' : t.status === 'EN RUTA' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/50' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/50'}`}>{t.status}</span>
@@ -741,7 +854,7 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
               </div>
               <div className="bg-slate-900 border border-slate-700 p-2 rounded flex justify-between items-center">
                 <span className="text-xs text-slate-400 uppercase font-bold">Token Piloto</span>
-                <span className="font-mono text-emerald-400 font-bold tracking-widest">{t.token}</span>
+                <span className="font-mono text-blue-400 font-bold tracking-widest">{t.token}</span>
               </div>
             </Card>
           ))}
@@ -829,6 +942,7 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
       if (res.status === 'success') {
         const parsed = res.data.map(p => ({ ...p, asignados: Array.isArray(p.asignados) ? p.asignados : [] }));
         
+        // Notificación de nueva asignación en background
         if (isBackground) {
            const myOldCount = CACHE.proyectos ? CACHE.proyectos.filter(p => p.asignados.includes(currentUser.email)).length : 0;
            const myNewCount = parsed.filter(p => p.asignados.includes(currentUser.email)).length;
@@ -925,8 +1039,9 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
         ) : loading && proyectos.length === 0 ? (
           <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" size={28}/></div>
         ) : visibleProyectos.length === 0 ? (
-          <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm">
-            {canCreate ? "No hay proyectos activos." : "No tienes proyectos asignados en este momento."}
+          <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50 mt-6">
+             <Navigation className="mx-auto text-slate-600 mb-4" size={48} />
+             <p className="text-slate-400 text-sm max-w-md mx-auto">No tienes proyectos asignados en este momento. Cuando Producción te incluya en una gira, aparecerá aquí automáticamente.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
@@ -940,7 +1055,7 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
                   onClick={() => { setSelectedProject(proyecto); setCurrentView('PROJECT_DETAILS'); }}
                   className={`group cursor-pointer ${proyecto.status === 'ACTIVO' ? 'hover:border-emerald-500' : 'opacity-70 grayscale hover:grayscale-0'}`}
                 >
-                  <div className="p-3 md:p-4">
+                  <div className="p-4">
                     <div className="flex justify-between items-start mb-3">
                       <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><Music className="text-emerald-500" size={20} /></div>
                       <div className="flex flex-col items-end gap-1">
@@ -1046,7 +1161,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
       } catch(e) {}
       return { ...ev, fullDate, asignados: Array.isArray(ev.asignados) ? ev.asignados : [] };
     });
-    setHitos(parsedEvents.sort((a,b) => a.fullDate - b.fullDate));
+    setHitos(parsedEvents.sort((a,b) => a.fullDate.getTime() - b.fullDate.getTime()));
   };
 
   const fetchHitos = async (force = false, isBackground = false) => {
@@ -1072,7 +1187,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
 
   useEffect(() => { 
     fetchHitos(); 
-    if (CACHE.usuarios) setDirectory(CACHE.usuarios);
+    if (CACHE.usuarios) setDirectory(CACHE.usuarios.filter(u => u.status === 'ACTIVO'));
     const interval = setInterval(() => { fetchHitos(true, true); }, 30000);
     return () => clearInterval(interval);
   }, [p]);
@@ -1085,7 +1200,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
 
   if (firstHito && firstHito.fullDate && firstHito.fullDate.getTime() !== 0) {
     const fd = firstHito.fullDate;
-    projectDateStr = `${String(fd.getDate()).padStart(2, '0')}/${String(fd.getMonth() + 1).padStart(2, '0')}/${fd.getFullYear()} - ${String(fd.getHours()).padStart(2, '0')}:${String(fd.getMinutes()).padStart(2, '0')} h`;
+    projectDateStr = `${String(fd.getDate()).padStart(2, '0')}/${String(fd.getMonth() + 1).padStart(2, '0')}/${fd.getFullYear()}`;
     
     const diffMs = fd.getTime() - new Date().getTime();
     const hoursDiff = diffMs / (1000 * 60 * 60);
@@ -1142,13 +1257,13 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-5xl mx-auto">
+    <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-7xl mx-auto">
       <button onClick={() => setCurrentView('DASHBOARD')} className="flex items-center gap-1.5 text-xs md:text-sm text-slate-400 hover:text-white transition-colors mb-2"><ChevronLeft size={16}/> Volver a Proyectos</button>
       
       <header className="border-b border-slate-800 pb-4 flex flex-col items-start gap-2">
         <div>
           <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 uppercase font-bold tracking-wider mb-1.5 inline-block">VISTA PROYECTO</span>
-          <h1 className="text-xl md:text-2xl font-black text-white leading-tight">{p.name}</h1>
+          <h1 className="text-xl md:text-3xl font-black text-white leading-tight">{p.name}</h1>
           <div className="mt-1.5 space-y-1">
             <p className="text-xs md:text-sm text-slate-300 flex items-center gap-1.5"><Calendar size={12}/> Inicio: {projectDateStr}</p>
             <p className="text-xs md:text-sm text-slate-400 flex items-center gap-1.5"><User size={12}/> Liderado por: {p.manager}</p>
@@ -1156,96 +1271,107 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
         </div>
       </header>
 
-      {/* --- MÓDULOS DEL PROYECTO (TARJETAS GRANDES) --- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-6 mb-8">
-          <Card onClick={() => setCurrentView('RIDERS')} className="p-4 md:p-6 flex flex-col items-center justify-center text-center group cursor-pointer hover:border-emerald-500 transition-all">
-              <div className="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <FileText className="text-emerald-500" size={28} />
-              </div>
-              <h3 className="font-bold text-white text-lg">Riders Técnicos</h3>
-              <p className="text-xs text-slate-400 mt-1">Stageplots y Requerimientos</p>
-          </Card>
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        
+        {/* LADO IZQUIERDO: MÓDULOS Y TIMING */}
+        <div className="flex-1 w-full space-y-6">
+            
+            {/* --- MÓDULOS DEL PROYECTO (TARJETAS COMPACTAS) --- */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <Card onClick={() => setCurrentView('RIDERS')} className="p-3 flex items-center gap-3 group cursor-pointer hover:border-emerald-500 transition-all">
+                    <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <FileText className="text-emerald-500" size={24} />
+                    </div>
+                    <div className="text-left">
+                        <h3 className="font-bold text-white text-base leading-tight">Riders Técnicos</h3>
+                        <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">Stageplots y Requerimientos</p>
+                    </div>
+                </Card>
 
-          <Card onClick={() => setCurrentView('TRANSPORT')} className="p-4 md:p-6 flex flex-col items-center justify-center text-center group cursor-pointer hover:border-blue-500 transition-all">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <Truck className="text-blue-500" size={28} />
-              </div>
-              <h3 className="font-bold text-white text-lg">Transportes</h3>
-              <p className="text-xs text-slate-400 mt-1">Logística y Rutas</p>
-          </Card>
-
-          <Card onClick={() => setCurrentView('CHAT')} className="p-4 md:p-6 flex flex-col items-center justify-center text-center group cursor-pointer hover:border-amber-500 transition-all">
-              <div className="w-14 h-14 bg-amber-500/10 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <MessageSquare className="text-amber-500" size={28} />
-              </div>
-              <h3 className="font-bold text-white text-lg">Anuncios</h3>
-              <p className="text-xs text-slate-400 mt-1">Comunicados oficiales</p>
-          </Card>
-      </div>
-
-      {/* --- SECCIÓN TIMING --- */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-8 mb-4 gap-4 border-t border-slate-800 pt-6">
-        <div className="flex items-center gap-4 flex-wrap">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2"><Clock className="text-emerald-500"/> Run of Show / Timing</h2>
-          {showClock && (
-            <div className="bg-slate-900 border border-slate-700 px-4 py-1.5 rounded-lg flex items-center gap-2 shadow-inner animate-fade-in">
-              <Timer className="text-emerald-500 animate-pulse" size={16} />
-              <LiveClock />
+                <Card onClick={() => setCurrentView('TRANSPORT')} className="p-3 flex items-center gap-3 group cursor-pointer hover:border-blue-500 transition-all">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <Truck className="text-blue-500" size={24} />
+                    </div>
+                    <div className="text-left">
+                        <h3 className="font-bold text-white text-base leading-tight">Transportes</h3>
+                        <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">Logística y Rutas</p>
+                    </div>
+                </Card>
             </div>
-          )}
-        </div>
-        {canManage && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Agregar Hito</Button>}
-      </div>
 
-      {isCreating && (
-        <Card className="p-6 border-emerald-500 mb-6">
-          <h2 className="text-lg font-bold text-white mb-4">Agendar Nuevo Hito</h2>
-          <form onSubmit={handleCreateHito} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">Título del Hito</label>
-                <input list="hitos-list" required className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" placeholder="Ej: Soundcheck, Load In..." value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
-                <datalist id="hitos-list"><option value="Load In (Montaje)" /><option value="Soundcheck (Prueba de Sonido)" /><option value="Puertas (Apertura al público)" /><option value="Show Telonero" /><option value="Show Principal" /><option value="Load Out (Desmontaje)" /></datalist>
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">Ubicación / Locación</label>
-                <div className="flex items-center gap-2">
-                  <input required className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" placeholder="Ej: Escenario Principal" value={form.location} onChange={e=>setForm({...form, location: e.target.value})} />
-                  <Button type="button" variant="secondary" icon={MapPin} onClick={captureGPS} title="Usar GPS" className="px-3" />
+            {/* --- SECCIÓN TIMING (LINEA DE TIEMPO) --- */}
+            <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3 border-b border-slate-700/50 pb-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2"><Clock className="text-emerald-500" size={20}/> Run of Show / Timing</h2>
+                  {showClock && (
+                    <div className="bg-slate-900 border border-slate-700 px-3 py-1 rounded flex items-center gap-2 shadow-inner">
+                      <Timer className="text-emerald-500 animate-pulse" size={14} />
+                      <LiveClock />
+                    </div>
+                  )}
                 </div>
+                {canManage && !isCreating && <Button icon={Plus} className="py-1.5 px-3 text-xs" onClick={() => setIsCreating(true)}>Agregar Hito</Button>}
               </div>
-              <div><label className="text-xs text-slate-400 block mb-1">Fecha</label><input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" onChange={e=>setForm({...form, date: e.target.value})} /></div>
-              <div><label className="text-xs text-slate-400 block mb-1">Hora</label><input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 md:p-2.5 text-xs md:text-sm text-white outline-none focus:border-emerald-500" onChange={e=>setForm({...form, time: e.target.value})} /></div>
-            </div>
-            <div className="flex gap-2 pt-2"><Button variant="secondary" className="flex-1 py-2 md:py-2.5" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1 py-2 md:py-2.5">Guardar Hito</Button></div>
-          </form>
-        </Card>
-      )}
 
-      {fetchError ? (
-        <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3"><AlertCircle size={20} /> {fetchError}</div>
-      ) : loading && hitos.length === 0 ? (
-        <div className="flex justify-center p-10"><Loader2 className="animate-spin text-emerald-500" size={32}/></div>
-      ) : hitos.length === 0 ? (
-        <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50">
-          <CalendarPlus className="mx-auto text-slate-600 mb-4" size={48} />
-          <p className="text-slate-400 text-sm max-w-md mx-auto">Aún no has agregado hitos al timing de este proyecto.</p>
+              {isCreating && (
+                <Card className="p-4 md:p-5 border-emerald-500 mb-6 bg-slate-900 shadow-xl">
+                  <h2 className="text-base font-bold text-white mb-3">Agendar Nuevo Hito</h2>
+                  <form onSubmit={handleCreateHito} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Título del Hito</label>
+                        <input list="hitos-list" required className="w-full bg-slate-950 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-emerald-500" placeholder="Ej: Soundcheck, Load In..." value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
+                        <datalist id="hitos-list"><option value="Load In (Montaje)" /><option value="Soundcheck (Prueba de Sonido)" /><option value="Puertas (Apertura al público)" /><option value="Show Telonero" /><option value="Show Principal" /><option value="Load Out (Desmontaje)" /></datalist>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Ubicación / Locación</label>
+                        <div className="flex items-center gap-2">
+                          <input required className="w-full bg-slate-950 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-emerald-500" placeholder="Ej: Escenario Principal" value={form.location} onChange={e=>setForm({...form, location: e.target.value})} />
+                          <Button type="button" variant="secondary" icon={MapPin} onClick={captureGPS} title="Usar GPS" className="px-3" />
+                        </div>
+                      </div>
+                      <div><label className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Fecha</label><input required type="date" className="w-full bg-slate-950 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-emerald-500" onChange={e=>setForm({...form, date: e.target.value})} /></div>
+                      <div><label className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Hora</label><input required type="time" className="w-full bg-slate-950 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-emerald-500" onChange={e=>setForm({...form, time: e.target.value})} /></div>
+                    </div>
+                    <div className="flex gap-2 pt-1"><Button variant="secondary" className="flex-1 py-2" onClick={()=>setIsCreating(false)}>Cancelar</Button><Button type="submit" className="flex-1 py-2">Guardar Hito</Button></div>
+                  </form>
+                </Card>
+              )}
+
+              {fetchError ? (
+                <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl text-red-400 flex items-center gap-3"><AlertCircle size={20} /> {fetchError}</div>
+              ) : loading && hitos.length === 0 ? (
+                <div className="flex justify-center p-6"><Loader2 className="animate-spin text-emerald-500" size={24}/></div>
+              ) : hitos.length === 0 ? (
+                <div className="text-center p-8 border border-slate-800 border-dashed rounded-xl bg-slate-900/50">
+                  <CalendarPlus className="mx-auto text-slate-600 mb-3" size={32} />
+                  <p className="text-slate-400 text-xs md:text-sm max-w-md mx-auto">Aún no hay hitos en el timing de este proyecto.</p>
+                </div>
+              ) : (
+                <div className="relative before:absolute before:inset-y-0 before:left-[5px] md:before:left-[9px] before:w-0.5 before:bg-slate-800 ml-1 md:ml-0 space-y-4">
+                  {hitos.map((event) => (
+                    <EventCard 
+                       key={event.id} 
+                       event={event} 
+                       canManage={canManage} 
+                       handleDeleteHito={handleDeleteHito} 
+                       setAssigningHito={setAssigningHito} 
+                       currentUser={currentUser} 
+                       requestConfirm={requestConfirm} 
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {hitos.map((event) => (
-            <EventCard 
-               key={event.id} 
-               event={event} 
-               canManage={canManage} 
-               handleDeleteHito={handleDeleteHito} 
-               setAssigningHito={setAssigningHito} 
-               currentUser={currentUser} 
-               requestConfirm={requestConfirm} 
-            />
-          ))}
+
+        {/* LADO DERECHO: SIDEBAR ANUNCIOS */}
+        <div className="w-full lg:w-80 shrink-0 sticky top-6">
+           <ProjectChatSidebar currentUser={currentUser} selectedProject={selectedProject} showToast={showToast} />
         </div>
-      )}
+
+      </div>
 
       {assigningHito && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
@@ -1596,7 +1722,7 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
         } catch(e) {}
         return { ...ev, fullDate, timeFmt };
       })
-      .sort((a,b) => a.fullDate - b.fullDate);
+      .sort((a,b) => a.fullDate.getTime() - b.fullDate.getTime());
   };
   
   const riderHitos = getRiderHitos();
@@ -3166,7 +3292,7 @@ export default function App() {
       <main className="flex-1 relative overflow-y-auto h-screen bg-slate-950 print:bg-white custom-scrollbar print:overflow-visible print:h-auto pb-[70px] md:pb-0">
         <div className="p-3 md:p-6 print:p-0">
           {currentView === 'DASHBOARD' && <Dashboard currentUser={currentUser} setCurrentView={setCurrentView} setSelectedProject={setSelectedProject} showToast={showToast} directory={directory} />}
-          {currentView === 'PROJECT_DETAILS' && <ProjectDetailsView currentUser={currentUser} setCurrentView={setCurrentView} selectedProject={selectedProject} showToast={showToast} directory={directory} requestConfirm={requestConfirm} setActiveRider={setActiveRider} />}
+          {currentView === 'PROJECT_DETAILS' && <ProjectDetailsView currentUser={currentUser} setCurrentView={setCurrentView} selectedProject={selectedProject} showToast={showToast} requestConfirm={requestConfirm} />}
           {currentView === 'ADMIN_PANEL' && <AdminPanel currentUser={currentUser} showToast={showToast} requestConfirm={requestConfirm} />}
           {currentView === 'PROFILE' && <ProfileView currentUser={currentUser} setCurrentUser={setCurrentUser} showToast={showToast} theme={theme} setTheme={setTheme} />}
           {currentView === 'STAFF' && <StaffDirectory currentUser={currentUser} />}
