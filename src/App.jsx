@@ -4274,8 +4274,7 @@ export default function App() {
           </div>
         </div>
       )}
-
-      <div className={`flex-1 min-h-0 ${theme === 'light' ? 'light-mode bg-slate-50' : 'bg-slate-950'} flex flex-col lg:flex-row font-sans print:bg-white print:text-black`}>
+      
       {theme === 'light' && (
         <style>{`
           .light-mode { background-color: #f8fafc !important; color: #0f172a !important; }
@@ -4286,12 +4285,32 @@ export default function App() {
           
           .light-mode .border-slate-800 { border-color: #e2e8f0 !important; }
           .light-mode .border-slate-700 { border-color: #cbd5e1 !important; }
+          .light-mode .border-slate-600 { border-color: #cbd5e1 !important; }
           
           .light-mode .text-white { color: #0f172a !important; }
+          .light-mode .text-slate-50 { color: #0f172a !important; }
+          .light-mode .text-slate-100 { color: #1e293b !important; }
           .light-mode .text-slate-200 { color: #1e293b !important; }
           .light-mode .text-slate-300 { color: #334155 !important; }
           .light-mode .text-slate-400 { color: #475569 !important; }
           .light-mode .text-slate-500 { color: #64748b !important; }
+
+          .light-mode .bg-emerald-600, .light-mode .bg-emerald-500, 
+          .light-mode .bg-blue-600, .light-mode .bg-blue-500, 
+          .light-mode .bg-red-600, .light-mode .bg-red-500, 
+          .light-mode .bg-amber-600, .light-mode .bg-amber-500 {
+              color: #ffffff !important;
+          }
+          .light-mode .bg-emerald-600 .text-white, .light-mode .bg-emerald-500 .text-white,
+          .light-mode .bg-blue-600 .text-white, .light-mode .bg-blue-500 .text-white,
+          .light-mode .bg-red-600 .text-white, .light-mode .bg-red-500 .text-white,
+          .light-mode .bg-amber-600 .text-white, .light-mode .bg-amber-500 .text-white,
+          .light-mode .bg-emerald-600 *, .light-mode .bg-emerald-500 *, 
+          .light-mode .bg-blue-600 *, .light-mode .bg-blue-500 *, 
+          .light-mode .bg-red-600 *, .light-mode .bg-red-500 *, 
+          .light-mode .bg-amber-600 *, .light-mode .bg-amber-500 * {
+              color: #ffffff !important;
+          }
 
           .light-mode input:not([type="checkbox"]), .light-mode select, .light-mode textarea {
               background-color: #ffffff !important;
@@ -4302,27 +4321,44 @@ export default function App() {
               border-color: #10b981 !important;
           }
 
-          .light-mode .text-emerald-500 { color: #059669 !important; }
-          .light-mode .text-emerald-400 { color: #10b981 !important; }
-          .light-mode .text-blue-500 { color: #2563eb !important; }
-          .light-mode .text-blue-400 { color: #3b82f6 !important; }
-          .light-mode .text-amber-500 { color: #d97706 !important; }
-          .light-mode .text-amber-400 { color: #f59e0b !important; }
-          .light-mode .text-red-500 { color: #dc2626 !important; }
-          .light-mode .text-red-400 { color: #ef4444 !important; }
+          .light-mode .text-emerald-500 { color: #047857 !important; }
+          .light-mode .text-emerald-400 { color: #059669 !important; }
+          .light-mode .text-blue-500 { color: #1d4ed8 !important; }
+          .light-mode .text-blue-400 { color: #2563eb !important; }
+          .light-mode .text-amber-500 { color: #b45309 !important; }
+          .light-mode .text-amber-400 { color: #d97706 !important; }
+          .light-mode .text-red-500 { color: #b91c1c !important; }
+          .light-mode .text-red-400 { color: #dc2626 !important; }
           
           .light-mode .bg-emerald-600 { background-color: #059669 !important; color: #ffffff !important; }
           .light-mode .bg-red-600 { background-color: #dc2626 !important; color: #ffffff !important; }
 
-          .light-mode .bg-slate-950\\/80 { background-color: rgba(248, 250, 252, 0.85) !important; }
+          .light-mode .bg-slate-950\/20 { background-color: rgba(15, 23, 42, 0.05) !important; }
+          .light-mode .bg-slate-950\/40 { background-color: rgba(15, 23, 42, 0.1) !important; }
+          .light-mode .bg-slate-950\/80 { background-color: rgba(248, 250, 252, 0.85) !important; }
+          .light-mode .bg-slate-950\/90 { background-color: rgba(248, 250, 252, 0.92) !important; }
           
-          .light-mode .bg-emerald-500\\/10 { background-color: rgba(16, 185, 129, 0.1) !important; border-color: rgba(16, 185, 129, 0.3) !important; }
+          .light-mode .bg-slate-900\/50 { background-color: rgba(255, 255, 255, 0.5) !important; }
+          .light-mode .bg-slate-900\/80 { background-color: rgba(255, 255, 255, 0.8) !important; }
+          .light-mode .bg-slate-900\/90 { background-color: rgba(255, 255, 255, 0.9) !important; }
+          .light-mode .bg-slate-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+          
+          .light-mode .bg-slate-800\/50 { background-color: rgba(241, 245, 249, 0.5) !important; }
+          .light-mode .bg-slate-800\/80 { background-color: rgba(241, 245, 249, 0.8) !important; }
+          
+          .light-mode .hover\\:bg-slate-800\\/50:hover { background-color: rgba(241, 245, 249, 0.5) !important; }
+          .light-mode .hover\\:bg-slate-850\\/50:hover { background-color: rgba(241, 245, 249, 0.6) !important; }
+          
+          .light-mode .bg-emerald-500\\/10 { background-color: rgba(5, 150, 105, 0.08) !important; border-color: rgba(5, 150, 105, 0.2) !important; }
+          .light-mode .bg-emerald-500\\/20 { background-color: rgba(5, 150, 105, 0.12) !important; border-color: rgba(5, 150, 105, 0.3) !important; }
+          .light-mode .bg-emerald-500\\/5 { background-color: rgba(5, 150, 105, 0.04) !important; }
           
           .light-mode thead.bg-slate-800 { background-color: #e2e8f0 !important; }
           .light-mode thead th { color: #475569 !important; }
           .light-mode tr { border-color: #cbd5e1 !important; }
         `}</style>
       )}
+
       <ConfirmModal />
 
       {showDisclaimerModal && (
@@ -4383,7 +4419,8 @@ export default function App() {
       )}
       {toastMessage && <div className="fixed top-4 right-4 z-[300] bg-emerald-500 text-white px-3 md:px-4 py-2.5 md:py-3 rounded-lg shadow-lg flex items-center gap-2.5 animate-fade-in print:hidden"><CheckCircle2 size={18} /><span className="font-bold text-xs md:text-sm">{toastMessage}</span></div>}
 
-      <aside className="bg-slate-900 border-r border-slate-800 w-64 shrink-0 hidden lg:flex flex-col h-screen sticky top-0 print:hidden">
+      <div className={`flex-1 min-h-0 ${theme === 'light' ? 'light-mode bg-slate-50' : 'bg-slate-950'} flex flex-col lg:flex-row font-sans print:bg-white print:text-black`}>
+        <aside className="bg-slate-900 border-r border-slate-800 w-64 shrink-0 hidden lg:flex flex-col h-screen sticky top-0 print:hidden">
         <div className="p-4 flex items-center gap-2.5 border-b border-slate-800"><Music className="text-emerald-500" size={20} /><h1 className="text-lg font-black text-white tracking-widest">ESQUEMAPPS</h1></div>
         <div className="p-3 flex-1 space-y-1 overflow-y-auto custom-scrollbar">
           {menuOptions.map(opt => (
