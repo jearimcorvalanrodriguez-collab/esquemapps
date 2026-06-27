@@ -1086,6 +1086,9 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
   const [assigningDriverToken, setAssigningDriverToken] = useState(null);
   const [driverForm, setDriverForm] = useState({ name: '', email: '', phone: '+569' });
   const [sendingId, setSendingId] = useState(null);
+  const [editingRouteId, setEditingRouteId] = useState(null);
+  const [editForm, setEditForm] = useState({ title: '', date: '', time: '', origin: '', dest: '', paradas: [] });
+  const [editStopInput, setEditStopInput] = useState('');
 
   const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role) || (currentUser.permisos || []).includes('TRANSPORT_MANAGE');
   const canManageAll = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('TRANSPORT_MANAGE');
@@ -1144,6 +1147,31 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
       }
     } catch(err) {
       showToast("Error al asignar piloto.");
+    }
+  };
+
+  const handleUpdateRoute = async (e, routeId) => {
+    e.preventDefault();
+    try {
+      const res = await apiFetch('updateTransporte', { 
+        id: routeId, 
+        title: editForm.title.trim(),
+        date: editForm.date,
+        time: editForm.time,
+        origin: editForm.origin.trim(),
+        dest: editForm.dest.trim(),
+        paradas: editForm.paradas
+      });
+      if (res.status === 'success') {
+        showToast("Ruta actualizada y avisos enviados.");
+        setEditingRouteId(null);
+        clearCache('transportes');
+        fetchTransports(true);
+      } else {
+        showToast("Error: " + res.message);
+      }
+    } catch(err) {
+      showToast("Error al actualizar la ruta.");
     }
   };
 
@@ -1305,140 +1333,206 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
             const hasDriver = !!t.conductor;
             return (
               <Card key={t.id} className="p-4 border-l-4 border-l-blue-500 flex flex-col justify-between min-h-[280px]">
-                <div>
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-bold text-base md:text-lg text-white leading-tight">{t.title}</h3>
-                    <span className={`text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded uppercase ${t.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/50' : t.status === 'EN RUTA' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/50' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/50'}`}>{t.status}</span>
-                  </div>
-                  
-                  <div className="space-y-2 text-xs md:text-sm text-slate-300 mb-4 text-left">
-                    <p className="flex items-center gap-2 font-mono"><Calendar size={13}/> {t.date} {t.time}</p>
+                {editingRouteId === t.id ? (
+                  <form onSubmit={(e) => handleUpdateRoute(e, t.id)} className="space-y-3 text-left animate-fade-in w-full">
+                    <div className="flex justify-between items-center border-b border-slate-800 pb-1.5 mb-1.5">
+                      <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider">Editar Ruta</h4>
+                      <span className="text-[10px] font-mono text-slate-500 font-bold">{t.token}</span>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Título de la Ruta</label>
+                      <input required className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-blue-500" value={editForm.title} onChange={e=>setEditForm({...editForm, title: e.target.value})} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Fecha</label>
+                        <input required type="date" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-blue-500" value={editForm.date} onChange={e=>setEditForm({...editForm, date: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Hora</label>
+                        <input required type="time" className="w-full bg-slate-900 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-blue-500" value={editForm.time} onChange={e=>setEditForm({...editForm, time: e.target.value})} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Origen</label>
+                      <AddressAutocomplete value={editForm.origin} onChange={val=>setEditForm({...editForm, origin: val})} placeholder="Buscar origen..." className="w-full bg-slate-900 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-blue-500"/>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-0.5 font-bold uppercase">Destino</label>
+                      <AddressAutocomplete value={editForm.dest} onChange={val=>setEditForm({...editForm, dest: val})} placeholder="Buscar destino..." className="w-full bg-slate-900 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-blue-500"/>
+                    </div>
                     
-                    <div className="border border-slate-800/80 bg-slate-900/40 rounded-lg p-2.5 space-y-1.5">
-                      <p className="flex items-start gap-1.5">
-                        <MapPin size={13} className="text-amber-500 shrink-0 mt-0.5"/> 
-                        <span className="font-bold shrink-0">Origen: </span>
-                        <span className="text-slate-300 truncate">{t.origin}</span>
-                      </p>
-                      
-                      {t.paradas && t.paradas.length > 0 && (
-                        <div className="pl-4 border-l border-slate-800 space-y-1 my-1">
-                          {t.paradas.map((st, i) => (
-                            <p key={i} className="flex items-start gap-1 text-slate-400 text-xs">
-                              <span className="font-bold text-blue-400">📍 Stop {i+1}:</span>
-                              <span className="truncate">{st}</span>
-                            </p>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-400 block font-bold uppercase">Paradas Intermedias</label>
+                      <div className="flex gap-1.5">
+                        <AddressAutocomplete value={editStopInput} onChange={setEditStopInput} placeholder="Añadir parada..." className="flex-1 bg-slate-900 border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-blue-500"/>
+                        <Button type="button" variant="blue" className="px-2.5 py-1.5 text-xs shrink-0" onClick={() => { if(editStopInput.trim()) { setEditForm(prev => ({...prev, paradas: [...(prev.paradas || []), editStopInput.trim()]})); setEditStopInput(''); } }}>+</Button>
+                      </div>
+                      {editForm.paradas && editForm.paradas.length > 0 && (
+                        <div className="space-y-1 max-h-24 overflow-y-auto custom-scrollbar p-2 bg-slate-950 rounded border border-slate-800">
+                          {editForm.paradas.map((s, idx) => (
+                            <div key={idx} className="flex justify-between items-center text-[10px] bg-slate-900 px-2 py-1 rounded border border-slate-850">
+                              <span className="text-slate-300 truncate">#{idx+1}: {s}</span>
+                              <button type="button" className="text-red-400 hover:text-red-300 ml-1 font-bold text-xs" onClick={() => setEditForm(prev => ({...prev, paradas: prev.paradas.filter((_, i) => i !== idx)}))}>✕</button>
+                            </div>
                           ))}
                         </div>
                       )}
-                      
-                      <p className="flex items-start gap-1.5 pt-1 border-t border-slate-800/50">
-                        <Navigation size={13} className="text-emerald-500 shrink-0 mt-0.5"/> 
-                        <span className="font-bold shrink-0">Destino: </span>
-                        <span className="text-slate-300 truncate">{t.dest}</span>
-                      </p>
                     </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 border-t border-slate-800 pt-3">
-                  {/* Conductor info */}
-                  <div className="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80">
-                    <div className="text-left">
-                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Piloto Asignado</p>
-                      {hasDriver ? (
-                        <div>
-                          <p className="text-xs font-bold text-white leading-tight">{t.conductor.split(' (')[0]}</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5 leading-none">{t.conductorPhone}</p>
-                          <span className={`text-[9px] font-black uppercase inline-block mt-1 ${t.conductorAceptado === 'Ruta aceptada por conductor' ? 'text-emerald-400' : 'text-amber-400 animate-pulse'}`}>
-                            ● {t.conductorAceptado || 'PENDIENTE'}
-                          </span>
+                    
+                    <div className="flex gap-2 pt-2 border-t border-slate-800">
+                      <Button type="button" variant="secondary" className="flex-1 py-2 text-xs" onClick={()=>setEditingRouteId(null)}>Cancelar</Button>
+                      <Button type="submit" variant="blue" className="flex-1 py-2 text-xs">Guardar Cambios</Button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div>
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-bold text-base md:text-lg text-white leading-tight">{t.title}</h3>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {canManageAll && (
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                setEditingRouteId(t.id);
+                                setEditForm({ title: t.title, date: t.date, time: t.time, origin: t.origin, dest: t.dest, paradas: t.paradas || [] });
+                                setEditStopInput('');
+                              }} 
+                              className="text-slate-400 hover:text-emerald-400 hover:border-emerald-500/50 text-[10px] bg-slate-800 border border-slate-700 px-2 py-0.5 rounded transition-all font-bold"
+                              title="Editar Ruta"
+                            >
+                              Editar
+                            </button>
+                          )}
+                          <span className={`text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded uppercase ${t.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/50' : t.status === 'EN RUTA' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/50' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/50'}`}>{t.status}</span>
                         </div>
-                      ) : (
-                        <p className="text-xs text-slate-500 italic">Sin conductor asignado</p>
+                      </div>
+                      
+                      <div className="space-y-2 text-xs md:text-sm text-slate-300 mb-4 text-left">
+                        <p className="flex items-center gap-2 font-mono"><Calendar size={13}/> {t.date} {t.time}</p>
+                        
+                        <div className="border border-slate-800/80 bg-slate-900/40 rounded-lg p-2.5 space-y-1.5">
+                          <p className="flex items-start gap-1.5">
+                            <MapPin size={13} className="text-amber-500 shrink-0 mt-0.5"/> 
+                            <span className="font-bold shrink-0">Origen: </span>
+                            <span className="text-slate-300 truncate">{t.origin}</span>
+                          </p>
+                          
+                          {t.paradas && t.paradas.length > 0 && (
+                            <div className="pl-4 border-l border-slate-800 space-y-1 my-1">
+                              {t.paradas.map((st, i) => (
+                                <p key={i} className="flex items-start gap-1 text-slate-400 text-xs">
+                                  <span className="font-bold text-blue-400">📍 Stop {i+1}:</span>
+                                  <span className="truncate">{st}</span>
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                          
+                          <p className="flex items-start gap-1.5 pt-1 border-t border-slate-800/50">
+                            <Navigation size={13} className="text-emerald-500 shrink-0 mt-0.5"/> 
+                            <span className="font-bold shrink-0">Destino: </span>
+                            <span className="text-slate-300 truncate">{t.dest}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 border-t border-slate-800 pt-3 w-full">
+                      <div className="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80">
+                        <div className="text-left">
+                          <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Piloto Asignado</p>
+                          {hasDriver ? (
+                            <div>
+                              <p className="text-xs font-bold text-white leading-tight">{t.conductor.split(' (')[0]}</p>
+                              <p className="text-[10px] text-slate-400 mt-0.5 leading-none">{t.conductorPhone}</p>
+                              <span className={`text-[9px] font-black uppercase inline-block mt-1 ${t.conductorAceptado === 'Ruta aceptada por conductor' ? 'text-emerald-400' : 'text-amber-400 animate-pulse'}`}>
+                                ● {t.conductorAceptado || 'PENDIENTE'}
+                              </span>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-slate-500 italic">Sin conductor asignado</p>
+                          )}
+                        </div>
+                        {canManageAll && (
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            className="py-1 px-2 text-[10px] border border-slate-700 bg-slate-900"
+                            onClick={() => {
+                              setAssigningDriverToken(t.token);
+                              if (hasDriver) {
+                                const name = t.conductor.split(' (')[0];
+                                const email = t.conductor.match(/\(([^)]+)\)/)?.[1] || '';
+                                setDriverForm({ name, email, phone: t.conductorPhone });
+                              } else {
+                                setDriverForm({ name: '', email: '', phone: '+569' });
+                              }
+                            }}
+                          >
+                            {hasDriver ? 'Cambiar' : 'Asignar'}
+                          </Button>
+                        )}
+                      </div>
+
+                      {assigningDriverToken === t.token && (
+                        <form onSubmit={(e) => handleSaveDriver(e, t)} className="p-3 bg-slate-900 border border-slate-700 rounded-lg space-y-2 text-left animate-fade-in w-full">
+                          <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Configurar Conductor</h4>
+                          <input required type="text" placeholder="Nombre completo" value={driverForm.name} onChange={e=>setDriverForm({...driverForm, name: e.target.value})} className="w-full bg-slate-950 border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-blue-500"/>
+                          <input required type="email" placeholder="Email (recibe confirmación)" value={driverForm.email} onChange={e=>setDriverForm({...driverForm, email: e.target.value})} className="w-full bg-slate-950 border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-blue-500"/>
+                          <input required type="tel" placeholder="WhatsApp (ej. +56912345678)" value={driverForm.phone} onChange={e=>setDriverForm({...driverForm, phone: e.target.value.replace(/[^0-9+]/g, '')})} className="w-full bg-slate-950 border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-blue-500"/>
+                          <div className="flex gap-2 pt-1">
+                            <Button type="button" variant="secondary" className="flex-1 py-1 text-xs" onClick={()=>setAssigningDriverToken(null)}>Cancelar</Button>
+                            <Button type="submit" variant="blue" className="flex-1 py-1 text-xs">Guardar</Button>
+                          </div>
+                        </form>
                       )}
-                    </div>
-                    {canManageAll && (
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        className="py-1 px-2 text-[10px] border border-slate-700 bg-slate-900"
-                        onClick={() => {
-                          setAssigningDriverToken(t.token);
-                          if (hasDriver) {
-                            const name = t.conductor.split(' (')[0];
-                            const email = t.conductor.match(/\(([^)]+)\)/)?.[1] || '';
-                            setDriverForm({ name, email, phone: t.conductorPhone });
-                          } else {
-                            setDriverForm({ name: '', email: '', phone: '+569' });
-                          }
-                        }}
-                      >
-                        {hasDriver ? 'Cambiar' : 'Asignar'}
-                      </Button>
-                    )}
-                  </div>
 
-                  {/* Driver Edit Form Inline */}
-                  {assigningDriverToken === t.token && (
-                    <form onSubmit={(e) => handleSaveDriver(e, t)} className="p-3 bg-slate-900 border border-slate-700 rounded-lg space-y-2 text-left animate-fade-in">
-                      <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Configurar Conductor</h4>
-                      <input required type="text" placeholder="Nombre completo" value={driverForm.name} onChange={e=>setDriverForm({...driverForm, name: e.target.value})} className="w-full bg-slate-950 border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-blue-500"/>
-                      <input required type="email" placeholder="Email (recibe confirmación)" value={driverForm.email} onChange={e=>setDriverForm({...driverForm, email: e.target.value})} className="w-full bg-slate-950 border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-blue-500"/>
-                      <input required type="tel" placeholder="WhatsApp (ej. +56912345678)" value={driverForm.phone} onChange={e=>setDriverForm({...driverForm, phone: e.target.value.replace(/[^0-9+]/g, '')})} className="w-full bg-slate-950 border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-blue-500"/>
-                      <div className="flex gap-2 pt-1">
-                        <Button type="button" variant="secondary" className="flex-1 py-1 text-xs" onClick={()=>setAssigningDriverToken(null)}>Cancelar</Button>
-                        <Button type="submit" variant="blue" className="flex-1 py-1 text-xs">Guardar</Button>
-                      </div>
-                    </form>
-                  )}
-
-                  {/* Token and Notification Buttons */}
-                  <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-lg flex justify-between items-center gap-3">
-                    <div className="text-left flex-1 min-w-0">
-                      <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider mb-0.5">Token Piloto</p>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-blue-400 font-bold tracking-widest text-xs md:text-sm truncate">{t.token}</span>
-                        <button 
-                          type="button" 
-                          onClick={() => copyToClipboard(t.token)} 
-                          className="text-slate-400 hover:text-white p-0.5"
-                          title="Copiar Token"
-                        >
-                          <Copy size={11} />
-                        </button>
+                      <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-lg flex justify-between items-center gap-3">
+                        <div className="text-left flex-1 min-w-0">
+                          <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider mb-0.5">Token Piloto</p>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-blue-400 font-bold tracking-widest text-xs md:text-sm truncate">{t.token}</span>
+                            <button 
+                              type="button" 
+                              onClick={() => copyToClipboard(t.token)} 
+                              className="text-slate-400 hover:text-white p-0.5"
+                              title="Copiar Token"
+                            >
+                              <Copy size={11} />
+                            </button>
+                          </div>
+                        </div>
+                        {hasDriver && canManageAll && (
+                          <div className="flex items-center gap-1.5">
+                            <button 
+                              type="button" 
+                              onClick={() => handleSendNotification(t)}
+                              disabled={sendingId === t.token}
+                              className="p-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-blue-400 hover:text-blue-300 rounded-lg transition-colors flex items-center justify-center shrink-0"
+                              title="Enviar Token por Correo"
+                            >
+                              {sendingId === t.token ? <Loader2 size={12} className="animate-spin"/> : <Mail size={12} />}
+                            </button>
+                            <a 
+                              href={getWhatsAppLink(t)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-emerald-400 hover:text-emerald-300 rounded-lg transition-colors flex items-center justify-center shrink-0"
+                              title="Enviar Token por WhatsApp"
+                            >
+                              <MessageCircle size={12} />
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    {hasDriver && canManageAll && (
-                      <div className="flex items-center gap-1.5">
-                        <button 
-                          type="button" 
-                          onClick={() => handleSendNotification(t)}
-                          disabled={sendingId === t.token}
-                          className="p-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-blue-400 hover:text-blue-300 rounded-lg transition-colors flex items-center justify-center shrink-0"
-                          title="Enviar Token por Correo"
-                        >
-                          {sendingId === t.token ? <Loader2 size={12} className="animate-spin"/> : <Mail size={12} />}
-                        </button>
-                        <a 
-                          href={getWhatsAppLink(t)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-emerald-400 hover:text-emerald-300 rounded-lg transition-colors flex items-center justify-center shrink-0"
-                          title="Enviar Token por WhatsApp"
-                        >
-                          <MessageCircle size={12} />
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  </>
+                )}
               </Card>
             );
           })}
-        </div>              </div>
-            </Card>
-          ))}
         </div>
       )}
     </div>
