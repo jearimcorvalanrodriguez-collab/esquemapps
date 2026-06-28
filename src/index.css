@@ -72,39 +72,44 @@
   color: #0f172a !important; /* text-slate-900 */
 }
 
-/* Backgrounds of pages and layout containers */
+/* Page background should be very light/clean slate-50 */
 .light-mode,
 .light-mode .bg-slate-950,
+.light-mode .bg-slate-950\/80 {
+  background-color: #f8fafc !important; /* slate-50 */
+  color: #1e293b !important;
+}
+
+/* Headers, navigations, sidebars, and submenus should have no background (transparent) to look clean */
+.light-mode header,
+.light-mode nav,
 .light-mode .bg-slate-900,
 .light-mode .bg-slate-900\/40,
 .light-mode .bg-slate-900\/50,
-.light-mode .bg-slate-950\/60,
-.light-mode .bg-slate-950\/80 {
-  background-color: #f1f5f9 !important; /* slate-100 */
-  color: #1e293b !important; /* text-slate-800 */
-}
-
-/* Sidebar and Header background */
-.light-mode .lg\:w-64,
-.light-mode nav,
-.light-mode header,
-.light-mode .bg-slate-900.border-b {
-  background-color: #e2e8f0 !important; /* slate-200 */
+.light-mode .bg-slate-900.border-b,
+.light-mode .lg\:w-64 {
+  background-color: transparent !important;
   border-color: #cbd5e1 !important;
 }
 
-/* Cards should be white/slightly gray with nice borders and high contrast */
+/* Cards and sections containing long texts or project info should be white */
 .light-mode .bg-slate-800,
-.light-mode .bg-slate-900\/50,
+.light-mode .bg-slate-850,
 .light-mode .bg-slate-900\/80,
-.light-mode .bg-slate-950,
-.light-mode .bg-slate-950\/80,
-.light-mode .bg-slate-950\/60,
-.light-mode .bg-slate-900,
-.light-mode .bg-slate-850 {
+.light-mode .bg-slate-950\/60 {
   background-color: #ffffff !important; /* white cards */
   color: #1e293b !important;
-  border-color: #cbd5e1 !important; /* slate-300 border */
+  border-color: #cbd5e1 !important;
+}
+
+/* Inputs and text boxes containing actual data should be slightly gray (slate-100) */
+.light-mode input,
+.light-mode select,
+.light-mode textarea,
+.light-mode .bg-slate-900\/20 {
+  background-color: #f1f5f9 !important; /* light gray for data fields */
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }
 
 .light-mode .border-slate-800,
@@ -137,15 +142,6 @@
   color: #64748b !important; /* text-slate-500 */
 }
 
-/* Interactive elements and inputs */
-.light-mode input,
-.light-mode select,
-.light-mode textarea {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
 .light-mode input::placeholder,
 .light-mode textarea::placeholder {
   color: #94a3b8 !important;
@@ -166,16 +162,12 @@
   color: #0f172a !important;
 }
 
-.light-mode .bg-slate-900 {
-  background-color: #cbd5e1 !important;
-}
-
 /* Timeline vertical line */
 .light-mode .before\:bg-slate-800::before {
   background-color: #cbd5e1 !important;
 }
 
-/* In light mode, the primary texts inside "IMPORTANTE" and "RECORDATORIO" sections should be readable */
+/* Warnings and records */
 .light-mode .text-red-500,
 .light-mode .text-red-400 {
   color: #b91c1c !important; /* Darker red */

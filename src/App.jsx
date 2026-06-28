@@ -96,12 +96,21 @@ const compareProjectIds = (idA, idB) => {
   let strB = String(idB).trim();
   if (strA.endsWith('.0')) strA = strA.slice(0, -2);
   if (strB.endsWith('.0')) strB = strB.slice(0, -2);
-  const numA = Math.round(Number(strA));
-  const numB = Math.round(Number(strB));
+  
+  if (strA === strB) return true;
+  if (strA.toLowerCase() === strB.toLowerCase()) return true;
+
+  const numA = Number(strA);
+  const numB = Number(strB);
   if (!isNaN(numA) && !isNaN(numB)) {
-    return numA === numB;
+    if (numA === numB) return true;
+    
+    // Fallback para notación científica o diferencias mínimas de redondeo
+    const sA = String(Math.round(numA));
+    const sB = String(Math.round(numB));
+    if (sA.substring(0, 9) === sB.substring(0, 9)) return true;
   }
-  return strA === strB;
+  return false;
 };
 
 const apiFetch = async (action, payload = {}) => {
@@ -2704,27 +2713,55 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
   const [directory, setDirectory] = useState([]);
 
   const processHitos = (data) => {
-    const projectHitos = data.filter(ev => compareProjectIds(ev.proyectoId, p.id));
+    const projectHitos = data.filter(ev => compareProjectIds(ev.proyectoId, p.id) || compareProjectIds(ev.proyectoId, p.name));
     const parsedEvents = projectHitos.map(ev => {
-      let fullDate = new Date(0); 
+      let fullDate = new Date(0);
       try {
-          let dStr = '';
-          let dRaw = String(ev.date);
-          if (dRaw.includes('T')) dRaw = dRaw.split('T')[0];
-          const matchISO = dRaw.match(/(\d{4})-(\d{2})-(\d{2})/);
-          if (matchISO) dStr = matchISO[0];
-          else {
-              const matchLoc = dRaw.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-              if(matchLoc) dStr = `${matchLoc[3]}-${matchLoc[2]}-${matchLoc[1]}`;
+        let dStr = String(ev.date || '').trim();
+        if (dStr.includes('T')) {
+          dStr = dStr.split('T')[0];
+        }
+        
+        let year, month, day;
+        const matchISO = dStr.match(/(\d{4})[-/](\d{2})[-/](\d{2})/);
+        if (matchISO) {
+          year = parseInt(matchISO[1]);
+          month = parseInt(matchISO[2]) - 1;
+          day = parseInt(matchISO[3]);
+        } else {
+          const matchLoc = dStr.match(/(\d{2})[-/](\d{2})[-/](\d{4})/);
+          if (matchLoc) {
+            year = parseInt(matchLoc[3]);
+            month = parseInt(matchLoc[2]) - 1;
+            day = parseInt(matchLoc[1]);
           }
-          
-          let tStr = '00:00';
-          const timeMatch = String(ev.time).match(/\d{2}:\d{2}/);
-          if(timeMatch) tStr = timeMatch[0];
-
-          const dateObj = new Date(`${dStr}T${tStr}:00`);
-          if(!isNaN(dateObj.getTime())) fullDate = dateObj;
-      } catch(e) {}
+        }
+        
+        let hour = 0, min = 0;
+        if (ev.time) {
+          const timeMatch = String(ev.time).match(/(\d{2}):(\d{2})/);
+          if (timeMatch) {
+            hour = parseInt(timeMatch[1]);
+            min = parseInt(timeMatch[2]);
+          }
+        }
+        
+        if (year !== undefined) {
+          const dateObj = new Date(year, month, day, hour, min, 0);
+          if (!isNaN(dateObj.getTime())) fullDate = dateObj;
+        } else {
+          const directDate = new Date(ev.date);
+          if (!isNaN(directDate.getTime())) {
+             if (ev.time) {
+                const timeMatch = String(ev.time).match(/(\d{2}):(\d{2})/);
+                if (timeMatch) {
+                   directDate.setHours(parseInt(timeMatch[1]), parseInt(timeMatch[2]), 0, 0);
+                }
+             }
+             fullDate = directDate;
+          }
+        }
+      } catch (err) {}
       return { ...ev, fullDate, asignados: Array.isArray(ev.asignados) ? ev.asignados : [] };
     });
     setHitos(parsedEvents.sort((a,b) => a.fullDate.getTime() - b.fullDate.getTime()));
@@ -2739,8 +2776,8 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
       const res = await apiFetch('getHitos');
       if (res.status === 'success') { 
         if (isBackground) {
-           const myOldHitos = CACHE.hitos ? CACHE.hitos.filter(h => compareProjectIds(h.proyectoId, p.id) && h.asignados?.includes(currentUser.email)).length : 0;
-           const myNewHitos = res.data.filter(h => compareProjectIds(h.proyectoId, p.id) && h.asignados?.includes(currentUser.email)).length;
+           const myOldHitos = CACHE.hitos ? CACHE.hitos.filter(h => (compareProjectIds(h.proyectoId, p.id) || compareProjectIds(h.proyectoId, p.name)) && h.asignados?.includes(currentUser.email)).length : 0;
+           const myNewHitos = res.data.filter(h => (compareProjectIds(h.proyectoId, p.id) || compareProjectIds(h.proyectoId, p.name)) && h.asignados?.includes(currentUser.email)).length;
            if (myNewHitos > myOldHitos) showToast("⏱️ ¡Tienes un nuevo Hito asignado!");
         }
         CACHE.hitos = res.data; 
