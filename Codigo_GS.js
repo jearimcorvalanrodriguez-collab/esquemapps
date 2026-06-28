@@ -115,27 +115,35 @@ function getDefaultPermisos(ss, role) {
 // Helper para envío de correos
 function enviarCorreoNotificacion(destinatario, nombre, mensaje, clave, rol, mostrarBoton) {
   try {
-    let htmlBody = "<div style='font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #e2e8f0; border-radius:12px; background-color:#f8fafc;'>";
-    htmlBody += "<h2 style='color:#059669; font-weight:900;'>ESQUEMAS PRO</h2>";
-    htmlBody += "<p>Hola <b>" + nombre + "</b>,</p>";
-    htmlBody += "<p>" + mensaje + "</p>";
+    var styleDiv = "font-family:sans-serif; max-width:600px; padding:20px; border:1px solid #e2e8f0; border-radius:12px; background-color:#f8fafc;";
+    var styleH2 = "color:#059669; font-weight:900;";
+    var styleCode = "background-color:#ffffff; border:1px dashed #cbd5e1; padding:15px; border-radius:8px; text-align:center; margin:20px 0;";
+    var styleP = "margin:0 0 5px 0; font-size:12px; color:#64748b; font-weight:bold;";
+    var styleSpan = "font-size:24px; letter-spacing:4px; font-weight:900; color:#0f172a;";
+    var styleBtnDiv = "text-align:center; margin:25px 0;";
+    var styleBtn = "background-color:#059669; color:#ffffff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block;";
+
+    var htmlBody = "<div style=\"" + styleDiv + "\">" +
+      "<h2 style=\"" + styleH2 + "\">ESQUEMAS PRO</h2>" +
+      "<p>Hola <b>" + nombre + "</b>,</p>" +
+      "<p>" + mensaje + "</p>";
     
     if (clave) {
-      htmlBody += "<div style='background-color:#ffffff; border:1px dashed #cbd5e1; padding:15px; border-radius:8px; text-align:center; margin:20px 0;'>";
-      htmlBody += "<p style='margin:0 0 5px 0; font-size:12px; color:#64748b; font-weight:bold;'>CREDENCIALES TEMPORALES</p>";
-      htmlBody += "<span style='font-size:24px; letter-spacing:4px; font-weight:900; color:#0f172a;'>" + clave + "</span>";
-      htmlBody += "</div>";
+      htmlBody += "<div style=\"" + styleCode + "\">" +
+        "<p style=\"" + styleP + "\">CREDENCIALES TEMPORALES</p>" +
+        "<span style=\"" + styleSpan + "\">" + clave + "</span>" +
+        "</div>";
     }
     
     if (mostrarBoton) {
-      htmlBody += "<div style='text-align:center; margin:25px 0;'>";
-      htmlBody += "<a href='" + URL_PLATAFORMA + "' style='background-color:#059669; color:#ffffff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block;'>Ingresar a la Plataforma</a>";
-      htmlBody += "</div>";
+      htmlBody += "<div style=\"" + styleBtnDiv + "\">" +
+        "<a href=\"" + URL_PLATAFORMA + "\" style=\"" + styleBtn + "\">Ingresar a la Plataforma</a>" +
+        "</div>";
     }
     
-    htmlBody += "<hr style='border:0; border-top:1px solid #cbd5e1; margin:20px 0;'>";
-    htmlBody += "<p style='font-size:11px; color:#64748b; margin:0;'>Este es un correo automatico generado por el sistema logistico Esquemas Pro.</p>";
-    htmlBody += "</div>";
+    htmlBody += "<hr style=\"border:0; border-top:1px solid #cbd5e1; margin:20px 0;\">" +
+      "<p style=\"font-size:11px; color:#64748b; margin:0;\">Este es un correo automatico generado por el sistema logistico Esquemas Pro.</p>" +
+      "</div>";
 
     MailApp.sendEmail({
       to: destinatario,
