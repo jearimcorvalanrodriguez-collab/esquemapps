@@ -2369,6 +2369,8 @@ const ExpensesView = ({ currentUser, showToast, requestConfirm, selectedProject,
 // --- VISTAS PRINCIPALES ---
 const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast, directory }) => {
   const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECTS_MANAGE');
+  const canAssignTeam = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECT_ASSIGN');
+  const canStatusProject = [ROLES.ADMIN, ROLES.MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECT_STATUS');
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
@@ -2522,12 +2524,12 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
                     </div>
                     
                     <div className="flex flex-col gap-1.5 border-t border-slate-700 pt-3">
-                      {canCreate && (
+                      {canAssignTeam && (
                         <Button variant="ghost" className="w-full bg-slate-900 border border-slate-700 hover:text-white text-[10px] md:text-xs py-1.5 mb-1" icon={Users} onClick={(e) => { e.stopPropagation(); setAssigningProject(proyecto); }}>
                           Asignar Equipo ({proyecto.asignados.length})
                         </Button>
                       )}
-                      {canCreate && (
+                      {canStatusProject && (
                         <div className="flex gap-1.5">
                           <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 hover:text-white text-[10px] md:text-xs py-1.5" onClick={(e) => { e.stopPropagation(); showToast("Para editar nombre hazlo desde la BD."); }}>Editar</Button>
                           <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 hover:text-emerald-400 text-[10px] md:text-xs py-1.5" onClick={(e) => handleUpdateStatus(e, proyecto.id, proyecto.status)}>
@@ -2577,6 +2579,10 @@ const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast,
 const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, showToast, requestConfirm }) => {
   const p = selectedProject;
   const canManage = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECTS_MANAGE');
+  const canSeeRiders = (currentUser.permisos || []).includes('RIDERS') || 
+                        (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(currentUser.role));
+  const canSeeTransport = (currentUser.permisos || []).includes('TRANSPORT') || 
+                           (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role));
   
   const [hitos, setHitos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2730,25 +2736,29 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
             
             {/* --- MÓDULOS DEL PROYECTO (TARJETAS COMPACTAS) --- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                <Card onClick={() => setCurrentView('RIDERS')} className="p-3 flex items-center gap-3 group cursor-pointer hover:border-emerald-500 transition-all">
-                    <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <FileText className="text-emerald-500" size={24} />
-                    </div>
-                    <div className="text-left">
-                        <h3 className="font-bold text-white text-base leading-tight">Riders Técnicos</h3>
-                        <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">Stageplots y Requerimientos</p>
-                    </div>
-                </Card>
+                {canSeeRiders && (
+                  <Card onClick={() => setCurrentView('RIDERS')} className="p-3 flex items-center gap-3 group cursor-pointer hover:border-emerald-500 transition-all">
+                      <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          <FileText className="text-emerald-500" size={24} />
+                      </div>
+                      <div className="text-left">
+                          <h3 className="font-bold text-white text-base leading-tight">Riders Técnicos</h3>
+                          <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">Stageplots y Requerimientos</p>
+                      </div>
+                  </Card>
+                )}
 
-                <Card onClick={() => setCurrentView('TRANSPORT')} className="p-3 flex items-center gap-3 group cursor-pointer hover:border-blue-500 transition-all">
-                    <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <Truck className="text-blue-500" size={24} />
-                    </div>
-                    <div className="text-left">
-                        <h3 className="font-bold text-white text-base leading-tight">Transportes</h3>
-                        <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">Logística y Rutas</p>
-                    </div>
-                </Card>
+                {canSeeTransport && (
+                  <Card onClick={() => setCurrentView('TRANSPORT')} className="p-3 flex items-center gap-3 group cursor-pointer hover:border-blue-500 transition-all">
+                      <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          <Truck className="text-blue-500" size={24} />
+                      </div>
+                      <div className="text-left">
+                          <h3 className="font-bold text-white text-base leading-tight">Transportes</h3>
+                          <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">Logística y Rutas</p>
+                      </div>
+                  </Card>
+                )}
             </div>
 
             {/* --- SECCIÓN TIMING (LINEA DE TIEMPO) --- */}
@@ -2874,9 +2884,19 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
   const [isPreview, setIsPreview] = useState(false);
   const [linkingRider, setLinkingRider] = useState(false);
   
+  const canSeeRiders = (currentUser.permisos || []).includes('RIDERS') || 
+                        (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(currentUser.role));
   const canManageRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(currentUser.role) || (currentUser.permisos || []).includes('RIDERS_MANAGE');
   const canDeleteRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('RIDERS_MANAGE');
   const canManageProjects = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECTS_MANAGE');
+
+  if (!canSeeRiders) {
+    return (
+      <div className="p-8 text-center text-red-500 font-bold border border-red-500/20 bg-red-500/5 rounded-xl">
+        Acceso Denegado: No tienes privilegios para ver la sección de Riders Técnicos.
+      </div>
+    );
+  }
 
   const defaultContent = {
     proyectoId: selectedProject ? selectedProject.id : '',
