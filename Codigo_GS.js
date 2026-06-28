@@ -832,6 +832,22 @@ function doPost(e) {
       return configurarCORS({ status: 'error', message: 'Proyecto no encontrado' });
     }
 
+    if (action === 'getRolesConfig') {
+      let sheet = ss.getSheetByName('RolesConfig');
+      const config = [];
+      if (sheet) {
+        const rows = sheet.getDataRange().getValues();
+        for (let i = 1; i < rows.length; i++) {
+          if (rows[i][0]) {
+            let perms = [];
+            try { perms = JSON.parse(rows[i][1]); } catch(e) {}
+            config.push({ role: rows[i][0], permisos: perms });
+          }
+        }
+      }
+      return configurarCORS({ status: 'success', data: config });
+    }
+
     if (action === 'updateRoleDefaultPermisos') {
       if (!verificarPermisoRequester(ss, requester, ['ADMIN'])) {
         return configurarCORS({ status: 'error', message: 'ACCION RECHAZADA: Requiere privilegios de ADMIN.' });

@@ -4245,6 +4245,128 @@ const ChatView = ({ currentUser, showToast, requestConfirm }) => {
   );
 };
 
+const RoleConfigView = ({ currentUser, showToast, MODULOS }) => {
+  const [selectedRole, setSelectedRole] = useState(ROLES.TECH || 'TÉCNICO');
+  const [permisos, setPermisos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const fetchRolePermisos = async (role) => {
+    setLoading(true);
+    try {
+      const res = await apiFetch('getRolesConfig');
+      if (res.status === 'success') {
+        const matched = res.data.find(c => c.role === role);
+        if (matched) {
+          setPermisos(matched.permisos || []);
+        } else {
+          setPermisos(getDefaultLocalPermisos(role));
+        }
+      } else {
+        setPermisos(getDefaultLocalPermisos(role));
+      }
+    } catch(e) {
+      setPermisos(getDefaultLocalPermisos(role));
+    }
+    setLoading(false);
+  };
+
+  const getDefaultLocalPermisos = (role) => {
+    if (role === 'ADMIN') return ['DASHBOARD', 'PROJECTS_MANAGE', 'PROJECT_ASSIGN', 'PROJECT_STATUS', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'TRANSPORT_EDIT', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'ADMIN_PANEL', 'EXPENSES', 'EXPENSES_MANAGE'];
+    if (role === 'MANAGER') return ['DASHBOARD', 'PROJECTS_MANAGE', 'PROJECT_ASSIGN', 'PROJECT_STATUS', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'TRANSPORT_EDIT', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES', 'EXPENSES_MANAGE'];
+    if (role === 'TOUR MANAGER') return ['DASHBOARD', 'PROJECTS_MANAGE', 'PROJECT_ASSIGN', 'PROJECT_STATUS', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'TRANSPORT_EDIT', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES'];
+    if (role === 'JEFE CAT/APV') return ['DASHBOARD', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES'];
+    if (role === 'TEC. JEFE') return ['DASHBOARD', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF'];
+    if (role === 'APV/CATERING') return ['DASHBOARD', 'RIDERS', 'TRANSPORT', 'HITOS', 'CHAT', 'CHAT_SEND', 'STAFF'];
+    if (role === 'TRASLADO') return ['TRANSPORT', 'TRANSPORT_CREATE', 'CHAT', 'CHAT_SEND', 'STAFF'];
+    return ['DASHBOARD', 'RIDERS', 'TRANSPORT', 'HITOS', 'CHAT', 'STAFF'];
+  };
+
+  useEffect(() => {
+    fetchRolePermisos(selectedRole);
+  }, [selectedRole]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await apiFetch('updateRoleDefaultPermisos', { role: selectedRole, permisos });
+      if (res.status === 'success') {
+        showToast(`Plantilla de permisos para ${selectedRole} guardada con éxito.`);
+      } else {
+        showToast("Error al guardar: " + res.message);
+      }
+    } catch(e) {
+      showToast("Error al conectar con el servidor.");
+    }
+    setSaving(false);
+  };
+
+  return (
+    <Card className="max-w-xl mx-auto p-4 md:p-6 border-t-4 border-blue-500 text-left">
+      <div className="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
+        <div className="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
+          <Shield size={20} />
+        </div>
+        <div>
+          <h2 className="text-base md:text-lg font-bold text-white">Configuración Base de Roles</h2>
+          <p className="text-xs text-slate-400">Define los permisos por defecto para cada rol. Los nuevos usuarios heredarán esta plantilla automáticamente.</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Seleccionar Rol / Perfil</label>
+          <select 
+            value={selectedRole} 
+            onChange={e => setSelectedRole(e.target.value)} 
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-blue-500"
+          >
+            {Object.values(ROLES).map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 mb-2.5 uppercase">Privilegios para {selectedRole}</label>
+          {loading ? (
+            <div className="flex justify-center p-6"><Loader2 className="animate-spin text-blue-500" size={20}/></div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-950 p-3 rounded-lg border border-slate-850">
+              {MODULOS.map(mod => {
+                const isChecked = permisos.includes(mod.id);
+                return (
+                  <ToggleSwitch 
+                    key={mod.id}
+                    label={mod.label}
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setPermisos(prev => 
+                        checked ? [...prev, mod.id] : prev.filter(p => p !== mod.id)
+                      );
+                    }}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <Button 
+          onClick={handleSave} 
+          variant="primary" 
+          className="w-full py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-500 border-blue-500/50 mt-2" 
+          disabled={saving || loading}
+        >
+          {saving ? <Loader2 className="animate-spin mr-1.5" size={14}/> : <Save className="mr-1.5" size={14}/>} 
+          Guardar Plantilla de {selectedRole}
+        </Button>
+      </div>
+    </Card>
+  );
+};
+
 // --- PANEL DE ADMINISTRADOR ---
 const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCount }) => {
   const [dbUsers, setDbUsers] = useState([]);
@@ -4409,6 +4531,7 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
       <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
         <Button variant={activeTab === 'PENDIENTES' ? 'primary' : 'secondary'} onClick={() => setActiveTab('PENDIENTES')} icon={Bell}>Solicitudes ({pendingUsers.length})</Button>
         <Button variant={activeTab === 'DIRECTORIO' ? 'primary' : 'secondary'} onClick={() => setActiveTab('DIRECTORIO')} icon={Users}>Directorio</Button>
+        <Button variant={activeTab === 'ROLES_CONFIG' ? 'primary' : 'secondary'} onClick={() => setActiveTab('ROLES_CONFIG')} icon={Shield}>Definición de Roles</Button>
         <Button variant={activeTab === 'INVITAR' ? 'primary' : 'secondary'} onClick={() => setActiveTab('INVITAR')} icon={UserPlus}>Invitar Staff</Button>
       </div>
       
@@ -4503,6 +4626,9 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
                 <Button type="submit" variant="primary" className="w-full py-2.5 md:py-3 text-sm md:text-base mt-2" disabled={processingId === 'inviting'} icon={UserCheck}>{processingId === 'inviting' ? 'Generando...' : 'Crear y Enviar'}</Button>
               </form>
             </Card>
+          )}
+          {activeTab === 'ROLES_CONFIG' && (
+            <RoleConfigView currentUser={currentUser} showToast={showToast} MODULOS={MODULOS} />
           )}
         </>
       )}
