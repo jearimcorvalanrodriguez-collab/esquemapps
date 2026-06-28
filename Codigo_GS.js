@@ -70,30 +70,45 @@ function verificarPermisoRequester(ss, requesterEmail, rolesPermitidos) {
 }
 
 // Permisos por defecto segun el rol
-function getDefaultPermisos(role) {
+function getDefaultPermisos(ss, role) {
+  try {
+    let sheet = ss.getSheetByName('RolesConfig');
+    if (sheet) {
+      const rows = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][0] === role && rows[i][1]) {
+          try {
+            return JSON.parse(rows[i][1]);
+          } catch(e) {}
+        }
+      }
+    }
+  } catch(e) {}
+
+  // Fallback to hardcoded defaults (updated with new granular permissions)
   if (role === 'ADMIN') {
-    return ['DASHBOARD', 'PROJECTS_MANAGE', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'ADMIN_PANEL', 'EXPENSES', 'EXPENSES_MANAGE'];
+    return ['DASHBOARD', 'PROJECTS_MANAGE', 'PROJECT_ASSIGN', 'PROJECT_STATUS', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'TRANSPORT_EDIT', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'ADMIN_PANEL', 'EXPENSES', 'EXPENSES_MANAGE'];
   }
   if (role === 'MANAGER') {
-    return ['DASHBOARD', 'PROJECTS_MANAGE', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES', 'EXPENSES_MANAGE'];
+    return ['DASHBOARD', 'PROJECTS_MANAGE', 'PROJECT_ASSIGN', 'PROJECT_STATUS', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'TRANSPORT_EDIT', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES', 'EXPENSES_MANAGE'];
   }
   if (role === 'TOUR MANAGER') {
-    return ['DASHBOARD', 'PROJECTS_MANAGE', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES'];
+    return ['DASHBOARD', 'PROJECTS_MANAGE', 'PROJECT_ASSIGN', 'PROJECT_STATUS', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'TRANSPORT_EDIT', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES'];
   }
   if (role === 'JEFE CAT/APV') {
-    return ['DASHBOARD', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES'];
+    return ['DASHBOARD', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF', 'EXPENSES'];
   }
   if (role === 'TEC. JEFE') {
-    return ['DASHBOARD', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'CHAT', 'CHAT_SEND', 'STAFF'];
+    return ['DASHBOARD', 'RIDERS', 'RIDERS_MANAGE', 'TRANSPORT', 'TRANSPORT_CREATE', 'HITOS', 'HITOS_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF'];
   }
   if (role === 'APV/CATERING') {
-    return ['DASHBOARD', 'RIDERS', 'TRANSPORT', 'CHAT', 'CHAT_SEND', 'STAFF'];
+    return ['DASHBOARD', 'RIDERS', 'TRANSPORT', 'HITOS', 'CHAT', 'CHAT_SEND', 'STAFF'];
   }
   if (role === 'TRASLADO') {
-    return ['TRANSPORT', 'TRANSPORT_MANAGE', 'CHAT', 'CHAT_SEND', 'STAFF'];
+    return ['TRANSPORT', 'TRANSPORT_CREATE', 'CHAT', 'CHAT_SEND', 'STAFF'];
   }
   // Técnico y otros roles por defecto (solo lectura)
-  return ['DASHBOARD', 'RIDERS', 'TRANSPORT', 'CHAT', 'STAFF'];
+  return ['DASHBOARD', 'RIDERS', 'TRANSPORT', 'HITOS', 'CHAT', 'STAFF'];
 }
 
 // Helper para envío de correos
@@ -177,7 +192,7 @@ function doPost(e) {
         const phone = sanitizarEntrada(data.payload.phone);
         const role = sanitizarEntrada(data.payload.role);
         
-        sheetUsuarios.appendRow([newId, name, email, phone, role, '', 'PENDING', 'M', 'OMNIVORA', JSON.stringify(getDefaultPermisos(role))]);
+        sheetUsuarios.appendRow([newId, name, email, phone, role, '', 'PENDING', 'M', 'OMNIVORA', JSON.stringify(getDefaultPermisos(ss, role))]);
         return configurarCORS({ status: 'success', message: 'Solicitud en revision.' });
       }
 
@@ -258,7 +273,7 @@ function doPost(e) {
             try { 
                permisosParsed = JSON.parse(permisosStr); 
             } catch(e) { 
-               permisosParsed = getDefaultPermisos(rows[i][4]); 
+               permisosParsed = getDefaultPermisos(ss, rows[i][4]); 
                sheetUsuarios.getRange(i + 1, 10).setValue(JSON.stringify(permisosParsed));
             }
 
@@ -275,6 +290,9 @@ function doPost(e) {
           if (rows[i][1]) {
              let p = [];
              try { p = JSON.parse(rows[i][9]); } catch(e) {}
+             if (!p || p.length === 0) {
+               p = getDefaultPermisos(ss, rows[i][4]);
+             }
              usuarios.push({ id: rows[i][0], name: rows[i][1], email: rows[i][2].toString().trim(), phone: rows[i][3], role: rows[i][4], status: rows[i][6], dieta: rows[i][8] || 'OMNIVORA', permisos: p });
           }
         }
@@ -812,6 +830,32 @@ function doPost(e) {
         }
       }
       return configurarCORS({ status: 'error', message: 'Proyecto no encontrado' });
+    }
+
+    if (action === 'updateRoleDefaultPermisos') {
+      if (!verificarPermisoRequester(ss, requester, ['ADMIN'])) {
+        return configurarCORS({ status: 'error', message: 'ACCION RECHAZADA: Requiere privilegios de ADMIN.' });
+      }
+      let sheet = ss.getSheetByName('RolesConfig');
+      if (!sheet) {
+        sheet = ss.insertSheet('RolesConfig');
+        sheet.appendRow(['Role', 'Permisos']);
+      }
+      const rows = sheet.getDataRange().getValues();
+      let foundRow = -1;
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][0] === data.payload.role) {
+          foundRow = i + 1;
+          break;
+        }
+      }
+      const permsStr = JSON.stringify(data.payload.permisos);
+      if (foundRow !== -1) {
+        sheet.getRange(foundRow, 2).setValue(permsStr);
+      } else {
+        sheet.appendRow([data.payload.role, permsStr]);
+      }
+      return configurarCORS({ status: 'success' });
     }
 
     return configurarCORS({ status: 'error', message: 'Accion no reconocida: ' + action });

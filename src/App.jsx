@@ -1216,8 +1216,20 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
   const [editForm, setEditForm] = useState({ title: '', date: '', time: '', origin: '', dest: '', paradas: [] });
   const [editStopInput, setEditStopInput] = useState('');
 
-  const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role) || (currentUser.permisos || []).includes('TRANSPORT_MANAGE');
-  const canManageAll = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('TRANSPORT_MANAGE');
+  const canSeeTransport = (currentUser.permisos || []).includes('TRANSPORT') || 
+                           (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role));
+  const canCreateRoute = (currentUser.permisos || []).includes('TRANSPORT_CREATE') || 
+                          (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role));
+  const canEditRoute = (currentUser.permisos || []).includes('TRANSPORT_EDIT') || 
+                        (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role));
+
+  if (!canSeeTransport) {
+    return (
+      <div className="p-8 text-center text-red-500 font-bold border border-red-500/20 bg-red-500/5 rounded-xl">
+        Acceso Denegado: No tienes privilegios para ver la sección de Transportes.
+      </div>
+    );
+  }
 
   const fetchTransports = async (force = false, isBackground = false) => {
     if (!isBackground) setLoading(true);
@@ -1364,7 +1376,7 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <NotificationsButton currentUser={currentUser} />
           <Button variant="ghost" icon={RefreshCw} onClick={() => fetchTransports(true)} className="px-2 border border-slate-700 hover:text-emerald-400" title="Actualizar Transportes" />
-          {canCreate && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Nueva Ruta</Button>}
+          {canCreateRoute && !isCreating && <Button icon={Plus} onClick={() => setIsCreating(true)}>Nueva Ruta</Button>}
         </div>
       </header>
 
@@ -1517,7 +1529,7 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
                       <div className="flex justify-between items-start mb-3">
                         <h3 className="font-bold text-base md:text-lg text-white leading-tight">{t.title}</h3>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {canManageAll && (
+                          {canEditRoute && (
                             <button 
                               type="button" 
                               onClick={() => {
@@ -1581,7 +1593,7 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
                             <p className="text-xs text-slate-500 italic">Sin conductor asignado</p>
                           )}
                         </div>
-                        {canManageAll && (
+                        {canEditRoute && (
                           <Button 
                             type="button" 
                             variant="ghost" 
@@ -1630,7 +1642,7 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
                             </button>
                           </div>
                         </div>
-                        {hasDriver && canManageAll && (
+                        {hasDriver && canEditRoute && (
                           <div className="flex items-center gap-1.5">
                             <button 
                               type="button" 
@@ -2583,6 +2595,10 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
                         (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(currentUser.role));
   const canSeeTransport = (currentUser.permisos || []).includes('TRANSPORT') || 
                            (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TRASLADO].includes(currentUser.role));
+  const canSeeHitos = (currentUser.permisos || []).includes('HITOS') || 
+                       (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(currentUser.role));
+  const canManageHitos = (currentUser.permisos || []).includes('HITOS_MANAGE') || 
+                          (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role));
   
   const [hitos, setHitos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2762,19 +2778,25 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
             </div>
 
             {/* --- SECCIÓN TIMING (LINEA DE TIEMPO) --- */}
-            <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4 md:p-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3 border-b border-slate-700/50 pb-3">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2"><Clock className="text-emerald-500" size={20}/> Run of Show / Timing</h2>
-                  {showClock && (
-                    <div className="bg-slate-900 border border-slate-700 px-3 py-1 rounded flex items-center gap-2 shadow-inner">
-                      <Timer className="text-emerald-500 animate-pulse" size={14} />
-                      <LiveClock />
-                    </div>
-                  )}
+            {!canSeeHitos ? (
+              <Card className="p-5 border-slate-800 text-center text-slate-500 text-xs">
+                <Clock className="mx-auto text-slate-700 mb-2" size={24} />
+                No tienes permisos para visualizar el timing o timeline de este proyecto.
+              </Card>
+            ) : (
+              <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-3 border-b border-slate-700/50 pb-3">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2"><Clock className="text-emerald-500" size={20}/> Run of Show / Timing</h2>
+                    {showClock && (
+                      <div className="bg-slate-900 border border-slate-700 px-3 py-1 rounded flex items-center gap-2 shadow-inner">
+                        <Timer className="text-emerald-500 animate-pulse" size={14} />
+                        <LiveClock />
+                      </div>
+                    )}
+                  </div>
+                  {canManageHitos && !isCreating && <Button icon={Plus} className="py-1.5 px-3 text-xs" onClick={() => setIsCreating(true)}>Agregar Hito</Button>}
                 </div>
-                {canManage && !isCreating && <Button icon={Plus} className="py-1.5 px-3 text-xs" onClick={() => setIsCreating(true)}>Agregar Hito</Button>}
-              </div>
 
               {isCreating && (
                 <Card className="p-4 md:p-5 border-emerald-500 mb-6 bg-slate-900 shadow-xl">
@@ -2824,7 +2846,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
                     <EventCard 
                        key={event.id} 
                        event={event} 
-                       canManage={canManage} 
+                       canManage={canManageHitos} 
                        handleDeleteHito={handleDeleteHito} 
                        setAssigningHito={setAssigningHito} 
                        currentUser={currentUser} 
@@ -2834,6 +2856,7 @@ const ProjectDetailsView = ({ currentUser, setCurrentView, selectedProject, show
                 </div>
               )}
             </div>
+            )}
         </div>
 
         {/* LADO DERECHO: SIDEBAR ANUNCIOS */}
