@@ -1108,7 +1108,6 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   const [regName, setRegName] = useState('');
   const [regRole, setRegRole] = useState(ROLES.TECH);
   const [regPhone, setRegPhone] = useState('+569');
-  const [adminCode, setAdminCode] = useState('');
   const [adminTempPass, setAdminTempPass] = useState('');
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [tcAccepted, setTcAccepted] = useState(false);
@@ -1178,7 +1177,6 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
         email: email.trim(), 
         phone: regPhone.trim(), 
         role: regRole,
-        adminCode: adminCode.trim(),
         disclaimerAceptado: true,
         tcVersion: 'v1.0'
       });
@@ -1289,7 +1287,7 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
                 {Object.values(ROLES).filter(r => r !== ROLES.ADMIN).map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
-            <div><label className="block text-xs font-bold text-slate-400 mb-1">Código de Activación Administrador (Opcional)</label><input type="text" value={adminCode} onChange={e=>setAdminCode(e.target.value)} placeholder="Solo si deseas inicializar como Admin" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm focus:border-emerald-500 outline-none placeholder:text-slate-600" /></div>
+
             
             {!alreadyAcceptedTC && (
                <div className="space-y-2 pt-1 text-left">
@@ -1337,7 +1335,7 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
               <div className="font-mono text-lg font-black text-emerald-400 select-all tracking-widest text-center bg-slate-950 p-2.5 rounded border border-emerald-500/30">{adminTempPass}</div>
               <p className="text-[10px] text-slate-400 mt-1 leading-normal">Copia esta clave. Se ha enviado una copia por correo, pero ya puedes iniciar sesión inmediatamente.</p>
             </div>
-            <Button onClick={() => { setAdminTempPass(''); setAdminCode(''); setMode('LOGIN'); }} className="w-full mt-6 py-2.5" variant="primary">Ir al Login</Button>
+            <Button onClick={() => { setAdminTempPass(''); setMode('LOGIN'); }} className="w-full mt-6 py-2.5" variant="primary">Ir al Login</Button>
           </div>
         )}
       </Card>

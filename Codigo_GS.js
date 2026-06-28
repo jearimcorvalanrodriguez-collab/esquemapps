@@ -213,7 +213,7 @@ function doPost(e) {
         let claveTemporal = '';
         
         const totalUsers = sheetUsuarios.getDataRange().getValues().length - 1; // Excluir cabecera
-        if (data.payload.adminCode === 'ADMIN_INIT_2026' || totalUsers <= 0) {
+        if (totalUsers <= 0) {
           finalRole = 'ADMIN';
           finalStatus = 'ACTIVO';
           isNewAdmin = true;
