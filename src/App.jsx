@@ -4395,6 +4395,7 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
   const [musName, setMusName] = useState('');
   const [musEmail, setMusEmail] = useState('');
   const [musPhone, setMusPhone] = useState('+569');
+  const [createdArtist, setCreatedArtist] = useState(null);
 
   const MODULOS = [
     { id: 'DASHBOARD', label: 'Ver Proyectos' },
@@ -4514,12 +4515,13 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
         const resAprob = await apiFetch('aprobarUsuario', { email: musEmail });
         if(resAprob.status === 'success') {
           const tempPass = resAprob.tempPass;
-          if (tempPass) {
-            alert(`¡Músico/Artista Creado con Éxito!\n\nNombre: ${musName}\nRol: ARTISTA\nToken de Acceso Temporal: ${tempPass}\n\nPor favor, copia este token y envíaselo al músico para que ingrese en ARTIST-GEST.`);
-          } else {
-            showToast(`Acceso de artista creado. Credenciales enviadas a ${musEmail}`);
-          }
-          setMusName(''); setMusEmail(''); setMusPhone('+569'); setActiveTab('DIRECTORIO'); 
+          setCreatedArtist({
+            name: musName,
+            email: musEmail,
+            phone: musPhone,
+            tempPass: tempPass || 'Acceso ya existente o correo automático'
+          });
+          setMusName(''); setMusEmail(''); setMusPhone('+569'); 
           clearCache('usuarios');
           fetchUsers(true);
           if (refreshPendingCount) refreshPendingCount();
@@ -4593,13 +4595,13 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
       )}
 
       <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-        <Button variant={activeTab === 'PENDIENTES' ? 'primary' : 'secondary'} onClick={() => setActiveTab('PENDIENTES')} icon={Bell}>Solicitudes ({pendingUsers.length})</Button>
-        <Button variant={activeTab === 'DIRECTORIO' ? 'primary' : 'secondary'} onClick={() => setActiveTab('DIRECTORIO')} icon={Users}>Directorio</Button>
-        <Button variant={activeTab === 'ROLES_CONFIG' ? 'primary' : 'secondary'} onClick={() => setActiveTab('ROLES_CONFIG')} icon={Shield}>Definición de Roles</Button>
-        <Button variant={activeTab === 'INVITAR' ? 'primary' : 'secondary'} onClick={() => setActiveTab('INVITAR')} icon={UserPlus}>Invitar Staff</Button>
+        <Button variant={activeTab === 'PENDIENTES' ? 'primary' : 'secondary'} onClick={() => { setActiveTab('PENDIENTES'); setCreatedArtist(null); }} icon={Bell}>Solicitudes ({pendingUsers.length})</Button>
+        <Button variant={activeTab === 'DIRECTORIO' ? 'primary' : 'secondary'} onClick={() => { setActiveTab('DIRECTORIO'); setCreatedArtist(null); }} icon={Users}>Directorio</Button>
+        <Button variant={activeTab === 'ROLES_CONFIG' ? 'primary' : 'secondary'} onClick={() => { setActiveTab('ROLES_CONFIG'); setCreatedArtist(null); }} icon={Shield}>Definición de Roles</Button>
+        <Button variant={activeTab === 'INVITAR' ? 'primary' : 'secondary'} onClick={() => { setActiveTab('INVITAR'); setCreatedArtist(null); }} icon={UserPlus}>Invitar Staff</Button>
         <Button 
           variant={activeTab === 'CREAR_MUSICO' ? 'primary' : 'secondary'} 
-          onClick={() => setActiveTab('CREAR_MUSICO')} 
+          onClick={() => { setActiveTab('CREAR_MUSICO'); setCreatedArtist(null); }} 
           icon={Music} 
           className={activeTab === 'CREAR_MUSICO' ? 'bg-blue-600 border-blue-500 hover:bg-blue-500' : 'border-blue-500/30 text-blue-400 hover:bg-blue-600/10'}
         >
@@ -4711,34 +4713,77 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
           )}
           {activeTab === 'CREAR_MUSICO' && (
             <Card className="max-w-xl mx-auto p-4 md:p-6 border-t-4 border-blue-500">
-              <div className="flex items-center gap-2 mb-3">
-                <Music className="text-blue-500" size={24} />
-                <h2 className="text-lg md:text-xl font-bold text-white text-left">Crear Acceso a Músico / Artista</h2>
-              </div>
-              <p className="text-xs text-slate-400 mb-4 text-left">Registra a un artista o miembro de la banda directamente. Al crearlo, la cuenta quedará aprobada automáticamente y podrá ingresar a su panel <b>Artist-Gest</b> con su token temporal.</p>
-              <form onSubmit={handleMusicianInvite} className="space-y-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase text-left">Nombre Completo del Artista</label>
-                  <input type="text" value={musName} onChange={e=>setMusName(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-blue-500" placeholder="Ej. Juan Pérez" required />
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-left">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Correo</label>
-                    <input type="email" value={musEmail} onChange={e=>setMusEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-blue-500" placeholder="artista@correo.com" required />
+              {createdArtist ? (
+                <div className="space-y-4 text-left animate-fade-in">
+                  <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
+                    <CheckCircle className="text-emerald-500" size={24} />
+                    <h2 className="text-base md:text-lg font-bold text-white">¡Músico / Artista Creado con Éxito!</h2>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Teléfono</label>
-                    <input type="tel" value={musPhone} onChange={e=>setMusPhone(e.target.value.replace(/[^0-9+]/g, ''))} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-blue-500" required />
+                  
+                  <p className="text-xs text-slate-400">La cuenta ha sido aprobada correctamente en el sistema. Puedes enviar la invitación al artista mediante los siguientes botones rápidos:</p>
+
+                  <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs font-mono">
+                    <p className="text-slate-400"><span className="font-bold text-slate-500 uppercase tracking-wider block text-[9px] mb-0.5">Nombre:</span> <span className="text-white font-sans font-bold">{createdArtist.name}</span></p>
+                    <p className="text-slate-400"><span className="font-bold text-slate-500 uppercase tracking-wider block text-[9px] mb-0.5">Correo:</span> <span className="text-white">{createdArtist.email}</span></p>
+                    <p className="text-slate-400"><span className="font-bold text-slate-500 uppercase tracking-wider block text-[9px] mb-0.5">Contraseña Temporal:</span> <span className="text-emerald-400 font-bold tracking-widest bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">{createdArtist.tempPass}</span></p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <a 
+                      href={`https://wa.me/${createdArtist.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                        `¡Hola ${createdArtist.name}! Te hemos creado tu cuenta de acceso exclusivo para la aplicación de administración de repertorios y ensayos ARTIST-GEST.\n\nPara ingresar, haz clic en el siguiente enlace:\n🔗 https://jearimcorvalanrodriguez-collab.github.io/artist-gest/\n\n📧 Correo: ${createdArtist.email}\n🔑 Contraseña Temporal: ${createdArtist.tempPass}\n\nPor favor, actualiza tu contraseña al ingresar. ¡Gracias!`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-center text-xs flex items-center justify-center gap-2 transition-colors active:scale-95 duration-100"
+                    >
+                      Enviar por WhatsApp
+                    </a>
+                    <a 
+                      href={`mailto:${createdArtist.email}?subject=Acceso%20Artist-Gest%20-%20Esquemas%20Pro&body=${encodeURIComponent(
+                        `Hola ${createdArtist.name}!,\n\nTe hemos creado tu cuenta de acceso exclusivo para la aplicación de administración de repertorios y ensayos ARTIST-GEST.\n\nPara ingresar, haz clic en el siguiente enlace:\nhttps://jearimcorvalanrodriguez-collab.github.io/artist-gest/\n\nCredenciales de Acceso:\n- Correo: ${createdArtist.email}\n- Contraseña Temporal: ${createdArtist.tempPass}\n\nPor favor, actualiza tu contraseña en tu perfil al ingresar.\n\nSaludos,\nEquipo de Logística Esquemas Pro.`
+                      )}`}
+                      className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-lg text-center text-xs flex items-center justify-center gap-2 transition-colors active:scale-95 duration-100"
+                    >
+                      Enviar por Correo
+                    </a>
+                    <Button variant="secondary" className="py-2.5 text-xs font-bold shrink-0" onClick={() => setCreatedArtist(null)}>
+                      Crear Otro
+                    </Button>
                   </div>
                 </div>
-                <div className="text-left">
-                  <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Rol Asignado</label>
-                  <input type="text" value="ARTISTA" disabled className="w-full bg-slate-950 border border-slate-800 text-slate-500 rounded-lg p-2.5 text-sm font-bold cursor-not-allowed" />
-                </div>
-                <Button type="submit" variant="blue" className="w-full py-2.5 md:py-3 text-sm md:text-base mt-2 bg-blue-600 hover:bg-blue-500 border-blue-500" disabled={processingId === 'musician-inviting'} icon={Music}>
-                  {processingId === 'musician-inviting' ? 'Creando...' : 'Crear y Aprobar Artista'}
-                </Button>
-              </form>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Music className="text-blue-500" size={24} />
+                    <h2 className="text-lg md:text-xl font-bold text-white text-left">Crear Acceso a Músico / Artista</h2>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-4 text-left">Registra a un artista o miembro de la banda directamente. Al crearlo, la cuenta quedará aprobada automáticamente y podrá ingresar a su panel <b>Artist-Gest</b> con su token temporal.</p>
+                  <form onSubmit={handleMusicianInvite} className="space-y-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase text-left">Nombre Completo del Artista</label>
+                      <input type="text" value={musName} onChange={e=>setMusName(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-blue-500" placeholder="Ej. Juan Pérez" required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-left">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Correo</label>
+                        <input type="email" value={musEmail} onChange={e=>setMusEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-blue-500" placeholder="artista@correo.com" required />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Teléfono</label>
+                        <input type="tel" value={musPhone} onChange={e=>setMusPhone(e.target.value.replace(/[^0-9+]/g, ''))} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-blue-500" required />
+                      </div>
+                    </div>
+                    <div className="text-left">
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Rol Asignado</label>
+                      <input type="text" value="ARTISTA" disabled className="w-full bg-slate-950 border border-slate-800 text-slate-500 rounded-lg p-2.5 text-sm font-bold cursor-not-allowed" />
+                    </div>
+                    <Button type="submit" variant="blue" className="w-full py-2.5 md:py-3 text-sm md:text-base mt-2 bg-blue-600 hover:bg-blue-500 border-blue-500" disabled={processingId === 'musician-inviting'} icon={Music}>
+                      {processingId === 'musician-inviting' ? 'Creando...' : 'Crear y Aprobar Artista'}
+                    </Button>
+                  </form>
+                </>
+              )}
             </Card>
           )}
           {activeTab === 'ROLES_CONFIG' && (
