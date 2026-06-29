@@ -3902,10 +3902,50 @@ const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setAc
 };
 
 // --- STAFF DIRECTORIO ---
-const StaffDirectory = ({ currentUser }) => {
+const StaffDirectory = ({ currentUser, showToast, requestConfirm }) => {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [localDirectory, setLocalDirectory] = useState([]);
+  const [activeSubTab, setActiveSubTab] = useState('STAFF_ACTIVO');
+  const [allArtists, setAllArtists] = useState([]);
+  const [editingArtist, setEditingArtist] = useState(null);
+  const [processingId, setProcessingId] = useState(null);
+
+  const handleEditArtistSave = async (e) => {
+    e.preventDefault();
+    setProcessingId('editing-artist');
+    try {
+      const res = await apiFetch('updateUserAdmin', editingArtist);
+      if (res.status === 'success') {
+        if (showToast) showToast("Músico actualizado con éxito.");
+        setEditingArtist(null);
+        clearCache('usuarios');
+        fetchDirectory(true);
+      } else {
+        if (showToast) showToast("Error: " + res.message);
+      }
+    } catch(e) {
+      if (showToast) showToast("Error al guardar cambios.");
+    }
+    setProcessingId(null);
+  };
+
+  const handleDeleteArtist = async (email) => {
+    setProcessingId(email);
+    try {
+      const res = await apiFetch('eliminarUsuario', { email });
+      if (res.status === 'success') {
+        if (showToast) showToast("Músico eliminado de la base de datos.");
+        clearCache('usuarios');
+        fetchDirectory(true);
+      } else {
+        if (showToast) showToast("Error: " + res.message);
+      }
+    } catch(e) {
+      if (showToast) showToast("Error al conectar.");
+    }
+    setProcessingId(null);
+  };
 
   const fetchDirectory = async (force = false) => {
     setLoading(true);
@@ -3928,6 +3968,8 @@ const StaffDirectory = ({ currentUser }) => {
       }
 
       const activeUsers = users.filter(u => u.status === 'ACTIVO' && u.email !== currentUser.email);
+      const artists = users.filter(u => u.role === 'ARTISTA');
+      setAllArtists(artists);
       const canSeeEveryone = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV, ROLES.APV].includes(currentUser.role);
       
       let visibleEmails = new Set();
@@ -3949,6 +3991,8 @@ const StaffDirectory = ({ currentUser }) => {
     fetchDirectory();
   }, [currentUser]);
 
+  const isAuthorizedToManageArtists = [ROLES.ADMIN, ROLES.MANAGER].includes(currentUser.role);
+
   return (
     <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-5xl mx-auto print:m-0 print:p-0 print:w-full">
       <header className="border-b border-slate-800 pb-3 md:pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 print:hidden">
@@ -3959,48 +4003,26 @@ const StaffDirectory = ({ currentUser }) => {
         <Button variant="ghost" icon={RefreshCw} onClick={() => fetchDirectory(true)} className="px-2 border border-slate-700 hover:text-emerald-400" title="Actualizar" />
       </header>
 
-      <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 md:p-6 mb-6 print:border-black print:bg-white print:text-black hidden print:block">
-          <div className="flex justify-between items-center mb-4 md:mb-6 border-b border-slate-800 print:border-black pb-3 md:pb-4">
-            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2"><Utensils className="text-amber-500 print:text-black"/> Reporte Catering (APV)</h2>
-            <Button variant="secondary" icon={Printer} className="print:hidden py-1.5 px-3 text-xs" onClick={() => {
-              const originalTitle = document.title;
-              document.title = `Reporte_Catering_${new Date().toLocaleDateString().replace(/\//g, '-')}`;
-              window.print();
-              setTimeout(() => { document.title = originalTitle; }, 1000);
-            }}>Imprimir PDF</Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-               <h3 className="text-[10px] md:text-xs font-bold text-slate-400 print:text-black mb-2 uppercase tracking-wider">Detalle de Asignación</h3>
-               <div className="overflow-y-auto max-h-[300px] print:max-h-none border border-slate-700 print:border-black rounded-lg custom-scrollbar bg-slate-800 print:bg-transparent">
-                 <table className="w-full text-left text-xs md:text-sm print:text-black">
-                   <thead className="bg-slate-900 print:bg-gray-200 sticky top-0 border-b border-slate-700 print:border-black">
-                     <tr><th className="p-2 pl-3">Nombre / Rol</th><th className="p-2">Dieta</th></tr>
-                   </thead>
-                   <tbody>
-                      <tr className="border-b border-slate-700/50 print:border-black/50">
-                        <td className="p-2 pl-3">
-                          <div className="font-bold text-white print:text-black">{currentUser.name} (Tú)</div>
-                          <div className="text-[9px] text-slate-400 print:text-slate-600 uppercase mt-0.5">{currentUser.role}</div>
-                        </td>
-                        <td className="p-2"><span className="text-[9px] md:text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 print:border-black print:text-black px-1.5 py-0.5 rounded font-black uppercase tracking-wider truncate block max-w-[100px] md:max-w-none">{currentUser.dieta || 'OMNÍVORA'}</span></td>
-                      </tr>
-                     {localDirectory.map(u => (
-                       <tr key={u.email} className="border-b border-slate-700/50 print:border-black/50 last:border-0">
-                         <td className="p-2 pl-3">
-                           <div className="font-bold text-white print:text-black">{u.name}</div>
-                           <div className="text-[9px] text-slate-400 print:text-slate-600 uppercase mt-0.5">{u.role}</div>
-                         </td>
-                         <td className="p-2"><span className="text-[9px] md:text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 print:border-black print:text-black px-1.5 py-0.5 rounded font-black uppercase tracking-wider truncate block max-w-[100px] md:max-w-none">{u.dieta || 'OMNÍVORA'}</span></td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-               </div>
-            </div>
-          </div>
+      {isAuthorizedToManageArtists && (
+        <div className="flex gap-2 mb-4 border-b border-slate-850 pb-2.5 print:hidden">
+          <Button 
+            variant={activeSubTab === 'STAFF_ACTIVO' ? 'primary' : 'secondary'} 
+            onClick={() => { setActiveSubTab('STAFF_ACTIVO'); setEditingArtist(null); }}
+            icon={Users}
+            className="py-1.5 px-3 text-xs"
+          >
+            Directorio Staff
+          </Button>
+          <Button 
+            variant={activeSubTab === 'ARTIST_GEST' ? 'primary' : 'secondary'} 
+            onClick={() => { setActiveSubTab('ARTIST_GEST'); setEditingArtist(null); }}
+            icon={Music}
+            className={`py-1.5 px-3 text-xs ${activeSubTab === 'ARTIST_GEST' ? 'bg-blue-600 border-blue-500 hover:bg-blue-500' : 'border-blue-500/30 text-blue-400 hover:bg-blue-600/10'}`}
+          >
+            ARTIST-GEST (Músicos)
+          </Button>
         </div>
+      )}
 
       {fetchError ? (
         <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm print:hidden">
@@ -4009,16 +4031,194 @@ const StaffDirectory = ({ currentUser }) => {
       ) : loading && localDirectory.length === 0 ? ( 
         <div className="flex justify-center p-8 print:hidden"><PianoLoader size={40} /></div> 
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 print:hidden">
-          {localDirectory.map((user, idx) => (
-            <Card key={idx} className="p-3 md:p-4 flex flex-col justify-between">
-              <div className="flex items-center gap-3 mb-3"><div className="w-10 h-10 rounded-full bg-slate-700 text-white font-black flex items-center justify-center text-lg shrink-0">{user.name.charAt(0)}</div><div className="flex-1 min-w-0"><h3 className="font-bold text-white text-base md:text-lg truncate">{user.name}</h3><span className="text-[9px] md:text-[10px] bg-slate-900 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 uppercase font-bold inline-block mt-0.5">{user.role}</span></div></div>
-              <div className="space-y-1.5 mb-3 text-xs md:text-sm text-slate-300"><p className="flex items-center gap-2"><Phone size={12} className="text-slate-500 shrink-0"/> <span className="truncate">{user.phone}</span></p><p className="flex items-center gap-2"><Mail size={12} className="text-slate-500 shrink-0"/> <span className="truncate">{user.email}</span></p></div>
-              <div className="flex flex-row gap-2 mt-auto border-t border-slate-700 pt-3"><Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 py-1.5 text-xs" icon={Mail} onClick={() => openEmail(user.email)}>Correo</Button><Button variant="primary" className="flex-1 py-1.5 text-xs" icon={MessageSquare} onClick={() => openWhatsApp(user.phone)}>WhatsApp</Button></div>
-            </Card>
-          ))}
-          {localDirectory.length === 0 && ( <div className="col-span-full text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm">No se encontraron contactos.</div> )}
-        </div>
+        <>
+          {activeSubTab === 'STAFF_ACTIVO' && (
+            <>
+              <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 md:p-6 mb-6 print:border-black print:bg-white print:text-black hidden print:block">
+                  <div className="flex justify-between items-center mb-4 md:mb-6 border-b border-slate-800 print:border-black pb-3 md:pb-4">
+                    <h2 className="text-lg md:text-xl font-bold flex items-center gap-2"><Utensils className="text-amber-500 print:text-black"/> Reporte Catering (APV)</h2>
+                    <Button variant="secondary" icon={Printer} className="print:hidden py-1.5 px-3 text-xs" onClick={() => {
+                      const originalTitle = document.title;
+                      document.title = `Reporte_Catering_${new Date().toLocaleDateString().replace(/\//g, '-')}`;
+                      window.print();
+                      setTimeout(() => { document.title = originalTitle; }, 1000);
+                    }}>Imprimir PDF</Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                       <h3 className="text-[10px] md:text-xs font-bold text-slate-400 print:text-black mb-2 uppercase tracking-wider">Detalle de Asignación</h3>
+                       <div className="overflow-y-auto max-h-[300px] print:max-h-none border border-slate-700 print:border-black rounded-lg custom-scrollbar bg-slate-800 print:bg-transparent">
+                         <table className="w-full text-left text-xs md:text-sm print:text-black">
+                           <thead className="bg-slate-900 print:bg-gray-200 sticky top-0 border-b border-slate-700 print:border-black">
+                             <tr><th className="p-2 pl-3">Nombre / Rol</th><th className="p-2">Dieta</th></tr>
+                           </thead>
+                           <tbody>
+                              <tr className="border-b border-slate-700/50 print:border-black/50">
+                                <td className="p-2 pl-3">
+                                  <div className="font-bold text-white print:text-black">{currentUser.name} (Tú)</div>
+                                  <div className="text-[9px] text-slate-400 print:text-slate-600 uppercase mt-0.5">{currentUser.role}</div>
+                                </td>
+                                <td className="p-2"><span className="text-[9px] md:text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 print:border-black print:text-black px-1.5 py-0.5 rounded font-black uppercase tracking-wider truncate block max-w-[100px] md:max-w-none">{currentUser.dieta || 'OMNÍVORA'}</span></td>
+                              </tr>
+                             {localDirectory.map(u => (
+                               <tr key={u.email} className="border-b border-slate-700/50 print:border-black/50 last:border-0">
+                                 <td className="p-2 pl-3">
+                                   <div className="font-bold text-white print:text-black">{u.name}</div>
+                                   <div className="text-[9px] text-slate-400 print:text-slate-600 uppercase mt-0.5">{u.role}</div>
+                                 </td>
+                                 <td className="p-2"><span className="text-[9px] md:text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/30 print:border-black print:text-black px-1.5 py-0.5 rounded font-black uppercase tracking-wider truncate block max-w-[100px] md:max-w-none">{u.dieta || 'OMNÍVORA'}</span></td>
+                               </tr>
+                             ))}
+                           </tbody>
+                         </table>
+                       </div>
+                    </div>
+                  </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 print:hidden">
+                {localDirectory.map((user, idx) => (
+                  <Card key={idx} className="p-3 md:p-4 flex flex-col justify-between">
+                    <div className="flex items-center gap-3 mb-3"><div className="w-10 h-10 rounded-full bg-slate-700 text-white font-black flex items-center justify-center text-lg shrink-0">{user.name.charAt(0)}</div><div className="flex-1 min-w-0"><h3 className="font-bold text-white text-base md:text-lg truncate">{user.name}</h3><span className="text-[9px] md:text-[10px] bg-slate-900 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700 uppercase font-bold inline-block mt-0.5">{user.role}</span></div></div>
+                    <div className="space-y-1.5 mb-3 text-xs md:text-sm text-slate-300"><p className="flex items-center gap-2"><Phone size={12} className="text-slate-500 shrink-0"/> <span className="truncate">{user.phone}</span></p><p className="flex items-center gap-2"><Mail size={12} className="text-slate-500 shrink-0"/> <span className="truncate">{user.email}</span></p></div>
+                    <div className="flex flex-row gap-2 mt-auto border-t border-slate-700 pt-3"><Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 py-1.5 text-xs" icon={Mail} onClick={() => openEmail(user.email)}>Correo</Button><Button variant="primary" className="flex-1 py-1.5 text-xs" icon={MessageSquare} onClick={() => openWhatsApp(user.phone)}>WhatsApp</Button></div>
+                  </Card>
+                ))}
+                {localDirectory.length === 0 && ( <div className="col-span-full text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm">No se encontraron contactos.</div> )}
+              </div>
+            </>
+          )}
+
+          {activeSubTab === 'ARTIST_GEST' && (
+            <div className="animate-fade-in text-slate-100 print:hidden">
+              {editingArtist ? (
+                <Card className="max-w-xl mx-auto p-4 md:p-6 border-t-4 border-blue-500 bg-slate-900">
+                  <h2 className="text-base md:text-lg font-bold text-white mb-3 text-left">Editar Perfil de Músico</h2>
+                  <form onSubmit={handleEditArtistSave} className="space-y-3.5 text-left">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Nombre del Músico</label>
+                      <input type="text" className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-white outline-none focus:border-blue-500" value={editingArtist.name} onChange={e=>setEditingArtist({...editingArtist, name: e.target.value})} required />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Correo (No modificable)</label>
+                        <input type="email" disabled className="w-full bg-slate-950 border border-slate-850 rounded p-2.5 text-xs text-slate-500 outline-none cursor-not-allowed font-mono" value={editingArtist.email} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Teléfono</label>
+                        <input type="tel" className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-white outline-none focus:border-blue-500" value={editingArtist.phone} onChange={e=>setEditingArtist({...editingArtist, phone: e.target.value.replace(/[^0-9+]/g, '')})} required />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Estado de la Cuenta</label>
+                      <select className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-white outline-none focus:border-blue-500" value={editingArtist.status} onChange={e=>setEditingArtist({...editingArtist, status: e.target.value})}>
+                        <option value="ACTIVO">ACTIVO (Acceso Permitido)</option>
+                        <option value="INACTIVO">BLOQUEADO / INACTIVO (Acceso Denegado)</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button variant="ghost" className="flex-1 bg-slate-800 py-2 text-xs" onClick={() => setEditingArtist(null)}>Cancelar</Button>
+                      <Button type="submit" variant="primary" className="flex-1 py-2 text-xs bg-blue-600 hover:bg-blue-500" disabled={processingId === 'editing-artist'}>
+                        {processingId === 'editing-artist' ? 'Guardando...' : 'Guardar Cambios'}
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                  {allArtists.map((user, idx) => (
+                    <Card key={idx} className={`p-3 md:p-4 flex flex-col justify-between ${user.status === 'INACTIVO' ? 'opacity-55 border-red-500/25 bg-red-950/5' : 'border-slate-850'}`}>
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-full bg-blue-900/30 text-blue-400 font-black flex items-center justify-center text-sm shrink-0"><Music size={14}/></div>
+                            <div className="min-w-0 text-left">
+                              <h3 className="font-bold text-white text-sm md:text-base truncate leading-snug">{user.name}</h3>
+                              <span className={`text-[8px] px-1 rounded uppercase font-black tracking-wider border leading-none inline-block mt-0.5 ${
+                                user.status === 'ACTIVO' 
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                  : 'bg-red-500/10 text-red-400 border-red-500/20'
+                              }`}>
+                                {user.status === 'ACTIVO' ? 'ACTIVO' : 'BLOQUEADO'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1 mb-3.5 text-xs text-slate-300 text-left">
+                          <p className="flex items-center gap-1.5 text-slate-400 font-mono truncate"><Mail size={11} className="text-slate-600 shrink-0"/> {user.email}</p>
+                          <p className="flex items-center gap-1.5 text-slate-400"><Phone size={11} className="text-slate-600 shrink-0"/> {user.phone}</p>
+                          <p className="flex items-center gap-1.5">
+                            <span className="font-bold text-slate-500 text-[9px] uppercase">Términos:</span> 
+                            {user.acceptedTerms ? (
+                              <span className="text-emerald-400 font-bold flex items-center gap-0.5 text-[9px]">Aceptados <CheckCircle2 size={9} /></span>
+                            ) : (
+                              <span className="text-amber-500 font-bold flex items-center gap-0.5 text-[9px]">Pendientes <AlertCircle size={9} /></span>
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="bg-slate-950/80 p-2.5 rounded border border-slate-900 text-left mb-3.5">
+                          <span className="text-[8px] uppercase font-bold text-slate-500 block mb-1">Token de Primer Ingreso</span>
+                          {user.tempPassToken ? (
+                            <div className="flex items-center justify-between gap-2">
+                              <code className="text-emerald-400 font-mono font-bold tracking-widest text-xs bg-emerald-500/5 px-1 py-0.5 rounded border border-emerald-500/10">{user.tempPassToken}</code>
+                              <span className="text-[8px] font-bold text-amber-500 uppercase">Por Activar</span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-500 font-medium">Contraseña ya configurada.</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="border-t border-slate-800/60 pt-3 flex flex-col gap-1.5 mt-auto">
+                        <div className="flex gap-1.5">
+                          <Button variant="secondary" className="flex-1 py-1 text-xs shrink-0 font-bold" icon={Edit3} onClick={() => setEditingArtist(user)}>Editar</Button>
+                          <Button 
+                            variant="ghost" 
+                            className="p-1 px-2.5 text-red-500 hover:text-red-400 border border-red-500/20 hover:bg-red-500/10 rounded-lg text-xs" 
+                            icon={Trash2} 
+                            disabled={processingId === user.email}
+                            onClick={() => requestConfirm(`¿Eliminar definitivamente al músico ${user.name}? Se borrará también de la base de datos de usuarios.`, () => handleDeleteArtist(user.email))}
+                          >
+                            {processingId === user.email ? '...' : ''}
+                          </Button>
+                        </div>
+
+                        {user.tempPassToken && (
+                          <div className="grid grid-cols-2 gap-1.5 mt-0.5">
+                            <a 
+                              href={`https://wa.me/${user.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                                `¡Hola ${user.name}! Te hemos creado tu cuenta de acceso exclusivo para la aplicación de administración de repertorios y ensayos ARTIST-GEST.\n\nPara ingresar, haz clic en el siguiente enlace:\n🔗 https://jearimcorvalanrodriguez-collab.github.io/artist-gest/?email=${user.email}&tempPass=${user.tempPassToken}\n\n📧 Correo: ${user.email}\n🔑 Contraseña Temporal: ${user.tempPassToken}\n\nPor favor, ingresa para aceptar los términos y establecer tu contraseña definitiva.`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-emerald-600/10 border border-emerald-500/25 hover:bg-emerald-600/15 text-emerald-400 font-bold py-1.5 rounded text-center text-[9px] flex items-center justify-center gap-1 transition-colors"
+                            >
+                              WhatsApp Inv
+                            </a>
+                            <a 
+                              href={`mailto:${user.email}?subject=Acceso%20Artist-Gest%20-%20Esquemas%20Pro&body=${encodeURIComponent(
+                                `Hola ${user.name}!,\n\nTe hemos creado tu cuenta de acceso exclusivo para la aplicación de administración de repertorios y ensayos ARTIST-GEST.\n\nPara ingresar, haz clic en el siguiente enlace:\nhttps://jearimcorvalanrodriguez-collab.github.io/artist-gest/?email=${user.email}&tempPass=${user.tempPassToken}\n\nCredenciales de Acceso:\n- Correo: ${user.email}\n- Contraseña Temporal: ${user.tempPassToken}\n\nPor favor, actualiza tu contraseña en tu perfil al ingresar.\n\nSaludos,\nEquipo de Logística Esquemas Pro.`
+                              )}`}
+                              className="bg-blue-600/10 border border-blue-500/25 hover:bg-blue-600/15 text-blue-400 font-bold py-1.5 rounded text-center text-[9px] flex items-center justify-center gap-1 transition-colors"
+                            >
+                              Correo Inv
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                  {allArtists.length === 0 && (
+                    <div className="col-span-full text-center p-8 border border-slate-800 border-dashed rounded-xl text-slate-500 text-sm">No se encontraron músicos registrados en el sistema.</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -5332,7 +5532,7 @@ export default function App() {
           {currentView === 'PROJECT_DETAILS' && <ProjectDetailsView currentUser={effectiveUser} setCurrentView={setCurrentView} selectedProject={selectedProject} showToast={showToast} requestConfirm={requestConfirm} />}
           {currentView === 'ADMIN_PANEL' && <AdminPanel currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} refreshPendingCount={() => fetchDirectoryGlobal(true)} />}
           {currentView === 'PROFILE' && <ProfileView currentUser={effectiveUser} setCurrentUser={setCurrentUser} showToast={showToast} theme={theme} setTheme={setTheme} requestConfirm={requestConfirm} />}
-          {currentView === 'STAFF' && <StaffDirectory currentUser={effectiveUser} />}
+          {currentView === 'STAFF' && <StaffDirectory currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} />}
           {currentView === 'CHAT' && <ChatView currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} />}
           {currentView === 'TRANSPORT' && <TransportView currentUser={effectiveUser} setCurrentView={setCurrentView} showToast={showToast} selectedProject={selectedProject} />}
           {currentView === 'TRANSPORT_DETAILS' && <TransportDetailsView currentUser={effectiveUser} setCurrentView={setCurrentView} showToast={showToast} />}

@@ -253,7 +253,8 @@ function doPost(e) {
           JSON.stringify(getDefaultPermisos(ss, finalRole)),
           tcText,
           claveTemporal ? "true" : "false", // isTempPass
-          "false" // acceptedTerms
+          "false", // acceptedTerms
+          claveTemporal // Col 14 (N) - plain text temp passcode
         ]);
         
         if (isNewAdmin) {
@@ -277,6 +278,7 @@ function doPost(e) {
             sheetUsuarios.getRange(i + 1, 7).setValue("ACTIVO");     
             sheetUsuarios.getRange(i + 1, 12).setValue("true"); // Contraseña temporal
             sheetUsuarios.getRange(i + 1, 13).setValue("false"); // No ha aceptado términos aún
+            sheetUsuarios.getRange(i + 1, 14).setValue(claveTemporal); // Col 14 (N) - plain text temp passcode
             
             enviarCorreoNotificacion(data.payload.email, nombre, "Tu solicitud de acceso ha sido aprobada. Utiliza esta clave temporal para ingresar a la plataforma y no olvides actualizarla en tu perfil.", claveTemporal, rol, true);
             return configurarCORS({ status: "success", message: "Aprobado y correo enviado.", tempPass: claveTemporal });
@@ -394,12 +396,23 @@ function doPost(e) {
         const usuarios = [];
         for (let i = 1; i < rows.length; i++) {
           if (rows[i][1]) {
-             let p = [];
-             try { p = JSON.parse(rows[i][9]); } catch(e) {}
-             if (!p || p.length === 0) {
-               p = getDefaultPermisos(ss, rows[i][4]);
-             }
-             usuarios.push({ id: rows[i][0], name: rows[i][1], email: rows[i][2].toString().trim(), phone: rows[i][3], role: rows[i][4], status: rows[i][6], dieta: rows[i][8] || "OMNIVORA", permisos: p });
+              let tempPassToken = rows[i][13] ? rows[i][13].toString().trim() : "";
+              let isTempPassVal = rows[i][11] !== undefined ? rows[i][11].toString().trim().toLowerCase() : "false";
+              let acceptedTermsVal = rows[i][12] !== undefined ? rows[i][12].toString().trim().toLowerCase() : "false";
+
+              usuarios.push({ 
+                id: rows[i][0], 
+                name: rows[i][1], 
+                email: rows[i][2].toString().trim(), 
+                phone: rows[i][3], 
+                role: rows[i][4], 
+                status: rows[i][6], 
+                dieta: rows[i][8] || "OMNIVORA", 
+                permisos: JSON.parse(rows[i][9] || "[]"),
+                isTempPass: isTempPassVal === "true" || isTempPassVal === "1",
+                acceptedTerms: acceptedTermsVal === "true" || acceptedTermsVal === "1",
+                tempPassToken: tempPassToken
+              });
           }
         }
         return configurarCORS({ status: "success", data: usuarios });
@@ -419,6 +432,7 @@ function doPost(e) {
                sheetUsuarios.getRange(i + 1, 6).setValue(cifrarPassword(newPassword)); 
                sheetUsuarios.getRange(i + 1, 12).setValue("false"); // Ya no es contraseña temporal
                sheetUsuarios.getRange(i + 1, 13).setValue("true");  // Aceptó términos
+               sheetUsuarios.getRange(i + 1, 14).setValue("");      // Borrar token temporal de texto plano
             }
             
             sheetUsuarios.getRange(i + 1, 4).setValue(sanitizarEntrada(phone)); 
