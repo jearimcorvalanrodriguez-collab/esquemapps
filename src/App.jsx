@@ -1339,20 +1339,35 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
 
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    let str = String(dateStr).trim();
+    if (str.includes('T')) {
+      str = str.split('T')[0];
     }
-    return dateStr;
+    let clean = str.replace(/-/g, '/');
+    const parts = clean.split('/');
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+    }
+    return clean;
   };
 
   const formatDisplayTime = (timeStr) => {
     if (!timeStr) return '';
-    const parts = timeStr.split(':');
+    let str = String(timeStr).trim();
+    if (str.includes('T')) {
+      const timePart = str.split('T')[1];
+      const timeSubParts = timePart.split(':');
+      if (timeSubParts.length >= 2) {
+        return `${timeSubParts[0]}:${timeSubParts[1]}`;
+      }
+    }
+    const parts = str.split(':');
     if (parts.length >= 2) {
       return `${parts[0]}:${parts[1]}`;
     }
-    return timeStr;
+    return str;
   };
 
   if (!canSeeTransport) {
