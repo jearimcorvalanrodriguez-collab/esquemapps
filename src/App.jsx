@@ -1337,6 +1337,24 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
                         (currentUser.permisos || []).includes('TRANSPORT_EDIT') || 
                         (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role));
 
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+  };
+
+  const formatDisplayTime = (timeStr) => {
+    if (!timeStr) return '';
+    const parts = timeStr.split(':');
+    if (parts.length >= 2) {
+      return `${parts[0]}:${parts[1]}`;
+    }
+    return timeStr;
+  };
+
   if (!canSeeTransport) {
     return (
       <div className="p-8 text-center text-red-500 font-bold border border-red-500/20 bg-red-500/5 rounded-xl">
@@ -1658,12 +1676,26 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
                               Editar
                             </button>
                           )}
-                          <span className={`text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded uppercase ${t.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/50' : t.status === 'EN RUTA' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/50' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/50'}`}>{t.status}</span>
+                          <span className={`text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded uppercase border ${
+                            t.status === 'PENDING' || t.status === 'PENDIENTE' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' :
+                            t.status === 'COMENZADO' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' :
+                            t.status === 'EN VIAJE' || t.status === 'EN RUTA' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                            t.status === 'LLEGADO' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' :
+                            t.status === 'FINALIZADO' ? 'bg-slate-500/10 text-slate-400 border-slate-700' :
+                            'bg-slate-800 text-slate-400 border-slate-700'
+                          }`}>{t.status || 'PENDIENTE'}</span>
                         </div>
                       </div>
                       
                       <div className="space-y-2 text-xs md:text-sm text-slate-300 mb-4 text-left">
-                        <p className="flex items-center gap-2 font-mono"><Calendar size={13}/> {t.date} {t.time}</p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                          <p className="flex items-center gap-2 font-mono"><Calendar size={13}/> {formatDisplayDate(t.date)} {formatDisplayTime(t.time)}</p>
+                          {t.status === 'FINALIZADO' && t.endTime && (
+                            <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded flex items-center gap-1">
+                              ✅ Finalizado a las {t.endTime}
+                            </span>
+                          )}
+                        </div>
                         
                         <div className="border border-slate-800/80 bg-slate-900/40 rounded-lg p-2.5 space-y-1.5">
                           <p className="flex items-start gap-1.5">

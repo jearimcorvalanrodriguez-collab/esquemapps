@@ -622,7 +622,8 @@ function doPost(e) {
             paradas: rows[i][9] ? JSON.parse(rows[i][9]) : [],
             conductor: rows[i][10] || "",
             conductorPhone: rows[i][11] || "",
-            conductorAceptado: rows[i][12] || "PENDIENTE"
+            conductorAceptado: rows[i][12] || "PENDIENTE",
+            endTime: rows[i][13] || ""
           });
         }
       }
@@ -643,10 +644,11 @@ function doPost(e) {
         sanitizarEntrada(data.payload.dest), 
         "PENDING", 
         data.payload.proyectoId || "",
-        "[]", // paradas (Col J)
-        "",   // conductor (Col K)
-        "",   // conductorPhone (Col L)
-        "PENDIENTE" // conductorAceptado (Col M)
+        "[]", 
+        "",   
+        "",   
+        "PENDIENTE",
+        ""
       ]);
       return configurarCORS({ status: "success" });
     }
@@ -657,6 +659,10 @@ function doPost(e) {
       for (let i = 1; i < rows.length; i++) {
         if (rows[i][1] === data.payload.token) {
           sheet.getRange(i + 1, 8).setValue(sanitizarEntrada(data.payload.newStatus));
+          if (data.payload.newStatus === "FINALIZADO") {
+            const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            sheet.getRange(i + 1, 14).setValue(timeNow);
+          }
           return configurarCORS({ status: "success" });
         }
       }
@@ -684,7 +690,8 @@ function doPost(e) {
                 paradas: rows[i][9] ? JSON.parse(rows[i][9]) : [],
                 conductor: rows[i][10] || "",
                 conductorPhone: rows[i][11] || "",
-                conductorAceptado: rows[i][12] || "PENDIENTE"
+                conductorAceptado: rows[i][12] || "PENDIENTE",
+                endTime: rows[i][13] || ""
               } 
             } 
           });
