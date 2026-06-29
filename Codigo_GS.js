@@ -192,7 +192,7 @@ function doPost(e) {
     // 🛡️ CONTROL DE ACCESOS EN EL BACKEND (SEC-01)
     
     // Evitar bypass de tokens vacíos para conductor (SEC-05)
-    const tokenDriverActions = ["updateTransportStatus", "loginConductor", "aceptarRuta"];
+    const tokenDriverActions = ["updateTransportStatus", "loginConductor", "aceptarRuta", "updateDriverGPS"];
     if (tokenDriverActions.includes(action)) {
       const token = data.payload ? data.payload.token : null;
       if (!token || String(token).trim() === "") {
@@ -747,7 +747,9 @@ function doPost(e) {
             conductor: rows[i][10] || "",
             conductorPhone: rows[i][11] || "",
             conductorAceptado: rows[i][12] || "PENDIENTE",
-            endTime: rows[i][13] || ""
+            endTime: rows[i][13] || "",
+            lastLocation: rows[i][14] || "",
+            breadcrumbs: rows[i][15] ? JSON.parse(rows[i][15]) : []
           });
         }
       }
@@ -793,6 +795,40 @@ function doPost(e) {
       return configurarCORS({ status: "error", message: "Transporte no encontrado." });
     }
 
+    if (action === "updateDriverGPS") {
+      const sheet = ss.getSheetByName("Transportes");
+      const rows = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][1] === data.payload.token) {
+          const lat = data.payload.lat;
+          const lng = data.payload.lng;
+          const speed = data.payload.speed || 0;
+          const accuracy = data.payload.accuracy || 0;
+          const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          
+          sheet.getRange(i + 1, 15).setValue(`${lat},${lng}`);
+          
+          let currentBreadcrumbsRaw = rows[i][15] || "[]";
+          let breadcrumbs = [];
+          try {
+            breadcrumbs = JSON.parse(currentBreadcrumbsRaw);
+            if (!Array.isArray(breadcrumbs)) breadcrumbs = [];
+          } catch(e) {
+            breadcrumbs = [];
+          }
+          
+          breadcrumbs.push({ lat, lng, speed, accuracy, time });
+          if (breadcrumbs.length > 50) {
+            breadcrumbs.shift();
+          }
+          sheet.getRange(i + 1, 16).setValue(JSON.stringify(breadcrumbs));
+          
+          return configurarCORS({ status: "success" });
+        }
+      }
+      return configurarCORS({ status: "error", message: "Ruta no encontrada." });
+    }
+
     if (action === "loginConductor") {
       const sheet = ss.getSheetByName("Transportes");
       const rows = sheet.getDataRange().getValues();
@@ -815,7 +851,9 @@ function doPost(e) {
                 conductor: rows[i][10] || "",
                 conductorPhone: rows[i][11] || "",
                 conductorAceptado: rows[i][12] || "PENDIENTE",
-                endTime: rows[i][13] || ""
+                endTime: rows[i][13] || "",
+                lastLocation: rows[i][14] || "",
+                breadcrumbs: rows[i][15] ? JSON.parse(rows[i][15]) : []
               } 
             } 
           });
