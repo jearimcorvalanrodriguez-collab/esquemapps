@@ -483,6 +483,8 @@ function doPost(e) {
                sheetUsuarios.getRange(i + 1, 12).setValue("false"); // Ya no es contraseña temporal
                sheetUsuarios.getRange(i + 1, 13).setValue("true");  // Aceptó términos
                sheetUsuarios.getRange(i + 1, 14).setValue("");      // Borrar token temporal de texto plano
+            } else {
+               sheetUsuarios.getRange(i + 1, 13).setValue("true");  // Aceptó términos de todas formas
             }
             
             sheetUsuarios.getRange(i + 1, 4).setValue(sanitizarEntrada(phone)); 
