@@ -4434,7 +4434,12 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
     try {
       const res = await apiFetch('aprobarUsuario', { email });
       if (res.status === 'success') { 
-        showToast("Usuario aprobado. Correo enviado al usuario."); 
+        const tempPass = res.tempPass;
+        if (tempPass) {
+          alert(`¡Usuario Aprobado con Éxito!\n\nEmail: ${email}\nToken de Acceso Temporal: ${tempPass}\n\nPor favor, copia este token y envíaselo al usuario.`);
+        } else {
+          showToast("Usuario aprobado. Correo enviado al usuario."); 
+        }
         clearCache('usuarios');
         setDbUsers(prev => prev.map(u => u.email === email ? { ...u, status: 'ACTIVO' } : u));
         if (refreshPendingCount) refreshPendingCount();
@@ -4481,7 +4486,13 @@ const AdminPanel = ({ currentUser, showToast, requestConfirm, refreshPendingCoun
       if(resSolicitud.status === 'success') {
         const resAprob = await apiFetch('aprobarUsuario', { email: invEmail });
         if(resAprob.status === 'success') {
-          showToast(`Acceso creado. Credenciales enviadas a ${invEmail}`); setInvName(''); setInvEmail(''); setActiveTab('DIRECTORIO'); 
+          const tempPass = resAprob.tempPass;
+          if (tempPass) {
+            alert(`¡Usuario Creado con Éxito!\n\nNombre: ${invName}\nRol: ${invRole}\nToken de Acceso: ${tempPass}\n\nPor favor, copia este token y envíaselo al artista.`);
+          } else {
+            showToast(`Acceso creado. Credenciales enviadas a ${invEmail}`);
+          }
+          setInvName(''); setInvEmail(''); setActiveTab('DIRECTORIO'); 
           clearCache('usuarios');
           fetchUsers(true);
           if (refreshPendingCount) refreshPendingCount();

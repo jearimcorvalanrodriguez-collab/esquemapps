@@ -196,7 +196,7 @@ function doPost(e) {
     // ==========================================
     // 1. SECCIÓN USUARIOS, LOGIN Y PERFILES
     // ==========================================
-    if (action === "solicitarAcceso" || action === "checkEmailTC" || action === "aprobarUsuario" || action === "rechazarUsuario" || action === "eliminarUsuario" || action === "login" || action === "getUsuarios" || action === "updateProfile" || action === "updateUserAdmin") {
+    if (action === "solicitarAcceso" || action === "checkEmailTC" || action === "aprobarUsuario" || action === "rechazarUsuario" || action === "eliminarUsuario" || action === "login" || action === "getUsuarios" || action === "updateProfile" || action === "updateUserAdmin" || action === "recuperarClave") {
       const sheetUsuarios = ss.getSheetByName("Usuarios");
       if (!sheetUsuarios) return configurarCORS({ status: "error", message: "Pestaña Usuarios no existe." });
 
@@ -248,7 +248,9 @@ function doPost(e) {
           "M", 
           "OMNIVORA", 
           JSON.stringify(getDefaultPermisos(ss, finalRole)),
-          tcText
+          tcText,
+          claveTemporal ? "true" : "false", // isTempPass
+          "false" // acceptedTerms
         ]);
         
         if (isNewAdmin) {
@@ -270,9 +272,11 @@ function doPost(e) {
             const claveTemporal = Math.floor(100000 + Math.random() * 900000).toString();
             sheetUsuarios.getRange(i + 1, 6).setValue(cifrarPassword(claveTemporal)); 
             sheetUsuarios.getRange(i + 1, 7).setValue("ACTIVO");     
+            sheetUsuarios.getRange(i + 1, 12).setValue("true"); // Contraseña temporal
+            sheetUsuarios.getRange(i + 1, 13).setValue("false"); // No ha aceptado términos aún
             
             enviarCorreoNotificacion(data.payload.email, nombre, "Tu solicitud de acceso ha sido aprobada. Utiliza esta clave temporal para ingresar a la plataforma y no olvides actualizarla en tu perfil.", claveTemporal, rol, true);
-            return configurarCORS({ status: "success", message: "Aprobado y correo enviado." });
+            return configurarCORS({ status: "success", message: "Aprobado y correo enviado.", tempPass: claveTemporal });
           }
         }
         return configurarCORS({ status: "error", message: "Usuario no encontrado." });
@@ -338,6 +342,7 @@ function doPost(e) {
       if (action === "login") {
         const rows = sheetUsuarios.getDataRange().getValues();
         const passCifrada = cifrarPassword(data.payload.password);
+        const acceptedTermsInput = data.payload.acceptedTerms;
         for (let i = 1; i < rows.length; i++) { 
           if (rows[i][2].toString().trim().toLowerCase() === data.payload.email.trim().toLowerCase() && passCifrada === rows[i][5].toString().trim()) {
             if (rows[i][6] === "PENDING" || rows[i][6] === "INACTIVO") {
@@ -353,7 +358,29 @@ function doPost(e) {
                sheetUsuarios.getRange(i + 1, 10).setValue(JSON.stringify(permisosParsed));
             }
 
-            return configurarCORS({ status: "success", user: { id: rows[i][0], name: rows[i][1], email: rows[i][2].toString().trim(), phone: rows[i][3], role: rows[i][4], talla: rows[i][7] || "M", dieta: rows[i][8] || "OMNIVORA", permisos: permisosParsed } });
+            let isTempPassVal = rows[i][11] !== undefined ? rows[i][11].toString().trim().toLowerCase() : "false";
+            let acceptedTermsVal = rows[i][12] !== undefined ? rows[i][12].toString().trim().toLowerCase() : "false";
+
+            if (acceptedTermsInput === true || acceptedTermsInput === "true") {
+              sheetUsuarios.getRange(i + 1, 13).setValue("true");
+              acceptedTermsVal = "true";
+            }
+
+            return configurarCORS({ 
+              status: "success", 
+              user: { 
+                id: rows[i][0], 
+                name: rows[i][1], 
+                email: rows[i][2].toString().trim(), 
+                phone: rows[i][3], 
+                role: rows[i][4], 
+                talla: rows[i][7] || "M", 
+                dieta: rows[i][8] || "OMNIVORA", 
+                permisos: permisosParsed,
+                isTempPass: isTempPassVal === "true" || isTempPassVal === "1",
+                acceptedTerms: acceptedTermsVal === "true" || acceptedTermsVal === "1"
+              } 
+            });
           }
         }
         return configurarCORS({ status: "error", message: "Credenciales invalidas." });
@@ -387,6 +414,8 @@ function doPost(e) {
                   return configurarCORS({ status: "error", message: "La contrasena actual ingresada es incorrecta." });
                }
                sheetUsuarios.getRange(i + 1, 6).setValue(cifrarPassword(newPassword)); 
+               sheetUsuarios.getRange(i + 1, 12).setValue("false"); // Ya no es contraseña temporal
+               sheetUsuarios.getRange(i + 1, 13).setValue("true");  // Aceptó términos
             }
             
             sheetUsuarios.getRange(i + 1, 4).setValue(sanitizarEntrada(phone)); 
@@ -396,6 +425,33 @@ function doPost(e) {
           }
         }
         return configurarCORS({ status: "error", message: "Usuario no encontrado." });
+      }
+
+      if (action === "recuperarClave") {
+        const emailLower = data.payload.email.trim().toLowerCase();
+        const rows = sheetUsuarios.getDataRange().getValues();
+        for (let i = 1; i < rows.length; i++) {
+          if (rows[i][2].toString().trim().toLowerCase() === emailLower) {
+            const nombre = rows[i][1];
+            const rol = rows[i][4];
+            const claveTemporal = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            sheetUsuarios.getRange(i + 1, 6).setValue(cifrarPassword(claveTemporal)); 
+            sheetUsuarios.getRange(i + 1, 12).setValue("true"); // Es contraseña temporal
+            sheetUsuarios.getRange(i + 1, 13).setValue("false"); // Debe re-aceptar términos
+            
+            enviarCorreoNotificacion(
+              rows[i][2].toString().trim(), 
+              nombre, 
+              "Has solicitado la recuperación de tu contraseña. Utiliza este nuevo token / contraseña temporal para ingresar a la plataforma y cámbiala lo antes posible en tu perfil.", 
+              claveTemporal, 
+              rol, 
+              true
+            );
+            return configurarCORS({ status: "success", message: "Se ha enviado una nueva clave temporal a tu correo." });
+          }
+        }
+        return configurarCORS({ status: "error", message: "El correo electrónico no está registrado." });
       }
     }
 
