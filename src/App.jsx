@@ -1457,7 +1457,8 @@ const TransportView = ({ currentUser, setCurrentView, showToast, selectedProject
   const getWhatsAppLink = (t) => {
     const cleanPhone = t.conductorPhone.replace(/[^0-9]/g, '');
     const driverName = t.conductor.split(' (')[0];
-    const msg = `Hola ${driverName}! Te hemos asignado una nueva ruta: '${t.title}'. Para ver el itinerario completo e iniciar navegacion con Waze o Google Maps, ingresa con tu Token a la app:\n\n🔗 ${window.location.origin}\n🔑 Token: ${t.token}\n\nPor favor, confirma recepcion en el correo que te enviamos. ¡Gracias!`;
+    const driverAppUrl = window.location.origin.replace('esquemapps', 'esquemas-driver');
+    const msg = `Hola ${driverName}! Te hemos asignado una nueva ruta: '${t.title}'. Para ver el itinerario completo e iniciar navegación con Waze o Google Maps, haz clic en el siguiente enlace:\n\n🔗 ${driverAppUrl}?token=${t.token}\n\n🔑 Token: ${t.token}\n\nPor favor, confirma recepción en el correo que te enviamos. ¡Gracias!`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   };
 
