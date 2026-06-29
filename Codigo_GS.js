@@ -124,6 +124,11 @@ function enviarCorreoNotificacion(destinatario, nombre, mensaje, clave, rol, mos
     var styleBtnDiv = "text-align:center; margin:25px 0;";
     var styleBtn = "background-color:#059669; color:#ffffff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block;";
 
+    var finalUrl = URL_PLATAFORMA;
+    if (clave) {
+      finalUrl += "?email=" + encodeURIComponent(destinatario) + "&tempPass=" + encodeURIComponent(clave);
+    }
+
     var htmlBody = "<div style=\"" + styleDiv + "\">" +
       "<h2 style=\"" + styleH2 + "\">ESQUEMAS PRO</h2>" +
       "<p>Hola <b>" + nombre + "</b>,</p>" +
@@ -138,7 +143,7 @@ function enviarCorreoNotificacion(destinatario, nombre, mensaje, clave, rol, mos
     
     if (mostrarBoton) {
       htmlBody += "<div style=\"" + styleBtnDiv + "\">" +
-        "<a href=\"" + URL_PLATAFORMA + "\" style=\"" + styleBtn + "\">Ingresar a la Plataforma</a>" +
+        "<a href=\"" + finalUrl + "\" style=\"" + styleBtn + "\">Ingresar a la Plataforma</a>" +
         "</div>";
     }
     

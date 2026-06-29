@@ -1089,6 +1089,18 @@ const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   const [tcAccepted, setTcAccepted] = useState(false);
   const [alreadyAcceptedTC, setAlreadyAcceptedTC] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    const tempPassParam = params.get('tempPass');
+    if (emailParam) setEmail(emailParam);
+    if (tempPassParam) setPass(tempPassParam);
+    if (emailParam && tempPassParam) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showToast("Credenciales cargadas desde el enlace.");
+    }
+  }, []);
+
   const checkEmailTCStatus = async (emailToCheck) => {
     if (!emailToCheck || !emailToCheck.includes('@')) {
       setAlreadyAcceptedTC(false);
