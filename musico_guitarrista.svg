@@ -1,216 +1,99 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 550" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" width="100%" height="100%">
   <defs>
-    <style>
-      .platform-top { fill: #F5F5F5; }
-      .platform-left { fill: #D4D4D4; }
-      .platform-right { fill: #BDBDBD; }
-      .shadow { fill: #E0E0E0; }
-      
-      /* Pierna Derecha (Fondo) */
-      .leg-r-thigh-1 { fill: #7A7A7A; }
-      .leg-r-thigh-2 { fill: #6E6E6E; }
-      .leg-r-thigh-3 { fill: #555555; }
-      .leg-r-thigh-4 { fill: #4D4D4D; }
-      .leg-r-calf-1 { fill: #858585; }
-      .leg-r-calf-2 { fill: #7A7A7A; }
-      .leg-r-calf-3 { fill: #5E5E5E; }
-      .leg-r-calf-4 { fill: #555555; }
-      .leg-r-foot-1 { fill: #999999; }
-      .leg-r-foot-2 { fill: #A3A3A3; }
-      .leg-r-foot-3 { fill: #666666; }
-      .leg-r-foot-4 { fill: #5C5C5C; }
-
-      /* Pierna Izquierda (Frente) */
-      .leg-l-thigh-1 { fill: #949494; }
-      .leg-l-thigh-2 { fill: #878787; }
-      .leg-l-thigh-3 { fill: #B8B8B8; }
-      .leg-l-thigh-4 { fill: #ADADAD; }
-      .leg-l-calf-1 { fill: #8F8F8F; }
-      .leg-l-calf-2 { fill: #828282; }
-      .leg-l-calf-3 { fill: #B3B3B3; }
-      .leg-l-calf-4 { fill: #A8A8A8; }
-      .leg-l-foot-1 { fill: #C2C2C2; }
-      .leg-l-foot-2 { fill: #B8B8B8; }
-      .leg-l-foot-3 { fill: #7A7A7A; }
-
-      /* Torso */
-      .torso-pelvis-1 { fill: #8C8C8C; }
-      .torso-pelvis-2 { fill: #999999; }
-      .torso-belly-1 { fill: #9E9E9E; }
-      .torso-belly-2 { fill: #A8A8A8; }
-      .torso-chest-l1 { fill: #B3B3B3; }
-      .torso-chest-l2 { fill: #BDBDBD; }
-      .torso-chest-r1 { fill: #757575; }
-      .torso-chest-r2 { fill: #808080; }
-      .torso-lower-r1 { fill: #6B6B6B; }
-      .torso-lower-r2 { fill: #707070; }
-
-      /* Cabeza y Cuello */
-      .neck-1 { fill: #999999; }
-      .neck-2 { fill: #666666; }
-      .head-l1 { fill: #D6D6D6; }
-      .head-l2 { fill: #E0E0E0; }
-      .head-r1 { fill: #7A7A7A; }
-      .head-r2 { fill: #858585; }
-      .head-t1 { fill: #EDEDED; }
-      .head-t2 { fill: #F5F5F5; }
-
-      /* Brazo Izquierdo (Mástil) */
-      .arm-l-up-1 { fill: #999999; }
-      .arm-l-up-2 { fill: #8A8A8A; }
-      .arm-l-fore-1 { fill: #A3A3A3; }
-      .arm-l-fore-2 { fill: #949494; }
-      .hand-l-1 { fill: #B8B8B8; }
-      .hand-l-2 { fill: #A3A3A3; }
-
-      /* Brazo Derecho (Rasgueo) */
-      .arm-r-up-1 { fill: #8C8C8C; }
-      .arm-r-up-2 { fill: #999999; }
-      .arm-r-fore-1 { fill: #7A7A7A; }
-      .arm-r-fore-2 { fill: #878787; }
-      .hand-r-1 { fill: #949494; }
-      .hand-r-2 { fill: #A3A3A3; }
-
-      /* Guitarra */
-      .gtr-face-1 { fill: #383838; }
-      .gtr-face-2 { fill: #333333; }
-      .gtr-face-3 { fill: #2E2E2E; }
-      .gtr-face-4 { fill: #262626; }
-      .gtr-face-5 { fill: #1F1F1F; }
-      .gtr-face-6 { fill: #222222; }
-      .gtr-face-7 { fill: #2B2B2B; }
-      .gtr-side-1 { fill: #111111; }
-      .gtr-side-2 { fill: #0A0A0A; }
-      .gtr-side-3 { fill: #050505; }
-      .gtr-side-4 { fill: #141414; }
-      .gtr-pickguard { fill: #E0E0E0; }
-      .gtr-neck-f1 { fill: #404040; }
-      .gtr-neck-f2 { fill: #4D4D4D; }
-      .gtr-neck-s { fill: #1A1A1A; }
-      .gtr-head-f1 { fill: #2B2B2B; }
-      .gtr-head-f2 { fill: #333333; }
-      .gtr-head-s { fill: #111111; }
-    </style>
+    <filter id="drop-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="4" dy="6" stdDeviation="5" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
   </defs>
 
-  <!-- 1. Plataforma Base (Perspectiva Isométrica) -->
-  <polygon class="platform-top" points="200,380 340,450 200,520 60,450" />
-  <polygon class="platform-left" points="60,450 200,520 200,540 60,470" />
-  <polygon class="platform-right" points="200,520 340,450 340,470 200,540" />
-  
-  <!-- 2. Sombra de Contacto -->
-  <polygon class="shadow" points="200,470 260,440 230,410 170,440" />
+  <rect width="400" height="800" fill="#f4f4f9" />
 
-  <!-- 3. Brazo Izquierdo (Fondo, Brazo y Antebrazo) -->
-  <!-- Brazo Superior -->
-  <polygon class="arm-l-up-1" points="180,185 160,205 165,215" />
-  <polygon class="arm-l-up-2" points="180,185 165,215 185,195" />
-  <!-- Antebrazo -->
-  <polygon class="arm-l-fore-1" points="160,205 125,175 135,165" />
-  <polygon class="arm-l-fore-2" points="160,205 135,165 165,215" />
+  <g filter="url(#drop-shadow)">
+    <path d="M 220 350 
+             C 250 350, 260 360, 260 380 
+             C 260 400, 240 410, 230 430 
+             C 320 450, 330 550, 310 650 
+             C 280 750, 120 750, 90 650 
+             C 70 550, 80 450, 130 400 
+             C 150 370, 170 350, 180 350 Z" 
+          fill="#F0C05A" stroke="#C7922D" stroke-width="4"/>
 
-  <!-- 4. Pierna Derecha (Atrás) -->
-  <!-- Muslo -->
-  <polygon class="leg-r-thigh-1" points="235,280 255,290 250,350" />
-  <polygon class="leg-r-thigh-2" points="235,280 250,350 230,340" />
-  <polygon class="leg-r-thigh-3" points="255,290 265,285 260,345" />
-  <polygon class="leg-r-thigh-4" points="255,290 260,345 250,350" />
-  <!-- Pantorrilla -->
-  <polygon class="leg-r-calf-1" points="230,340 250,350 240,410" />
-  <polygon class="leg-r-calf-2" points="230,340 240,410 220,400" />
-  <polygon class="leg-r-calf-3" points="250,350 260,345 250,405" />
-  <polygon class="leg-r-calf-4" points="250,350 250,405 240,410" />
-  <!-- Pie -->
-  <polygon class="leg-r-foot-1" points="220,400 240,410 255,395" />
-  <polygon class="leg-r-foot-2" points="220,400 255,395 235,385" />
-  <polygon class="leg-r-foot-3" points="240,410 250,405 265,390" />
-  <polygon class="leg-r-foot-4" points="240,410 265,390 255,395" />
+    <rect x="180" y="100" width="40" height="250" fill="#E8C58C" stroke="#B8945C" stroke-width="2"/>
 
-  <!-- 5. Torso Principal -->
-  <!-- Pelvis -->
-  <polygon class="torso-pelvis-1" points="190,280 225,300 240,290" />
-  <polygon class="torso-pelvis-2" points="190,280 240,290 205,270" />
-  <!-- Abdomen -->
-  <polygon class="torso-belly-1" points="185,230 220,250 225,300" />
-  <polygon class="torso-belly-2" points="185,230 225,300 190,280" />
-  <!-- Pecho Izquierdo -->
-  <polygon class="torso-chest-l1" points="180,185 220,205 220,250" />
-  <polygon class="torso-chest-l2" points="180,185 220,250 185,230" />
-  <!-- Pecho Derecho -->
-  <polygon class="torso-chest-r1" points="220,205 260,185 250,235" />
-  <polygon class="torso-chest-r2" points="220,205 250,235 220,250" />
-  <!-- Torso Inferior Derecho -->
-  <polygon class="torso-lower-r1" points="220,250 250,235 240,290" />
-  <polygon class="torso-lower-r2" points="220,250 240,290 225,300" />
+    <path d="M 180 100 
+             L 180 40 
+             C 180 20, 200 20, 220 30 
+             C 240 40, 230 60, 210 70 
+             C 200 75, 200 85, 220 100 Z" 
+          fill="#E8C58C" stroke="#B8945C" stroke-width="2"/>
 
-  <!-- 6. Pierna Izquierda (Frente) -->
-  <!-- Muslo -->
-  <polygon class="leg-l-thigh-1" points="190,280 215,295 210,370" />
-  <polygon class="leg-l-thigh-2" points="190,280 210,370 185,355" />
-  <polygon class="leg-l-thigh-3" points="175,270 190,280 185,355" />
-  <polygon class="leg-l-thigh-4" points="175,270 185,355 170,345" />
-  <!-- Pantorrilla -->
-  <polygon class="leg-l-calf-1" points="185,355 210,370 215,450" />
-  <polygon class="leg-l-calf-2" points="185,355 215,450 190,435" />
-  <polygon class="leg-l-calf-3" points="170,345 185,355 190,435" />
-  <polygon class="leg-l-calf-4" points="170,345 190,435 175,425" />
-  <!-- Pie -->
-  <polygon class="leg-l-foot-1" points="190,435 215,450 195,465" />
-  <polygon class="leg-l-foot-2" points="190,435 195,465 170,450" />
-  <polygon class="leg-l-foot-3" points="215,450 220,440 200,455" />
+    <path d="M 180 350 
+             C 140 370, 110 420, 120 500 
+             C 130 550, 170 580, 200 560 
+             C 210 550, 210 530, 210 510 
+             L 240 510 
+             C 245 480, 245 450, 220 440 
+             C 200 430, 200 380, 220 350 Z" 
+          fill="#1A1A1A" stroke="#000" stroke-width="1"/>
 
-  <!-- 7. Cabeza y Cuello (Maniquí Facetado) -->
-  <!-- Cuello -->
-  <polygon class="neck-1" points="210,175 220,180 220,165" />
-  <polygon class="neck-1" points="210,175 220,165 210,160" />
-  <polygon class="neck-2" points="220,180 230,175 230,160 220,165" />
-  <!-- Cabeza -->
-  <polygon class="head-l1" points="190,105 220,120 220,160" />
-  <polygon class="head-l2" points="190,105 220,160 190,145" />
-  <polygon class="head-r1" points="220,120 250,105 250,145" />
-  <polygon class="head-r2" points="220,120 250,145 220,160" />
-  <polygon class="head-t1" points="220,90 250,105 220,120" />
-  <polygon class="head-t2" points="220,90 220,120 190,105" />
+    <g transform="rotate(-15 240 560)">
+      <rect x="240" y="540" width="22" height="100" rx="11" fill="#E0E0E0" stroke="#999" stroke-width="2"/>
+      <line x1="251" y1="552" x2="251" y2="572" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="251" cy="552" r="3.5" fill="#111"/>
+      <circle cx="251" cy="595" r="7" fill="#E0E0E0" stroke="#666" stroke-width="1.5"/>
+      <circle cx="251" cy="595" r="5" fill="#333"/>
+      <circle cx="251" cy="620" r="7" fill="#E0E0E0" stroke="#666" stroke-width="1.5"/>
+      <circle cx="251" cy="620" r="5" fill="#333"/>
+    </g>
 
-  <!-- 8. Guitarra (Cuerpo, Mástil, Clavijero) -->
-  <!-- Mástil Posterior / Unión -->
-  <polygon class="gtr-neck-f1" points="205,210 195,205 100,120" />
-  <polygon class="gtr-neck-f2" points="205,210 100,120 110,125" />
-  <polygon class="gtr-neck-s" points="205,210 110,125 115,135 210,220" />
-  <!-- Clavijero -->
-  <polygon class="gtr-head-f1" points="100,120 110,125 95,105" />
-  <polygon class="gtr-head-f2" points="100,120 95,105 85,100" />
-  <polygon class="gtr-head-s" points="110,125 95,105 100,115 115,135" />
-  
-  <!-- Cuerpo Principal (Cara) -->
-  <polygon class="gtr-face-1" points="210,245 190,220 220,200" />
-  <polygon class="gtr-face-2" points="210,245 220,200 235,225" />
-  <polygon class="gtr-face-3" points="210,245 235,225 255,255" />
-  <polygon class="gtr-face-4" points="210,245 255,255 225,295" />
-  <polygon class="gtr-face-5" points="210,245 225,295 180,270" />
-  <polygon class="gtr-face-6" points="210,245 180,270 185,245" />
-  <polygon class="gtr-face-7" points="210,245 185,245 190,220" />
-  <!-- Pickguard / Detalle Frontal -->
-  <polygon class="gtr-pickguard" points="210,250 230,235 240,255 215,275" />
-  <!-- Profundidad del Cuerpo (Lados) -->
-  <polygon class="gtr-side-1" points="220,200 235,225 245,240 230,215" />
-  <polygon class="gtr-side-2" points="235,225 255,255 265,270 245,240" />
-  <polygon class="gtr-side-3" points="255,255 225,295 235,310 265,270" />
-  <polygon class="gtr-side-4" points="225,295 180,270 190,285 235,310" />
+    <rect x="168" y="550" width="64" height="75" rx="4" fill="#E0E0E0" stroke="#999" stroke-width="2"/>
+    
+    <g transform="translate(200, 580) rotate(-12)">
+      <rect x="-22" y="-8" width="44" height="16" rx="2" fill="#222"/>
+      <circle cx="-15" cy="0" r="2" fill="#E0E0E0"/>
+      <circle cx="-9" cy="0" r="2" fill="#E0E0E0"/>
+      <circle cx="-3" cy="0" r="2" fill="#E0E0E0"/>
+      <circle cx="3" cy="0" r="2" fill="#E0E0E0"/>
+      <circle cx="9" cy="0" r="2" fill="#E0E0E0"/>
+      <circle cx="15" cy="0" r="2" fill="#E0E0E0"/>
+    </g>
 
-  <!-- 9. Mano Izquierda (Superpuesta sobre el mástil) -->
-  <polygon class="hand-l-1" points="105,135 125,115 135,125" />
-  <polygon class="hand-l-2" points="105,135 135,125 115,145" />
+    <rect x="176" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+    <rect x="193" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+    <rect x="210" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
 
-  <!-- 10. Brazo Derecho (Frente, cruzando el cuerpo / Rasgueando) -->
-  <!-- Brazo Superior -->
-  <polygon class="arm-r-up-1" points="250,190 270,200 255,250" />
-  <polygon class="arm-r-up-2" points="250,190 255,250 235,240" />
-  <!-- Antebrazo -->
-  <polygon class="arm-r-fore-1" points="235,240 255,250 220,275" />
-  <polygon class="arm-r-fore-2" points="235,240 220,275 200,265" />
-  <!-- Mano -->
-  <polygon class="hand-r-1" points="200,265 220,275 210,285" />
-  <polygon class="hand-r-2" points="200,265 210,285 190,275" />
+    <rect x="183" y="460" width="34" height="14" rx="4" fill="#E0E0E0" stroke="#999" stroke-width="1.5"/>
 
+    <path d="M180 120 L220 120 M180 140 L220 140 M180 160 L220 160 M180 178 L220 178 
+             M180 195 L220 195 M180 211 L220 211 M180 226 L220 226 M180 240 L220 240 
+             M180 253 L220 253 M180 265 L220 265 M180 276 L220 276 M180 286 L220 286 
+             M180 295 L220 295 M180 304 L220 304 M180 312 L220 312 M180 320 L220 320 
+             M180 327 L220 327 M180 334 L220 334 M180 340 L220 340 M180 346 L220 346" 
+          stroke="#888" stroke-width="1"/>
+
+    <circle cx="200" cy="150" r="2.5" fill="#111"/> <circle cx="200" cy="186.5" r="2.5" fill="#111"/> <circle cx="200" cy="218.5" r="2.5" fill="#111"/> <circle cx="200" cy="246.5" r="2.5" fill="#111"/> <circle cx="193" cy="281" r="2" fill="#111"/> <circle cx="207" cy="281" r="2" fill="#111"/> 
+    <circle cx="200" cy="308" r="2.5" fill="#111"/> <circle cx="200" cy="323.5" r="2.5" fill="#111"/> <circle cx="200" cy="337" r="2.5" fill="#111"/> <circle cx="200" cy="348" r="2.5" fill="#111"/> <rect x="180" y="96" width="40" height="4" fill="#FAFAFA" stroke="#CCC" stroke-width="1"/>
+
+    <g fill="#E0E0E0" stroke="#999" stroke-width="1">
+      <rect x="168" y="43" width="12" height="4" rx="1"/>
+      <rect x="168" y="53" width="12" height="4" rx="1"/>
+      <rect x="168" y="63" width="12" height="4" rx="1"/>
+      <rect x="168" y="73" width="12" height="4" rx="1"/>
+      <rect x="168" y="83" width="12" height="4" rx="1"/>
+      <rect x="168" y="93" width="12" height="4" rx="1"/>
+      <circle cx="188" cy="45" r="2"/>
+      <circle cx="188" cy="55" r="2"/>
+      <circle cx="188" cy="65" r="2"/>
+      <circle cx="188" cy="75" r="2"/>
+      <circle cx="188" cy="85" r="2"/>
+      <circle cx="188" cy="95" r="2"/>
+    </g>
+
+    <path d="M 179 610 L 179 96 L 188 95
+             M 183.4 610 L 183.4 96 L 188 85
+             M 187.8 610 L 187.8 96 L 188 75
+             M 192.2 610 L 192.2 96 L 188 65
+             M 196.6 610 L 196.6 96 L 188 55
+             M 201 610 L 201 96 L 188 45" 
+          stroke="#CCC" stroke-width="0.8" fill="none" opacity="0.8"/>
+  </g>
 </svg>

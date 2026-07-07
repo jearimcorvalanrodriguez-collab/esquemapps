@@ -81,9 +81,9 @@ export const STAGE_ITEMS = {
         {/* Telecaster Guitar only (no stand/bracket) - Centered and parallel (horizontal) */}
         <g transform="translate(50, 50) rotate(-90 50 57.5) scale(0.8) translate(-50, -57.5)">
           {/* Neck */}
-          <rect x="47" y="10" width="6" height="50" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <rect x="47" y="10" width="6" height="50" fill="#fde68a" stroke="#d97706" className="print:fill-white print:stroke-black" strokeWidth="1"/>
           {/* Headstock */}
-          <path d="M47,10 Q45,2 50,0 Q55,0 55,6 L53,10 Z" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <path d="M47,10 Q45,2 50,0 Q55,0 55,6 L53,10 Z" fill="#fde68a" stroke="#d97706" className="print:fill-white print:stroke-black" strokeWidth="1"/>
           {/* Pegs */}
           <circle cx="56" cy="2" r="1" className="fill-slate-500 print:fill-black"/>
           <circle cx="56" cy="4" r="1" className="fill-slate-500 print:fill-black"/>
@@ -91,7 +91,7 @@ export const STAGE_ITEMS = {
           <circle cx="56" cy="8" r="1" className="fill-slate-500 print:fill-black"/>
           
           {/* Telecaster Body */}
-          <path d="M 45,55 C 33,55 28,60 28,68 C 28,75 35,78 35,82 C 35,86 23,90 23,100 C 23,110 33,115 50,115 C 67,115 77,110 77,100 C 77,90 65,86 65,82 C 65,78 62,75 62,68 C 62,62 69,60 69,54 C 58,54 55,60 50,60 L 45,55 Z" className="fill-red-600 stroke-red-800 print:fill-white print:stroke-black" strokeWidth="2.5"/>
+          <path d="M 45,55 C 33,55 28,60 28,68 C 28,75 35,78 35,82 C 35,86 23,90 23,100 C 23,110 33,115 50,115 C 67,115 77,110 77,100 C 77,90 65,86 65,82 C 65,78 62,75 62,68 C 62,62 69,60 69,54 C 58,54 55,60 50,60 L 45,55 Z" fill="#ef4444" stroke="#b91c1c" className="print:fill-white print:stroke-black" strokeWidth="2.5"/>
           {/* Pickguard */}
           <path d="M 50,60 C 42,60 38,65 38,72 L 48,85 L 58,82 Z" className="fill-slate-950 print:fill-slate-200"/>
           {/* Control Plate */}
@@ -137,9 +137,9 @@ export const STAGE_ITEMS = {
         {/* Fender Jazz Bass only (no stand/bracket) - Centered and parallel (horizontal) */}
         <g transform="translate(50, 50) rotate(-90 50 51.5) scale(0.73) translate(-50, -51.5)">
           {/* Neck */}
-          <rect x="47" y="0" width="6" height="60" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <rect x="47" y="0" width="6" height="60" fill="#fde68a" stroke="#d97706" className="print:fill-white print:stroke-black" strokeWidth="1"/>
           {/* Jazz Bass Headstock */}
-          <path d="M47,0 Q43,-10 49,-12 Q56,-12 55,-4 L53,0 Z" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <path d="M47,0 Q43,-10 49,-12 Q56,-12 55,-4 L53,0 Z" fill="#fde68a" stroke="#d97706" className="print:fill-white print:stroke-black" strokeWidth="1"/>
           {/* 4 large tuning pegs */}
           <circle cx="56" cy="-10" r="1.5" className="fill-slate-400 print:fill-black"/>
           <circle cx="56" cy="-7" r="1.5" className="fill-slate-400 print:fill-black"/>
@@ -147,9 +147,9 @@ export const STAGE_ITEMS = {
           <circle cx="56" cy="-1" r="1.5" className="fill-slate-400 print:fill-black"/>
           
           {/* Jazz Bass Body */}
-          <path d="M 46,55 C 38,55 30,42 30,42 C 30,42 35,62 34,68 C 33,74 23,80 23,94 C 23,108 33,115 50,115 C 67,115 77,108 77,94 C 77,80 67,74 66,68 C 65,62 70,46 70,46 C 70,46 62,55 54,55 L 46,55 Z" className="fill-blue-600 stroke-blue-800 print:fill-white print:stroke-black" strokeWidth="2.5"/>
+          <path d="M 46,55 C 38,55 30,42 30,42 C 30,42 35,62 34,68 C 33,74 23,80 23,94 C 23,108 33,115 50,115 C 67,115 77,108 77,94 C 77,80 67,74 66,68 C 65,62 70,46 70,46 C 70,46 62,55 54,55 L 46,55 Z" fill="#2563eb" stroke="#1d4ed8" className="print:fill-white print:stroke-black" strokeWidth="2.5"/>
           {/* Curved Jazz Bass Pickguard */}
-          <path d="M 48,56 C 42,56 36,62 36,70 C 36,82 48,86 48,94 L 54,94 L 54,70 Z" className="fill-slate-950 print:fill-slate-200"/>
+          <path d="M 48,56 C 42,56 36,62 36,70 C 36,82 48,86 48,94 L 54,94 L 54,70 Z" className="fill-slate-955 print:fill-slate-200"/>
           {/* Curved Chrome Control Plate */}
           <path d="M 56,88 C 56,88 64,88 66,96 C 68,104 60,110 54,110 L 52,98 Z" className="fill-slate-300 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1"/>
           {/* Two Jazz Bass Pickups */}
@@ -196,18 +196,10 @@ export const STAGE_ITEMS = {
     label: "Voz Principal", width: 11, height: 11, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        {/* Handheld Dynamic Microphone */}
-        {/* Grille */}
-        <circle cx="50" cy="30" r="16" strokeWidth="3" className="fill-slate-300 stroke-slate-500 print:fill-slate-100 print:stroke-black"/>
-        <ellipse cx="50" cy="30" rx="16" ry="6" strokeWidth="1.2" className="fill-none stroke-slate-500 print:stroke-black"/>
-        <line x1="50" y1="14" x2="50" y2="46" strokeWidth="1.2" className="stroke-slate-500 print:stroke-black"/>
-        {/* Handle */}
-        <path d="M44,46 L56,46 L54,82 C54,85 46,85 46,82 Z" strokeWidth="2.5" className="fill-slate-800 stroke-slate-655 print:fill-white print:stroke-black"/>
-        {/* Chrome collar */}
-        <rect x="43" y="44" width="14" height="4" rx="0.5" className="fill-slate-400 print:fill-black"/>
-        {/* On/Off Switch */}
-        <rect x="48" y="55" width="4" height="8" rx="0.5" className="fill-slate-955 print:fill-black"/>
-        <circle cx="50" cy="57" r="1" className="fill-red-500 print:fill-white"/>
+        {/* Solid silhouette microphone */}
+        <path d="M 50,14 C 42,14 36,20 36,28 L 36,44 C 36,52 42,58 50,58 C 58,58 64,52 64,44 L 64,28 C 64,20 58,14 50,14 Z" fill="currentColor"/>
+        <path d="M 44,58 L 40,84 C 40,87 43,90 47,90 L 53,90 C 57,90 60,87 60,84 L 56,58 Z" fill="currentColor" opacity="0.85"/>
+        <rect x="42" y="56" width="16" height="4" rx="1" fill="currentColor" opacity="0.95"/>
       </svg>
     )
   },
@@ -215,18 +207,10 @@ export const STAGE_ITEMS = {
     label: "Coros", width: 11, height: 11, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        {/* Handheld Dynamic Microphone */}
-        {/* Grille */}
-        <circle cx="50" cy="30" r="16" strokeWidth="3" className="fill-slate-300 stroke-slate-500 print:fill-slate-100 print:stroke-black"/>
-        <ellipse cx="50" cy="30" rx="16" ry="6" strokeWidth="1.2" className="fill-none stroke-slate-500 print:stroke-black"/>
-        <line x1="50" y1="14" x2="50" y2="46" strokeWidth="1.2" className="stroke-slate-500 print:stroke-black"/>
-        {/* Handle */}
-        <path d="M44,46 L56,46 L54,82 C54,85 46,85 46,82 Z" strokeWidth="2.5" className="fill-slate-800 stroke-slate-655 print:fill-white print:stroke-black"/>
-        {/* Green collar to distinguish backing vocals */}
-        <rect x="43" y="44" width="14" height="4" rx="0.5" className="fill-emerald-500 print:fill-black"/>
-        {/* On/Off Switch */}
-        <rect x="48" y="55" width="4" height="8" rx="0.5" className="fill-slate-955 print:fill-black"/>
-        <circle cx="50" cy="57" r="1" className="fill-emerald-400 print:fill-white"/>
+        {/* Solid silhouette microphone for Backing vocals */}
+        <path d="M 50,14 C 42,14 36,20 36,28 L 36,44 C 36,52 42,58 50,58 C 58,58 64,52 64,44 L 64,28 C 64,20 58,14 50,14 Z" fill="currentColor"/>
+        <path d="M 44,58 L 40,84 C 40,87 43,90 47,90 L 53,90 C 57,90 60,87 60,84 L 56,58 Z" fill="currentColor" opacity="0.85"/>
+        <rect x="42" y="56" width="16" height="4" rx="1" fill="currentColor" opacity="0.95"/>
       </svg>
     )
   },

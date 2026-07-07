@@ -66,24 +66,25 @@
 }
 
 /* ==========================================
-   ☀️ VISTA CLARA / LIGHT MODE STYLES
+   ☀️ DAYLIGHT COMPUTER DC-1 DESIGN SYSTEM
    ========================================== */
 .light-mode {
-  color: #0f172a !important;
-  background-color: #f8fafc !important;
+  color: #0c0d0e !important;
+  background-color: #faf5f2 !important;
 }
 
-/* Page backgrounds */
+/* Calm Page Background (Warm Paper) */
 .light-mode,
-.light-mode .bg-slate-950,
 .light-mode .bg-slate-955,
+.light-mode .bg-slate-955\/20,
+.light-mode .bg-slate-950,
 .light-mode .bg-slate-950\/80,
 .light-mode .bg-slate-955\/90 {
-  background-color: #f8fafc !important;
-  color: #1e293b !important;
+  background-color: #faf5f2 !important;
+  color: #0c0d0e !important;
 }
 
-/* Sidebar and Headers - white planning style */
+/* Notebook Margin Sidebar */
 .light-mode aside,
 .light-mode header,
 .light-mode nav,
@@ -92,12 +93,12 @@
 .light-mode .bg-slate-900\/50,
 .light-mode .bg-slate-900.border-b,
 .light-mode .lg\:w-64 {
-  background-color: #ffffff !important;
-  color: #1e293b !important;
-  border-color: #e2e8f0 !important;
+  background-color: #f5ede8 !important; /* Notebook paper edge color */
+  color: #0c0d0e !important;
+  border-color: rgba(12, 13, 14, 0.08) !important;
 }
 
-/* Cards and sections - clean white cards with shadow */
+/* Tactile Cards & Sections (Paper Sheets) */
 .light-mode .bg-slate-800,
 .light-mode .bg-slate-850,
 .light-mode .bg-slate-900\/80,
@@ -105,29 +106,30 @@
 .light-mode .bg-slate-900\/90,
 .light-mode .bg-slate-900\/95 {
   background-color: #ffffff !important;
-  color: #1e293b !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+  color: #0c0d0e !important;
+  border-color: rgba(12, 13, 14, 0.08) !important;
+  box-shadow: 0 1px 2px 0 rgba(12, 13, 14, 0.03) !important;
 }
 
-/* Inputs and textareas */
+/* Tactile Inputs & Selects */
 .light-mode input:not([type="checkbox"]),
 .light-mode select,
 .light-mode textarea,
 .light-mode .bg-slate-900\/20 {
   background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+  color: #0c0d0e !important;
+  border-color: rgba(12, 13, 14, 0.15) !important;
+  border-radius: 6px !important;
 }
 .light-mode input:focus,
 .light-mode select:focus,
 .light-mode textarea:focus {
-  border-color: #10b981 !important;
+  border-color: #e58a2d !important; /* Daylight signature Amber Glow */
   outline: none !important;
-  box-shadow: 0 0 0 1px #10b981 !important;
+  box-shadow: 0 0 0 1px #e58a2d !important;
 }
 
-/* Borders */
+/* Fine-line borders */
 .light-mode .border-slate-800,
 .light-mode .border-slate-700,
 .light-mode .border-slate-850,
@@ -135,10 +137,10 @@
 .light-mode .border-slate-700\/50,
 .light-mode .border-slate-800\/50,
 .light-mode .border-slate-600 {
-  border-color: #e2e8f0 !important;
+  border-color: rgba(12, 13, 14, 0.08) !important;
 }
 
-/* Texts */
+/* Dynamic text color contrast */
 .light-mode .text-white,
 .light-mode .text-slate-50,
 .light-mode .text-slate-100,
@@ -148,102 +150,135 @@
 .light-mode h3,
 .light-mode h4,
 .light-mode .font-bold {
-  color: #0f172a !important;
+  color: #0c0d0e !important;
 }
 
 .light-mode .text-slate-300,
 .light-mode .text-slate-400,
 .light-mode p {
-  color: #334155 !important;
+  color: #55524f !important; /* Charcoal brown */
 }
 
 .light-mode .text-slate-500 {
-  color: #64748b !important;
+  color: #8c8884 !important; /* Warm gray */
 }
 
 .light-mode input::placeholder,
 .light-mode textarea::placeholder {
-  color: #94a3b8 !important;
+  color: #a39f9b !important;
 }
 
-/* Buttons in light mode */
-.light-mode .bg-slate-700 {
-  background-color: #cbd5e1 !important;
-  color: #0f172a !important;
-  border-color: #94a3b8 !important;
-}
-.light-mode .bg-slate-700:hover {
-  background-color: #94a3b8 !important;
-}
-
-.light-mode .bg-slate-800 {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
-  border-color: #e2e8f0 !important;
-}
-.light-mode .bg-slate-800:hover {
-  background-color: #e2e8f0 !important;
-}
-
+/* Sidebar and menu hover states */
 .light-mode .hover\:bg-slate-800:hover {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
+  background-color: rgba(12, 13, 14, 0.04) !important;
+  color: #0c0d0e !important;
 }
 .light-mode .hover\:bg-slate-800\/50:hover,
 .light-mode .hover\:bg-slate-850\/50:hover {
-  background-color: rgba(241, 245, 249, 0.6) !important;
-  color: #0f172a !important;
+  background-color: rgba(12, 13, 14, 0.04) !important;
+  color: #0c0d0e !important;
 }
 
 .light-mode .bg-slate-800\/50,
 .light-mode .bg-slate-800\/80 {
-  background-color: rgba(241, 245, 249, 0.8) !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
 }
 
+/* Soft Amber Glow Active Highlights */
 .light-mode .bg-emerald-500\/10 {
-  background-color: rgba(16, 185, 129, 0.08) !important;
-  border-color: rgba(16, 185, 129, 0.2) !important;
+  background-color: rgba(229, 138, 45, 0.08) !important;
+  border-color: rgba(229, 138, 45, 0.2) !important;
 }
 .light-mode .bg-emerald-500\/20 {
-  background-color: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
+  background-color: rgba(229, 138, 45, 0.12) !important;
+  border-color: rgba(229, 138, 45, 0.3) !important;
 }
 .light-mode .bg-emerald-500\/5 {
-  background-color: rgba(16, 185, 129, 0.04) !important;
+  background-color: rgba(229, 138, 45, 0.04) !important;
 }
 
-.light-mode .bg-slate-955\/20 { background-color: rgba(15, 23, 42, 0.03) !important; }
-.light-mode .bg-slate-955\/40, .light-mode .bg-slate-950\/40 { background-color: rgba(15, 23, 42, 0.05) !important; }
+/* Buttons */
+.light-mode .bg-slate-700 {
+  background-color: #e8e2de !important;
+  color: #0c0d0e !important;
+  border-color: rgba(12, 13, 14, 0.1) !important;
+}
+.light-mode .bg-slate-700:hover {
+  background-color: #dcd5d0 !important;
+}
 
-/* Statuses and colors */
+.light-mode .bg-slate-800 {
+  background-color: #f5ede8 !important;
+  color: #0c0d0e !important;
+  border-color: rgba(12, 13, 14, 0.08) !important;
+}
+.light-mode .bg-slate-800:hover {
+  background-color: #e8e2de !important;
+}
+
+/* Signature Daylight Amber pill button */
+.light-mode .bg-emerald-600, 
+.light-mode .bg-emerald-500,
+.light-mode .bg-blue-600,
+.light-mode .bg-blue-500 {
+  background-color: #e58a2d !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+.light-mode .bg-emerald-600:hover, 
+.light-mode .bg-emerald-500:hover,
+.light-mode .bg-blue-600:hover,
+.light-mode .bg-blue-500:hover {
+  background-color: #c9721d !important;
+}
+
+/* Terracotta Red pill button */
+.light-mode .bg-red-600, 
+.light-mode .bg-red-500 {
+  background-color: #c94c3c !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+}
+.light-mode .bg-red-600:hover, 
+.light-mode .bg-red-500:hover {
+  background-color: #ad3c2f !important;
+}
+
+.light-mode .bg-slate-955\/40, .light-mode .bg-slate-955\/20 {
+  background-color: rgba(12, 13, 14, 0.03) !important;
+}
+
+/* Statuses and colors mapped to Amber & Terracotta */
 .light-mode .text-emerald-500,
 .light-mode .text-emerald-400,
 .light-mode .text-emerald-350,
-.light-mode .text-emerald-300 { color: #059669 !important; }
+.light-mode .text-emerald-300 { color: #e58a2d !important; }
 .light-mode .text-emerald-600,
-.light-mode .text-emerald-700 { color: #047857 !important; }
+.light-mode .text-emerald-700 { color: #c9721d !important; }
 
 .light-mode .text-red-500,
-.light-mode .text-red-400 { color: #dc2626 !important; }
+.light-mode .text-red-400 { color: #c94c3c !important; }
 .light-mode .text-red-600,
-.light-mode .text-red-700 { color: #b91c1c !important; }
+.light-mode .text-red-700 { color: #ad3c2f !important; }
 
 .light-mode .text-amber-500,
-.light-mode .text-amber-400 { color: #d97706 !important; }
-
+.light-mode .text-amber-400 { color: #e58a2d !important; }
 .light-mode .text-blue-500,
-.light-mode .text-blue-400 { color: #2563eb !important; }
+.light-mode .text-blue-400 { color: #e58a2d !important; }
 
-.light-mode .bg-emerald-600, .light-mode .bg-emerald-500 { background-color: #10b981 !important; color: #ffffff !important; }
-.light-mode .bg-emerald-600:hover, .light-mode .bg-emerald-500:hover { background-color: #059669 !important; }
-.light-mode .bg-red-600, .light-mode .bg-red-500 { background-color: #ef4444 !important; color: #ffffff !important; }
-.light-mode .bg-red-600:hover, .light-mode .bg-red-500:hover { background-color: #dc2626 !important; }
-
-/* Tables */
+/* Tables in warm tones */
 .light-mode thead.bg-slate-800,
-.light-mode thead.bg-slate-900 { background-color: #f1f5f9 !important; }
-.light-mode thead th { color: #475569 !important; font-weight: 700 !important; }
-.light-mode tr { border-color: #cbd5e1 !important; }
+.light-mode thead.bg-slate-900 { background-color: #f5ede8 !important; }
+.light-mode thead th { color: #55524f !important; font-weight: 700 !important; }
+.light-mode tr { border-color: rgba(12, 13, 14, 0.08) !important; }
+
+/* Stageplot Builder layout overrides */
+.light-mode #canvas-bg {
+  background-color: #faf5f2 !important;
+  border-color: rgba(12, 13, 14, 0.15) !important;
+}
 
 /* ==========================================
    🎹 PIANO LOADER ANIMATIONS

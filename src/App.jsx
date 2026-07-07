@@ -192,7 +192,7 @@ export default function App() {
 
   useEffect(() => {
     window.localStorage.setItem('esquemapps_theme', theme);
-    document.documentElement.style.backgroundColor = theme === 'light' ? '#f8fafc' : '#020617';
+    document.documentElement.style.backgroundColor = theme === 'light' ? '#faf5f2' : '#020617';
   }, [theme]);
 
 
