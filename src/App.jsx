@@ -49,7 +49,7 @@ export default function App() {
   const [riderEditTab, setRiderEditTab] = useState('GENERAL');
   const [riderSingleSectionOnly, setRiderSingleSectionOnly] = useState(false);
   const [showPasswordAlert, setShowPasswordAlert] = useState(false);
-  const [theme, setTheme] = useState(window.localStorage.getItem('esquemapps_theme') || 'dark');
+  const [theme, setTheme] = useState(window.localStorage.getItem('esquemapps_theme') || 'light');
   const [pendingCount, setPendingCount] = useState(0);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
 
@@ -242,100 +242,7 @@ export default function App() {
         </div>
       )}
       
-      {theme === 'light' && (
-        <style>{`
-          .light-mode { background-color: #f8fafc !important; color: #0f172a !important; }
-          .light-mode .bg-slate-950 { background-color: #f8fafc !important; }
-          .light-mode .bg-slate-900 { background-color: #ffffff !important; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-          .light-mode .bg-slate-800 { background-color: #f1f5f9 !important; border-color: #e2e8f0 !important; }
-          .light-mode .bg-slate-700 { background-color: #e2e8f0 !important; color: #334155 !important; }
-          
-          .light-mode .border-slate-800 { border-color: #e2e8f0 !important; }
-          .light-mode .border-slate-700 { border-color: #cbd5e1 !important; }
-          .light-mode .border-slate-600 { border-color: #cbd5e1 !important; }
-          
-          .light-mode .text-white { color: #0f172a !important; }
-          .light-mode .text-slate-50 { color: #0f172a !important; }
-          .light-mode .text-slate-100 { color: #1e293b !important; }
-          .light-mode .text-slate-200 { color: #1e293b !important; }
-          .light-mode .text-slate-300 { color: #334155 !important; }
-          .light-mode .text-slate-400 { color: #475569 !important; }
-          .light-mode .text-slate-500 { color: #64748b !important; }
-
-          .light-mode .bg-emerald-600, .light-mode .bg-emerald-500, 
-          .light-mode .bg-blue-600, .light-mode .bg-blue-500, 
-          .light-mode .bg-red-600, .light-mode .bg-red-500, 
-          .light-mode .bg-amber-600, .light-mode .bg-amber-500 {
-              color: #ffffff !important;
-          }
-          .light-mode .bg-emerald-600 .text-white, .light-mode .bg-emerald-500 .text-white,
-          .light-mode .bg-blue-600 .text-white, .light-mode .bg-blue-500 .text-white,
-          .light-mode .bg-red-600 .text-white, .light-mode .bg-red-500 .text-white,
-          .light-mode .bg-amber-600 .text-white, .light-mode .bg-amber-500 .text-white,
-          .light-mode .bg-emerald-600 *, .light-mode .bg-emerald-500 *, 
-          .light-mode .bg-blue-600 *, .light-mode .bg-blue-500 *, 
-          .light-mode .bg-red-600 *, .light-mode .bg-red-500 *, 
-          .light-mode .bg-amber-600 *, .light-mode .bg-amber-500 * {
-              color: #ffffff !important;
-          }
-
-          .light-mode input:not([type="checkbox"]), .light-mode select, .light-mode textarea {
-              background-color: #ffffff !important;
-              color: #0f172a !important;
-              border-color: #cbd5e1 !important;
-          }
-          .light-mode input:focus, .light-mode select:focus, .light-mode textarea:focus {
-              border-color: #10b981 !important;
-          }
-
-          .light-mode .text-emerald-500 { color: #047857 !important; }
-          .light-mode .text-emerald-400 { color: #059669 !important; }
-          .light-mode .text-emerald-300 { color: #047857 !important; }
-          .light-mode .text-emerald-200 { color: #065f46 !important; }
-          .light-mode .text-emerald-100 { color: #064e3b !important; }
-          .light-mode .text-emerald-50 { color: #022c22 !important; }
-          
-          .light-mode .text-blue-500 { color: #1d4ed8 !important; }
-          .light-mode .text-blue-400 { color: #2563eb !important; }
-          
-          .light-mode .text-amber-500 { color: #b45309 !important; }
-          .light-mode .text-amber-400 { color: #d97706 !important; }
-          
-          .light-mode .text-red-500 { color: #b91c1c !important; }
-          .light-mode .text-red-400 { color: #dc2626 !important; }
-          .light-mode .text-red-300 { color: #b91c1c !important; }
-          .light-mode .text-red-200 { color: #991b1b !important; }
-          .light-mode .text-red-100 { color: #7f1d1d !important; }
-          .light-mode .text-red-50 { color: #450a0a !important; }
-
-          .light-mode .bg-emerald-600 { background-color: #059669 !important; color: #ffffff !important; }
-          .light-mode .bg-red-600 { background-color: #dc2626 !important; color: #ffffff !important; }
-
-          .light-mode .bg-slate-955\/20 { background-color: rgba(15, 23, 42, 0.05) !important; }
-          .light-mode .bg-slate-950\/40 { background-color: rgba(15, 23, 42, 0.1) !important; }
-          .light-mode .bg-slate-950\/80 { background-color: rgba(248, 250, 252, 0.85) !important; }
-          .light-mode .bg-slate-955\/90 { background-color: rgba(248, 250, 252, 0.92) !important; }
-          
-          .light-mode .bg-slate-900\/50 { background-color: rgba(255, 255, 255, 0.5) !important; }
-          .light-mode .bg-slate-900\/80 { background-color: rgba(255, 255, 255, 0.8) !important; }
-          .light-mode .bg-slate-900\/90 { background-color: rgba(255, 255, 255, 0.9) !important; }
-          .light-mode .bg-slate-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
-          
-          .light-mode .bg-slate-800\/50 { background-color: rgba(241, 245, 249, 0.5) !important; }
-          .light-mode .bg-slate-800\/80 { background-color: rgba(241, 245, 249, 0.8) !important; }
-          
-          .light-mode .hover\\:bg-slate-800\\/50:hover { background-color: rgba(241, 245, 249, 0.5) !important; }
-          .light-mode .hover\\:bg-slate-850\\/50:hover { background-color: rgba(241, 245, 249, 0.6) !important; }
-          
-          .light-mode .bg-emerald-500\\/10 { background-color: rgba(5, 150, 105, 0.08) !important; border-color: rgba(5, 150, 105, 0.2) !important; }
-          .light-mode .bg-emerald-500\\/20 { background-color: rgba(5, 150, 105, 0.12) !important; border-color: rgba(5, 150, 105, 0.3) !important; }
-          .light-mode .bg-emerald-500\\/5 { background-color: rgba(5, 150, 105, 0.04) !important; }
-          
-          .light-mode thead.bg-slate-800 { background-color: #e2e8f0 !important; }
-          .light-mode thead th { color: #475569 !important; }
-          .light-mode tr { border-color: #cbd5e1 !important; }
-        `}</style>
-      )}
+      {/* Light mode overrides handled in index.css */}
 
       {confirmDialog.isOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">

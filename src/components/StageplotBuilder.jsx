@@ -12,28 +12,14 @@ export const STAGE_ITEMS = {
     label: "Batería", width: 22, height: 22, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        {/* Bass Drum */}
-        <ellipse cx="50" cy="52" rx="18" ry="22" strokeWidth="3" className="fill-slate-800 stroke-slate-400 print:fill-slate-100 print:stroke-black"/>
-        <rect x="32" y="70" width="36" height="5" rx="1.5" className="fill-slate-300 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1"/>
-        {/* Snare */}
-        <circle cx="32" cy="62" r="10" strokeWidth="2.5" className="fill-slate-700 stroke-slate-500 print:fill-slate-200 print:stroke-black"/>
-        <circle cx="32" cy="62" r="7" className="fill-slate-900 print:fill-white"/>
-        {/* Toms */}
-        <circle cx="40" cy="34" r="8" strokeWidth="2.5" className="fill-slate-700 stroke-slate-500 print:fill-slate-200 print:stroke-black"/>
-        <circle cx="40" cy="34" r="5.5" className="fill-slate-900 print:fill-white"/>
-        <circle cx="60" cy="34" r="8" strokeWidth="2.5" className="fill-slate-700 stroke-slate-500 print:fill-slate-200 print:stroke-black"/>
-        <circle cx="60" cy="34" r="5.5" className="fill-slate-900 print:fill-white"/>
-        {/* Floor Tom */}
-        <circle cx="68" cy="58" r="11" strokeWidth="2.5" className="fill-slate-700 stroke-slate-500 print:fill-slate-200 print:stroke-black"/>
-        <circle cx="68" cy="58" r="8.5" className="fill-slate-900 print:fill-white"/>
-        {/* Hi-Hat */}
-        <circle cx="18" cy="50" r="9" strokeWidth="2" className="fill-slate-800 stroke-slate-500 print:fill-white print:stroke-black"/>
-        <circle cx="18" cy="50" r="2" className="fill-slate-400 print:fill-black"/>
-        {/* Crash / Ride Cymbals */}
-        <circle cx="22" cy="28" r="11" strokeWidth="2" className="fill-slate-800 stroke-slate-500 print:fill-white print:stroke-black" opacity="0.9"/>
-        <circle cx="22" cy="28" r="2.5" className="fill-slate-400 print:fill-black"/>
-        <circle cx="78" cy="30" r="12" strokeWidth="2" className="fill-slate-800 stroke-slate-500 print:fill-white print:stroke-black" opacity="0.9"/>
-        <circle cx="78" cy="30" r="2.5" className="fill-slate-400 print:fill-black"/>
+        {/* Bombo / Bass Drum */}
+        <circle cx="50" cy="46" r="22" strokeWidth="3" className="fill-slate-800 stroke-slate-400 print:fill-slate-100 print:stroke-black"/>
+        {/* Tom de Piso / Floor Tom */}
+        <circle cx="72" cy="65" r="15" strokeWidth="2.5" className="fill-slate-700 stroke-slate-500 print:fill-slate-200 print:stroke-black"/>
+        {/* Caja / Snare */}
+        <circle cx="28" cy="68" r="12" strokeWidth="2.5" className="fill-slate-700 stroke-slate-500 print:fill-slate-200 print:stroke-black"/>
+        {/* Tom de Aire / Rack Tom */}
+        <circle cx="38" cy="22" r="9" strokeWidth="2" className="fill-slate-700 stroke-slate-500 print:fill-slate-200 print:stroke-black"/>
       </svg>
     )
   },
@@ -118,7 +104,31 @@ export const STAGE_ITEMS = {
   },
   TELECASTER: {
     label: "Guitarra Telecaster", width: 13, height: 13, defaultRotation: 0,
-    render: () => STAGE_ITEMS.KEYS.render()
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        {/* Telecaster Guitar only - Centered and parallel (horizontal) */}
+        <g transform="translate(50, 50) rotate(-90 50 57.5) scale(0.8) translate(-50, -57.5)">
+          {/* Neck */}
+          <rect x="47" y="10" width="6" height="50" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          {/* Headstock */}
+          <path d="M47,10 Q45,2 50,0 Q55,0 55,6 L53,10 Z" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          {/* Pegs */}
+          <circle cx="56" cy="2" r="1" className="fill-slate-500 print:fill-black"/>
+          <circle cx="56" cy="4" r="1" className="fill-slate-500 print:fill-black"/>
+          <circle cx="56" cy="6" r="1" className="fill-slate-500 print:fill-black"/>
+          <circle cx="56" cy="8" r="1" className="fill-slate-500 print:fill-black"/>
+          
+          {/* Telecaster Body - Butterscotch Blonde */}
+          <path d="M 45,55 C 33,55 28,60 28,68 C 28,75 35,78 35,82 C 35,86 23,90 23,100 C 23,110 33,115 50,115 C 67,115 77,110 77,100 C 77,90 65,86 65,82 C 65,78 62,75 62,68 C 62,62 69,60 69,54 C 58,54 55,60 50,60 L 45,55 Z" fill="#e8c87d" stroke="#bc9f63" className="print:fill-white print:stroke-black" strokeWidth="2.5"/>
+          {/* Pickguard - Black */}
+          <path d="M 50,60 C 42,60 38,65 38,72 L 48,85 L 58,82 Z" className="fill-slate-950 print:fill-slate-200"/>
+          {/* Control Plate */}
+          <rect x="58" y="85" width="6" height="20" rx="1" className="fill-slate-300 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1" transform="rotate(-15 61 95)"/>
+          {/* Bridge & Pickups */}
+          <rect x="45" y="80" width="10" height="12" className="fill-slate-400 stroke-slate-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+        </g>
+      </svg>
+    )
   },
   BASS: {
     label: "Bajo", width: 13, height: 13, defaultRotation: 0,
@@ -153,16 +163,70 @@ export const STAGE_ITEMS = {
   },
   JAZZBASS: {
     label: "Bajo Jazz Bass", width: 13, height: 13, defaultRotation: 0,
-    render: () => STAGE_ITEMS.DRUMS.render()
-  },
-  VOCALS: {
-    label: "Cantante / Coros", width: 11, height: 11, defaultRotation: 180,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        {/* Simple Person Silhouette facing audience without any stand or instrument */}
-        <path d="M15,55 C15,30 85,30 85,55 Z" className="fill-slate-800 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="2.5"/> 
-        <circle cx="50" cy="45" r="16" className="fill-slate-200 stroke-slate-655 print:fill-white print:stroke-black" strokeWidth="2"/> 
-        <path d="M34,45 C34,28 66,28 66,45 Z" className="fill-slate-955 print:fill-slate-200" strokeWidth="1"/> 
+        {/* Fender Jazz Bass only - Centered and parallel (horizontal) */}
+        <g transform="translate(50, 50) rotate(-90 50 51.5) scale(0.73) translate(-50, -51.5)">
+          {/* Neck */}
+          <rect x="47" y="0" width="6" height="60" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          {/* Jazz Bass Headstock */}
+          <path d="M47,0 Q43,-10 49,-12 Q56,-12 55,-4 L53,0 Z" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          {/* 4 large tuning pegs */}
+          <circle cx="56" cy="-10" r="1.5" className="fill-slate-400 print:fill-black"/>
+          <circle cx="56" cy="-7" r="1.5" className="fill-slate-400 print:fill-black"/>
+          <circle cx="56" cy="-4" r="1.5" className="fill-slate-400 print:fill-black"/>
+          <circle cx="56" cy="-1" r="1.5" className="fill-slate-400 print:fill-black"/>
+          
+          {/* Jazz Bass Body - Sunburst / Amber Center */}
+          <path d="M 46,55 C 38,55 30,42 30,42 C 30,42 35,62 34,68 C 33,74 23,80 23,94 C 23,108 33,115 50,115 C 67,115 77,108 77,94 C 77,80 67,74 66,68 C 65,62 70,46 70,46 C 70,46 62,55 54,55 L 46,55 Z" fill="#c25123" stroke="#6c2810" className="print:fill-white print:stroke-black" strokeWidth="2.5"/>
+          {/* Curved Jazz Bass Pickguard - White/Cream */}
+          <path d="M 48,56 C 42,56 36,62 36,70 C 36,82 48,86 48,94 L 54,94 L 54,70 Z" className="fill-slate-100 print:fill-slate-200"/>
+          {/* Curved Chrome Control Plate */}
+          <path d="M 56,88 C 56,88 64,88 66,96 C 68,104 60,110 54,110 L 52,98 Z" className="fill-slate-300 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1"/>
+          {/* Two Jazz Bass Pickups */}
+          <rect x="42" y="74" width="16" height="3" rx="0.5" className="fill-slate-900 print:fill-black"/>
+          <rect x="42" y="82" width="16" height="3" rx="0.5" className="fill-slate-900 print:fill-black"/>
+          {/* Bridge */}
+          <rect x="44" y="96" width="12" height="8" className="fill-slate-400 stroke-slate-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+        </g>
+      </svg>
+    )
+  },
+  VOCALS: {
+    label: "Voz Principal", width: 11, height: 11, defaultRotation: 0,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        {/* Handheld Dynamic Microphone */}
+        {/* Grille */}
+        <circle cx="50" cy="30" r="16" strokeWidth="3" className="fill-slate-300 stroke-slate-500 print:fill-slate-100 print:stroke-black"/>
+        <ellipse cx="50" cy="30" rx="16" ry="6" strokeWidth="1.2" className="fill-none stroke-slate-500 print:stroke-black"/>
+        <line x1="50" y1="14" x2="50" y2="46" strokeWidth="1.2" className="stroke-slate-500 print:stroke-black"/>
+        {/* Handle */}
+        <path d="M44,46 L56,46 L54,82 C54,85 46,85 46,82 Z" strokeWidth="2.5" className="fill-slate-800 stroke-slate-655 print:fill-white print:stroke-black"/>
+        {/* Chrome collar */}
+        <rect x="43" y="44" width="14" height="4" rx="0.5" className="fill-slate-400 print:fill-black"/>
+        {/* On/Off Switch */}
+        <rect x="48" y="55" width="4" height="8" rx="0.5" className="fill-slate-955 print:fill-black"/>
+        <circle cx="50" cy="57" r="1" className="fill-red-500 print:fill-white"/>
+      </svg>
+    )
+  },
+  BACKING_VOCALS: {
+    label: "Coros", width: 11, height: 11, defaultRotation: 0,
+    render: () => (
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+        {/* Handheld Dynamic Microphone */}
+        {/* Grille */}
+        <circle cx="50" cy="30" r="16" strokeWidth="3" className="fill-slate-300 stroke-slate-500 print:fill-slate-100 print:stroke-black"/>
+        <ellipse cx="50" cy="30" rx="16" ry="6" strokeWidth="1.2" className="fill-none stroke-slate-500 print:stroke-black"/>
+        <line x1="50" y1="14" x2="50" y2="46" strokeWidth="1.2" className="stroke-slate-500 print:stroke-black"/>
+        {/* Handle */}
+        <path d="M44,46 L56,46 L54,82 C54,85 46,85 46,82 Z" strokeWidth="2.5" className="fill-slate-800 stroke-slate-655 print:fill-white print:stroke-black"/>
+        {/* Green collar to distinguish backing vocals */}
+        <rect x="43" y="44" width="14" height="4" rx="0.5" className="fill-emerald-500 print:fill-black"/>
+        {/* On/Off Switch */}
+        <rect x="48" y="55" width="4" height="8" rx="0.5" className="fill-slate-955 print:fill-black"/>
+        <circle cx="50" cy="57" r="1" className="fill-emerald-400 print:fill-white"/>
       </svg>
     )
   },
@@ -242,7 +306,7 @@ export const STAGE_ITEMS = {
         <rect x="18" y="44" width="12" height="12" rx="2" className="fill-slate-700 print:fill-black"/>
         <circle cx="24" cy="50" r="3" className="fill-slate-955 print:fill-white"/>
         {/* Center D.I text */}
-        <text x="45" y="58" textAnchor="middle" className="fill-white print:fill-black font-sans font-bold select-none text-[22px] tracking-tighter">D.I</text>
+        <text x="43" y="62" textAnchor="middle" className="fill-white print:fill-black font-sans font-black select-none text-[34px] tracking-tight">D.I</text>
       </svg>
     )
   },
@@ -318,6 +382,38 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
   const [selectedId, setSelectedId] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canvasWidth, setCanvasWidth] = useState(600);
+
+  const [customPresets, setCustomPresets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('custom_stageplot_presets');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+  const [newPresetName, setNewPresetName] = useState('');
+
+  const handleSavePreset = () => {
+    if (!newPresetName.trim()) {
+      alert("Por favor ingresa un nombre para el preset.");
+      return;
+    }
+    const name = newPresetName.trim();
+    if (['rock_band', 'acoustic_duo', 'trio_jazz'].includes(name.toLowerCase())) {
+      alert("No puedes usar un nombre de preset por defecto.");
+      return;
+    }
+    // Copy the current items but map to strip original IDs to avoid clashes
+    const presetItems = items.map(({ id, ...rest }) => rest);
+    const updatedPresets = {
+      ...customPresets,
+      [name]: presetItems
+    };
+    setCustomPresets(updatedPresets);
+    localStorage.setItem('custom_stageplot_presets', JSON.stringify(updatedPresets));
+    setNewPresetName('');
+    alert(`Preset "${name}" guardado con éxito!`);
+  };
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -412,17 +508,11 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
     if (presetName === 'rock_band') {
       presetItems = [
         { id: '1', type: 'DRUMS', label: 'Batería', x: 50, y: 30, rotation: 0, scale: 1.0 },
-        { id: '2', type: 'BASS', label: 'Bajo', x: 30, y: 65, rotation: 0, scale: 1.0 },
-        { id: '3', type: 'GUITAR', label: 'Guitarra Lead', x: 70, y: 65, rotation: 0, scale: 1.0 },
         { id: '4', type: 'VOCALS', label: 'Voz Principal', x: 50, y: 75, rotation: 0, scale: 1.0 },
-        { id: '5', type: 'MONITOR', label: 'Mon Escenario', x: 50, y: 88, rotation: 0, scale: 1.0 },
-        { id: '6', type: 'AMP', label: 'Amp Bajo', x: 20, y: 35, rotation: 0, scale: 1.0 },
-        { id: '7', type: 'AMP', label: 'Amp Guitarra', x: 80, y: 35, rotation: 0, scale: 1.0 }
+        { id: '5', type: 'MONITOR', label: 'Mon Escenario', x: 50, y: 88, rotation: 0, scale: 1.0 }
       ];
     } else if (presetName === 'acoustic_duo') {
       presetItems = [
-        { id: '1', type: 'GUITAR', label: 'Guitarra/Voz 1', x: 40, y: 70, rotation: 0, scale: 1.0 },
-        { id: '2', type: 'GUITAR', label: 'Guitarra/Voz 2', x: 60, y: 70, rotation: 0, scale: 1.0 },
         { id: '3', type: 'VOCALS', label: 'Voz 1', x: 40, y: 78, rotation: 0, scale: 1.0 },
         { id: '4', type: 'VOCALS', label: 'Voz 2', x: 60, y: 78, rotation: 0, scale: 1.0 },
         { id: '5', type: 'MONITOR', label: 'Mon 1', x: 38, y: 88, rotation: 0, scale: 1.0 },
@@ -432,10 +522,14 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
       presetItems = [
         { id: '1', type: 'DRUMS', label: 'Batería', x: 75, y: 40, rotation: 0, scale: 1.0 },
         { id: '2', type: 'PIANO', label: 'Piano de Cola', x: 25, y: 50, rotation: 0, scale: 1.0 },
-        { id: '3', type: 'BASS', label: 'Contrabajo', x: 50, y: 55, rotation: 0, scale: 1.0 },
         { id: '4', type: 'MONITOR', label: 'Mon Piano', x: 25, y: 70, rotation: 0, scale: 1.0 },
         { id: '5', type: 'MONITOR', label: 'Mon Batería', x: 75, y: 65, rotation: 0, scale: 1.0 }
       ];
+    } else if (customPresets[presetName]) {
+      presetItems = customPresets[presetName].map((item, idx) => ({
+        ...item,
+        id: `${Date.now()}-${idx}`
+      }));
     }
     onChange(presetItems);
     setSelectedId(null);
@@ -465,18 +559,37 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
             </div>
             
             <div className="grid grid-cols-4 md:grid-cols-2 gap-2 flex-1 overflow-y-auto custom-scrollbar">
-              {Object.entries(STAGE_ITEMS).map(([key, def]) => (
-                <button 
-                  key={key} type="button" onClick={() => addItem(key)}
-                  className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-lg border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 transition-colors"
-                >
-                  <div className="w-6 h-6 pointer-events-none">{def.render()}</div>
-                  <span className="text-[8px] font-bold text-slate-300 leading-tight text-center">{def.label}</span>
-                </button>
-              ))}
+              {Object.entries(STAGE_ITEMS)
+                .filter(([key]) => ['DRUMS', 'KEYS', 'MONITOR', 'AMP', 'POWER', 'DI', 'MIC_STAND'].includes(key))
+                .map(([key, def]) => (
+                  <button 
+                    key={key} type="button" onClick={() => addItem(key)}
+                    className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-lg border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 transition-colors"
+                  >
+                    <div className="w-6 h-6 pointer-events-none">{def.render()}</div>
+                    <span className="text-[8px] font-bold text-slate-300 leading-tight text-center">{def.label}</span>
+                  </button>
+                ))
+              }
             </div>
 
             <div className="pt-2 border-t border-slate-800 space-y-1">
+              <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Músicos</h3>
+              <select 
+                onChange={(e) => { if (e.target.value) { addItem(e.target.value); e.target.value = ''; } }}
+                className="w-full bg-slate-800 border border-slate-700 rounded p-1 text-[10px] text-white outline-none focus:border-emerald-500 cursor-pointer"
+              >
+                <option value="">Añadir músico...</option>
+                <option value="TELECASTER">Guitarra Telecaster</option>
+                <option value="JAZZBASS">Bajo Jazz Bass</option>
+                <option value="VOCALS">Voz Principal</option>
+                <option value="BACKING_VOCALS">Coros</option>
+                <option value="HORNS">Vientos</option>
+                <option value="PERC">Percusión</option>
+              </select>
+            </div>
+
+            <div className="pt-2 border-t border-slate-800 space-y-1.5">
               <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Presets</h3>
               <select 
                 onChange={(e) => { if (e.target.value) { loadPreset(e.target.value); e.target.value = ''; } }}
@@ -486,7 +599,60 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                 <option value="rock_band">Banda de Rock</option>
                 <option value="acoustic_duo">Dúo Acústico</option>
                 <option value="trio_jazz">Jazz Trío</option>
+                {Object.keys(customPresets).map((name) => (
+                  <option key={name} value={name}>{name} (Usuario)</option>
+                ))}
               </select>
+
+              <div className="flex flex-col gap-1.5 pt-1">
+                <input 
+                  type="text" 
+                  value={newPresetName} 
+                  onChange={(e) => setNewPresetName(e.target.value)} 
+                  placeholder="Nombre de Preset..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded p-1 text-[10px] text-white outline-none focus:border-emerald-500"
+                />
+                <button 
+                  type="button" 
+                  onClick={handleSavePreset}
+                  className="w-full py-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-[10px] font-bold text-white rounded transition-colors"
+                >
+                  Guardar como Preset
+                </button>
+              </div>
+
+              {Object.keys(customPresets).length > 0 && (
+                <div className="flex gap-1 pt-1">
+                  <select 
+                    id="delete-preset-select"
+                    className="flex-1 bg-slate-800 border border-slate-700 rounded p-1 text-[9px] text-slate-400 outline-none cursor-pointer"
+                  >
+                    <option value="">Eliminar preset...</option>
+                    {Object.keys(customPresets).map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const sel = document.getElementById('delete-preset-select');
+                      if (sel && sel.value) {
+                        const name = sel.value;
+                        if (confirm(`¿Estás seguro de eliminar el preset "${name}"?`)) {
+                          const updated = { ...customPresets };
+                          delete updated[name];
+                          setCustomPresets(updated);
+                          localStorage.setItem('custom_stageplot_presets', JSON.stringify(updated));
+                          sel.value = '';
+                        }
+                      }
+                    }}
+                    className="px-2 py-1 bg-red-650 hover:bg-red-700 text-[9px] font-bold text-white rounded transition-colors"
+                  >
+                    Borrar
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="pt-2 border-t border-slate-800 space-y-2 mt-auto">

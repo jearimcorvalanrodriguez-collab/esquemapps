@@ -69,18 +69,22 @@
    ☀️ VISTA CLARA / LIGHT MODE STYLES
    ========================================== */
 .light-mode {
-  color: #0f172a !important; /* text-slate-900 */
+  color: #0f172a !important;
+  background-color: #f8fafc !important;
 }
 
-/* Page background should be very light/clean slate-50 */
+/* Page backgrounds */
 .light-mode,
 .light-mode .bg-slate-950,
-.light-mode .bg-slate-950\/80 {
-  background-color: #f8fafc !important; /* slate-50 */
+.light-mode .bg-slate-955,
+.light-mode .bg-slate-950\/80,
+.light-mode .bg-slate-955\/90 {
+  background-color: #f8fafc !important;
   color: #1e293b !important;
 }
 
-/* Headers, navigations, sidebars, and submenus should have no background (transparent) to look clean */
+/* Sidebar and Headers - white planning style */
+.light-mode aside,
 .light-mode header,
 .light-mode nav,
 .light-mode .bg-slate-900,
@@ -88,58 +92,73 @@
 .light-mode .bg-slate-900\/50,
 .light-mode .bg-slate-900.border-b,
 .light-mode .lg\:w-64 {
-  background-color: transparent !important;
-  border-color: #cbd5e1 !important;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border-color: #e2e8f0 !important;
 }
 
-/* Cards and sections containing long texts or project info should be white */
+/* Cards and sections - clean white cards with shadow */
 .light-mode .bg-slate-800,
 .light-mode .bg-slate-850,
 .light-mode .bg-slate-900\/80,
-.light-mode .bg-slate-950\/60 {
-  background-color: #ffffff !important; /* white cards */
+.light-mode .bg-slate-950\/60,
+.light-mode .bg-slate-900\/90,
+.light-mode .bg-slate-900\/95 {
+  background-color: #ffffff !important;
   color: #1e293b !important;
-  border-color: #cbd5e1 !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Inputs and text boxes containing actual data should be slightly gray (slate-100) */
-.light-mode input,
+/* Inputs and textareas */
+.light-mode input:not([type="checkbox"]),
 .light-mode select,
 .light-mode textarea,
 .light-mode .bg-slate-900\/20 {
-  background-color: #f1f5f9 !important; /* light gray for data fields */
+  background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: #cbd5e1 !important;
 }
+.light-mode input:focus,
+.light-mode select:focus,
+.light-mode textarea:focus {
+  border-color: #10b981 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px #10b981 !important;
+}
 
+/* Borders */
 .light-mode .border-slate-800,
 .light-mode .border-slate-700,
 .light-mode .border-slate-850,
 .light-mode .border-slate-900,
 .light-mode .border-slate-700\/50,
-.light-mode .border-slate-800\/50 {
-  border-color: #cbd5e1 !important;
+.light-mode .border-slate-800\/50,
+.light-mode .border-slate-600 {
+  border-color: #e2e8f0 !important;
 }
 
-/* Text color overrides */
+/* Texts */
 .light-mode .text-white,
+.light-mode .text-slate-50,
+.light-mode .text-slate-100,
+.light-mode .text-slate-200,
 .light-mode h1,
 .light-mode h2,
 .light-mode h3,
 .light-mode h4,
 .light-mode .font-bold {
-  color: #0f172a !important; /* text-slate-900 */
+  color: #0f172a !important;
 }
 
-.light-mode .text-slate-200,
 .light-mode .text-slate-300,
 .light-mode .text-slate-400,
 .light-mode p {
-  color: #334155 !important; /* text-slate-700 */
+  color: #334155 !important;
 }
 
 .light-mode .text-slate-500 {
-  color: #64748b !important; /* text-slate-500 */
+  color: #64748b !important;
 }
 
 .light-mode input::placeholder,
@@ -149,7 +168,7 @@
 
 /* Buttons in light mode */
 .light-mode .bg-slate-700 {
-  background-color: #cbd5e1 !important; /* light gray button */
+  background-color: #cbd5e1 !important;
   color: #0f172a !important;
   border-color: #94a3b8 !important;
 }
@@ -158,24 +177,73 @@
 }
 
 .light-mode .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+.light-mode .bg-slate-800:hover {
   background-color: #e2e8f0 !important;
+}
+
+.light-mode .hover\:bg-slate-800:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+.light-mode .hover\:bg-slate-800\/50:hover,
+.light-mode .hover\:bg-slate-850\/50:hover {
+  background-color: rgba(241, 245, 249, 0.6) !important;
   color: #0f172a !important;
 }
 
-/* Timeline vertical line */
-.light-mode .before\:bg-slate-800::before {
-  background-color: #cbd5e1 !important;
+.light-mode .bg-slate-800\/50,
+.light-mode .bg-slate-800\/80 {
+  background-color: rgba(241, 245, 249, 0.8) !important;
 }
 
-/* Warnings and records */
-.light-mode .text-red-500,
-.light-mode .text-red-400 {
-  color: #b91c1c !important; /* Darker red */
+.light-mode .bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
 }
+.light-mode .bg-emerald-500\/20 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+.light-mode .bg-emerald-500\/5 {
+  background-color: rgba(16, 185, 129, 0.04) !important;
+}
+
+.light-mode .bg-slate-955\/20 { background-color: rgba(15, 23, 42, 0.03) !important; }
+.light-mode .bg-slate-955\/40, .light-mode .bg-slate-950\/40 { background-color: rgba(15, 23, 42, 0.05) !important; }
+
+/* Statuses and colors */
 .light-mode .text-emerald-500,
-.light-mode .text-emerald-400 {
-  color: #047857 !important; /* Darker green */
-}
+.light-mode .text-emerald-400,
+.light-mode .text-emerald-350,
+.light-mode .text-emerald-300 { color: #059669 !important; }
+.light-mode .text-emerald-600,
+.light-mode .text-emerald-700 { color: #047857 !important; }
+
+.light-mode .text-red-500,
+.light-mode .text-red-400 { color: #dc2626 !important; }
+.light-mode .text-red-600,
+.light-mode .text-red-700 { color: #b91c1c !important; }
+
+.light-mode .text-amber-500,
+.light-mode .text-amber-400 { color: #d97706 !important; }
+
+.light-mode .text-blue-500,
+.light-mode .text-blue-400 { color: #2563eb !important; }
+
+.light-mode .bg-emerald-600, .light-mode .bg-emerald-500 { background-color: #10b981 !important; color: #ffffff !important; }
+.light-mode .bg-emerald-600:hover, .light-mode .bg-emerald-500:hover { background-color: #059669 !important; }
+.light-mode .bg-red-600, .light-mode .bg-red-500 { background-color: #ef4444 !important; color: #ffffff !important; }
+.light-mode .bg-red-600:hover, .light-mode .bg-red-500:hover { background-color: #dc2626 !important; }
+
+/* Tables */
+.light-mode thead.bg-slate-800,
+.light-mode thead.bg-slate-900 { background-color: #f1f5f9 !important; }
+.light-mode thead th { color: #475569 !important; font-weight: 700 !important; }
+.light-mode tr { border-color: #cbd5e1 !important; }
 
 /* ==========================================
    🎹 PIANO LOADER ANIMATIONS
