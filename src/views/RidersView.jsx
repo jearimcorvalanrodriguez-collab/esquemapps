@@ -14,12 +14,26 @@ import { PianoLoader } from '../components/PianoLoader';
 import { CACHE, apiFetch, clearCache, compareProjectIds } from '../utils/api';
 import { ROLES } from '../utils/constants';
 
-export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider, setActiveRider, directory, selectedProject, setCurrentView }) => {
+export const RidersView = ({ 
+  currentUser, showToast, requestConfirm, activeRider, setActiveRider, 
+  directory, selectedProject, setCurrentView,
+  viewMode: propViewMode, setViewMode: propSetViewMode,
+  editTab: propEditTab, setEditTab: propSetEditTab,
+  singleSectionOnly: propSingleSectionOnly, setSingleSectionOnly: propSetSingleSectionOnly
+}) => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
-  const [viewMode, setViewMode] = useState(activeRider ? 'DETAIL' : 'LIST');
-  const [editTab, setEditTab] = useState('GENERAL');
+  
+  const [localViewMode, setLocalViewMode] = useState(activeRider ? 'DETAIL' : 'LIST');
+  const [localEditTab, setLocalEditTab] = useState('GENERAL');
+
+  const viewMode = propViewMode !== undefined ? propViewMode : localViewMode;
+  const setViewMode = propSetViewMode !== undefined ? propSetViewMode : setLocalViewMode;
+
+  const editTab = propEditTab !== undefined ? propEditTab : localEditTab;
+  const setEditTab = propSetEditTab !== undefined ? propSetEditTab : setLocalEditTab;
+
   const [allHitos, setAllHitos] = useState([]);
   const [includeTiming, setIncludeTiming] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
@@ -46,8 +60,67 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
     contacto: { mgmtNombre: '', mgmtCel: '', mgmtCorreo: '', prodNombre: '', prodCel: '', prodCorreo: '' },
     soundcheck: '',
     recordatorio: '',
-    outputs: [{ mix: '', player: '', monitor: '', obs: '' }],
-    inputs: [{ ch: '1', name: '', mic: '', v48: '', stand: '', position: '', obs: '' }],
+    outputs: [
+      { mix: '1', player: 'Princesa Alba L', monitor: 'Shure Psm1000', obs: 'x2 Beltpacks' },
+      { mix: '2', player: 'Princesa Alba R', monitor: '', obs: '' },
+      { mix: '3', player: 'Drum L', monitor: 'Shure Psm1000', obs: '' },
+      { mix: '4', player: 'Drum R', monitor: '', obs: '' },
+      { mix: '5', player: 'Guitar L', monitor: 'Shure Psm1000', obs: '' },
+      { mix: '6', player: 'Guitar R', monitor: '', obs: '' },
+      { mix: '7', player: 'Playback L', monitor: 'Shure Psm1000', obs: '' },
+      { mix: '8', player: 'Playback R', monitor: '', obs: '' },
+      { mix: '9', player: 'Crew L', monitor: 'Shure Psm1000', obs: 'x4 Beltpacks' },
+      { mix: '10', player: 'Crew R', monitor: '', obs: '' },
+      { mix: '11', player: 'Spare L', monitor: 'Shure Psm1000', obs: 'x2 Beltpacks' },
+      { mix: '12', player: 'Spare R', monitor: '', obs: '' },
+      { mix: '13', player: 'CUE L', monitor: 'Shure Psm1000', obs: '' },
+      { mix: '14', player: 'CUE R', monitor: '', obs: '' },
+      { mix: '15', player: 'SideFill L', monitor: 'Line Array + Sub', obs: '' },
+      { mix: '16', player: 'SideFill R', monitor: 'Line Array + Sub', obs: '' }
+    ],
+    inputs: [
+      { ch: '1', name: 'Kick', mic: 'Shure Beta91', v48: 'SI', stand: '', position: 'Drum', obs: '' },
+      { ch: '2', name: 'Snare Top 1', mic: 'Shure Sm57', v48: '', stand: 'Mini Boom', position: 'Drum', obs: '' },
+      { ch: '3', name: 'Snare Bttm 1', mic: 'Shure Sm81', v48: 'SI', stand: 'Mini Boom', position: 'Drum', obs: '' },
+      { ch: '4', name: 'Snare Top 2', mic: 'Shure Sm57', v48: '', stand: 'Mini Boom', position: 'Drum', obs: '' },
+      { ch: '5', name: 'HHat', mic: 'Shure Sm81', v48: 'SI', stand: '', position: 'Drum', obs: '' },
+      { ch: '6', name: 'T1', mic: 'Sennheiser e904', v48: '', stand: '', position: 'Drum', obs: '' },
+      { ch: '7', name: 'T2', mic: 'Sennheiser e904', v48: '', stand: '', position: 'Drum', obs: '' },
+      { ch: '8', name: 'T3', mic: 'Sennheiser e904', v48: '', stand: '', position: 'Drum', obs: '' },
+      { ch: '9', name: 'T4', mic: 'Sennheiser e904', v48: '', stand: '', position: 'Drum', obs: '' },
+      { ch: '10', name: 'SPD', mic: 'DI Box Passive', v48: '', stand: '', position: 'Drum', obs: '' },
+      { ch: '11', name: 'OH Ride', mic: 'DPA 4099', v48: 'SI', stand: 'DPA Perc Support', position: 'Drum', obs: '' },
+      { ch: '12', name: 'OH HH', mic: 'DPA 4099', v48: 'SI', stand: 'DPA Perc Support', position: 'Drum', obs: '' },
+      { ch: '13', name: 'GTL', mic: 'DI Box Passive', v48: '', stand: '', position: 'Guitar', obs: '' },
+      { ch: '14', name: 'GTR', mic: 'DI Box Passive', v48: '', stand: '', position: 'Guitar', obs: '' },
+      { ch: '15', name: 'Voz Trini', mic: 'Shure AXD + V7', v48: '', stand: 'Base Stand', position: 'Lead Vocal', obs: 'X PLAYBACK TUNE' },
+      { ch: '16', name: 'Voz Trini Spare', mic: 'Shure AXD + V7', v48: '', stand: 'Base Stand', position: 'Lead Vocal', obs: 'X PLAYBACK TUNE' },
+      { ch: '17', name: 'Seq 1', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'Percs L' },
+      { ch: '18', name: 'Seq 2', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'Percs R' },
+      { ch: '19', name: 'Seq 3', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'Harm L' },
+      { ch: '20', name: 'Seq 4', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'Harm R' },
+      { ch: '21', name: 'Seq 5', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'BackVocals L' },
+      { ch: '22', name: 'Seq 6', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'BackVocals R' },
+      { ch: '23', name: 'Seq 7', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'Bass' },
+      { ch: '24', name: 'Seq 8', mic: 'XLR', v48: '', stand: '', position: 'Playback', obs: 'Lead Vocal' },
+      { ch: '25', name: 'Seq 9', mic: 'DI Box Passive', v48: '', stand: '', position: 'Playback', obs: 'Click' },
+      { ch: '26', name: 'Seq 10', mic: 'DI Box Passive', v48: '', stand: '', position: 'Playback', obs: 'Cuentas' },
+      { ch: '27', name: 'Seq 11', mic: 'DI Box Passive', v48: '', stand: '', position: 'Playback', obs: 'SMPTE' },
+      { ch: '28', name: 'TB - Princesa Alba', mic: 'Shure Sm58', v48: '', stand: 'Boom Stand', position: 'Lead Vocal', obs: '' },
+      { ch: '29', name: 'TB - Drum', mic: 'Shure SV100', v48: '', stand: 'Boom Stand', position: 'Drum', obs: '' },
+      { ch: '30', name: 'TB - GT', mic: 'Shure SV100', v48: '', stand: 'Boom Stand', position: 'Guitar', obs: '' },
+      { ch: '31', name: 'TB - Playback 1', mic: 'Shure Sm58', v48: '', stand: 'Boom Stand', position: 'Playback', obs: '' },
+      { ch: '32', name: 'TB - Playback 2', mic: '', v48: '', stand: '', position: 'Playback', obs: '' },
+      { ch: '33', name: 'TB - MON', mic: 'Shure SV100', v48: '', stand: 'Boom Stand', position: 'Monitor', obs: '' },
+      { ch: '34', name: 'TB - Stage L', mic: 'Shure SV100', v48: '', stand: 'Boom Stand', position: 'Stage Left', obs: '' },
+      { ch: '35', name: 'TB - Stage R', mic: 'Shure SV100', v48: '', stand: 'Boom Stand', position: 'Stage Right', obs: '' },
+      { ch: '36', name: 'TB - FOH', mic: 'Shure SV100', v48: '', stand: 'Boom Stand', position: 'FOH', obs: '' },
+      { ch: '37', name: 'Radio', mic: 'DI Box Passive', v48: '', stand: '', position: 'Monitor', obs: '' },
+      { ch: '38', name: 'Amb L', mic: 'Shure Sm81', v48: 'SI', stand: 'Boom Stand', position: 'Left FOH', obs: '' },
+      { ch: '39', name: 'Amb R', mic: 'Shure Sm81', v48: 'SI', stand: 'Boom Stand', position: 'Right FOH', obs: '' },
+      { ch: '40', name: 'Cajon', mic: 'Shure Beta91', v48: 'SI', stand: '', position: 'Drum', obs: 'Al Centro' },
+      { ch: '41', name: 'GT Acústica', mic: 'DI Box Active', v48: 'SI', stand: '', position: 'GT', obs: 'Al Centro' }
+    ],
     backline: [{ col1: '', col2: '', col3: '', col4: '' }],
     visuals: [{ col1: '', col2: '', col3: '', col4: '' }],
     stageplot: [],
@@ -72,6 +145,12 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
   ];
 
   const [form, setForm] = useState({ id: null, title: '', type: 'COMPLETO', content: defaultContent });
+
+  useEffect(() => {
+    if (activeRider && activeRider.id !== form.id) {
+      setForm({ ...activeRider });
+    }
+  }, [activeRider]);
 
   const fetchData = async (force = false, isBackground = false) => {
     if (!isBackground) setLoading(true);
@@ -119,7 +198,7 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
   }, [selectedProject]);
   
   useEffect(() => {
-    if (activeRider) setViewMode('DETAIL');
+    if (activeRider && propViewMode === undefined) setViewMode('DETAIL');
   }, [activeRider]);
 
   if (!selectedProject) return <div className="text-center p-8"><Button onClick={() => setCurrentView('DASHBOARD')}>Volver a Proyectos</Button></div>;
@@ -131,7 +210,8 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
       const payloadToSave = { ...form, content: JSON.stringify({ ...form.content, proyectoId: selectedProject.id }) };
       await apiFetch(action, payloadToSave);
       showToast("Documento guardado correctamente."); 
-      setViewMode('LIST');
+      if (propSetSingleSectionOnly) propSetSingleSectionOnly(false);
+      setCurrentView('PROJECT_DETAILS');
       setActiveRider(null);
       setIsPreview(false);
       clearCache('riders');
@@ -318,7 +398,7 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
     }
   };
   
-  const activeTabs = getTabsForType(form.type);
+  const activeTabs = propSingleSectionOnly ? [editTab] : getTabsForType(form.type);
 
   const handleTypeChange = (e) => {
     const newType = e.target.value;
@@ -370,10 +450,17 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
       {/* HEADER PRINCIPAL */}
       <header className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 print:hidden">
         <div>
-           {(!isPreview && viewMode === 'LIST') ? (
-             <button onClick={() => setCurrentView('PROJECT_DETAILS')} className="flex items-center gap-1.5 text-xs md:text-sm text-slate-400 hover:text-white transition-colors mb-2"><ChevronLeft size={16}/> Volver a {selectedProject.name}</button>
-           ) : (!isPreview && viewMode === 'DETAIL') && (
-             <button onClick={() => { setViewMode('LIST'); setActiveRider(null); }} className="flex items-center gap-1.5 text-xs md:text-sm text-slate-400 hover:text-white transition-colors mb-2"><ChevronLeft size={16}/> Volver a Documentos</button>
+           {!isPreview && (
+             <button 
+               onClick={() => { 
+                 if (propSetSingleSectionOnly) propSetSingleSectionOnly(false);
+                 setCurrentView('PROJECT_DETAILS'); 
+                 setActiveRider(null); 
+               }} 
+               className="flex items-center gap-1.5 text-xs md:text-sm text-slate-400 hover:text-white transition-colors mb-2"
+             >
+               <ChevronLeft size={16}/> Volver a {selectedProject.name}
+             </button>
            )}
            <h1 className="text-2xl font-black text-white flex items-center gap-2">
              <FileText className="text-emerald-500" size={24}/> 
@@ -392,7 +479,6 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
           )}
           {(viewMode === 'DETAIL' || isPreview) && <Button icon={Printer} variant="secondary" onClick={handlePrintRider} className="flex-1 sm:flex-none" title="Imprimir o Descargar en PDF">Imprimir PDF</Button>}
           {viewMode === 'DETAIL' && canManageRiders && <Button icon={Edit3} onClick={() => openEditor(activeRider)} className="flex-1 sm:flex-none">Editar</Button>}
-          {viewMode === 'LIST' && canManageRiders && <Button icon={Link} onClick={() => setLinkingRider(true)} variant="secondary" className="flex-1 sm:flex-none">Vincular</Button>}
           {viewMode === 'LIST' && canManageRiders && <Button icon={Plus} onClick={() => openEditor(null)} className="flex-1 sm:flex-none">Nuevo Documento</Button>}
         </div>
       </header>
@@ -409,7 +495,12 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
               <div><label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Título del Documento</label><input required className="w-full bg-slate-800 border-slate-700 rounded p-2 text-xs md:text-sm text-white outline-none focus:border-emerald-500" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} /></div>
               <div>
                 <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Área / Tipo</label>
-                <select className="w-full bg-slate-800 border-slate-700 rounded p-2 text-xs md:text-sm text-white font-bold outline-none focus:border-emerald-500 max-w-full break-words" value={form.type} onChange={handleTypeChange}>
+                <select 
+                  className="w-full bg-slate-800 border-slate-700 rounded p-2 text-xs md:text-sm text-white font-bold outline-none focus:border-emerald-500 max-w-full break-words disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" 
+                  value={form.type} 
+                  onChange={handleTypeChange}
+                  disabled={propSingleSectionOnly}
+                >
                   <option value="COMPLETO">RIDER COMPLETO</option>
                   <option value="SONIDO">SONIDO</option>
                   <option value="ILUMINACIÓN">ILUMINACIÓN</option>
@@ -420,11 +511,13 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
             </div>
           </div>
 
-          <div className="flex overflow-x-auto bg-slate-900 border-b border-slate-700 shrink-0 hide-scrollbar">
-            {activeTabs.map(tab => (
-              <button key={tab} type="button" onClick={() => setEditTab(tab)} className={`px-4 md:px-6 py-2 md:py-3 text-xs font-bold whitespace-nowrap transition-colors border-b-2 ${editTab === tab ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-transparent text-slate-400 hover:text-white'}`}>{tab}</button>
-            ))}
-          </div>
+          {!propSingleSectionOnly && (
+            <div className="flex overflow-x-auto bg-slate-900 border-b border-slate-700 shrink-0 hide-scrollbar">
+              {activeTabs.map(tab => (
+                <button key={tab} type="button" onClick={() => setEditTab(tab)} className={`px-4 md:px-6 py-2 md:py-3 text-xs font-bold whitespace-nowrap transition-colors border-b-2 ${editTab === tab ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-transparent text-slate-400 hover:text-white'}`}>{tab}</button>
+              ))}
+            </div>
+          )}
 
           <div className="p-3 md:p-6 bg-slate-950 relative">
             {editTab === 'GENERAL' && (
@@ -621,7 +714,7 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
 
                 {/* Tabla de Crew y Dietas Automática */}
                 {form.content.catering.showCatEquipo && (() => {
-                  if(!form.content.proyectoId) return <div className="p-4 border border-slate-800 border-dashed rounded-xl text-center text-xs text-slate-500 mt-6">⚠️ Vincula este Rider a un Proyecto en la pestaña GENERAL para ver el Crew.</div>;
+                  if(!form.content.proyectoId) return <div className="p-4 border border-slate-800 border-dashed rounded-xl text-center text-xs text-slate-500 mt-6">Vincula este Rider a un Proyecto en la pestaña GENERAL para ver el Crew.</div>;
                   
                   const selectedProj = proyectos.find(proj => String(proj.id) === String(form.content.proyectoId));
                   if(!selectedProj) return null;
@@ -681,7 +774,18 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
           </div>
 
           <div className="p-3 md:p-4 border-t border-slate-700 bg-slate-900 shrink-0 flex gap-2">
-            <Button variant="secondary" className="flex-1 py-2" onClick={() => { setIsPreview(false); if(!form.id) setViewMode('LIST'); else setViewMode('DETAIL'); }}>Cancelar</Button>
+            <Button 
+              variant="secondary" 
+              className="flex-1 py-2" 
+              onClick={() => { 
+                setIsPreview(false); 
+                if (propSetSingleSectionOnly) propSetSingleSectionOnly(false);
+                setCurrentView('PROJECT_DETAILS'); 
+                setActiveRider(null); 
+              }}
+            >
+              Cancelar
+            </Button>
             <Button variant="blue" className="flex-1 py-2" onClick={() => setIsPreview(true)} icon={Maximize}>Vista Previa</Button>
             <Button variant="primary" className="flex-1 py-2" onClick={handleSave} icon={Save}>Guardar Documento</Button>
           </div>
@@ -709,7 +813,6 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
              ) : (
                canManageRiders && (
                  <div className="flex gap-2 print:hidden">
-                   <Button variant="secondary" className="py-1.5" icon={Link} onClick={() => handleUnlinkRider(displayRider)}>Desvincular</Button>
                    {canDeleteRiders && <Button variant="danger" className="px-2.5 py-1.5 bg-slate-800" icon={Trash2} onClick={() => requestConfirm("¿Eliminar este Rider permanentemente?", () => handleDelete(displayRider.id))}></Button>}
                    <Button variant="secondary" className="py-1.5" icon={Edit3} onClick={() => openEditor(displayRider)}>Editar</Button>
                  </div>
@@ -729,17 +832,17 @@ export const RidersView = ({ currentUser, showToast, requestConfirm, activeRider
                {displayRider.content.contacto && (displayRider.content.contacto.mgmtNombre || displayRider.content.contacto.mgmtCel || displayRider.content.contacto.mgmtCorreo) && (
                  <div className="bg-slate-800 print:bg-transparent p-3 md:p-4 rounded-lg border border-slate-700 print:border-black">
                    <h4 className="text-slate-400 print:text-black text-[10px] md:text-xs font-black mb-2 uppercase">Contacto Management</h4>
-                   {displayRider.content.contacto.mgmtNombre && <p className="text-xs md:text-sm text-white print:text-black font-bold mb-1">👤 {displayRider.content.contacto.mgmtNombre}</p>}
-                   {displayRider.content.contacto.mgmtCel && <p className="text-xs md:text-sm text-white print:text-black">📱 {displayRider.content.contacto.mgmtCel}</p>}
-                   {displayRider.content.contacto.mgmtCorreo && <p className="text-xs md:text-sm text-white print:text-black">✉️ {displayRider.content.contacto.mgmtCorreo}</p>}
+                   {displayRider.content.contacto.mgmtNombre && <p className="text-xs md:text-sm text-white print:text-black font-bold mb-1">Nombre: {displayRider.content.contacto.mgmtNombre}</p>}
+                   {displayRider.content.contacto.mgmtCel && <p className="text-xs md:text-sm text-white print:text-black">Celular: {displayRider.content.contacto.mgmtCel}</p>}
+                   {displayRider.content.contacto.mgmtCorreo && <p className="text-xs md:text-sm text-white print:text-black">Correo: {displayRider.content.contacto.mgmtCorreo}</p>}
                  </div>
                )}
                {displayRider.content.contacto && (displayRider.content.contacto.prodNombre || displayRider.content.contacto.prodCel || displayRider.content.contacto.prodCorreo) && (
                  <div className="bg-slate-800 print:bg-transparent p-3 md:p-4 rounded-lg border border-slate-700 print:border-black">
                    <h4 className="text-slate-400 print:text-black text-[10px] md:text-xs font-black mb-2 uppercase">Contacto Producción</h4>
-                   {displayRider.content.contacto.prodNombre && <p className="text-xs md:text-sm text-white print:text-black font-bold mb-1">👤 {displayRider.content.contacto.prodNombre}</p>}
-                   {displayRider.content.contacto.prodCel && <p className="text-xs md:text-sm text-white print:text-black">📱 {displayRider.content.contacto.prodCel}</p>}
-                   {displayRider.content.contacto.prodCorreo && <p className="text-xs md:text-sm text-white print:text-black">✉️ {displayRider.content.contacto.prodCorreo}</p>}
+                   {displayRider.content.contacto.prodNombre && <p className="text-xs md:text-sm text-white print:text-black font-bold mb-1">Nombre: {displayRider.content.contacto.prodNombre}</p>}
+                   {displayRider.content.contacto.prodCel && <p className="text-xs md:text-sm text-white print:text-black">Celular: {displayRider.content.contacto.prodCel}</p>}
+                   {displayRider.content.contacto.prodCorreo && <p className="text-xs md:text-sm text-white print:text-black">Correo: {displayRider.content.contacto.prodCorreo}</p>}
                  </div>
                )}
              </div>

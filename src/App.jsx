@@ -10,11 +10,8 @@ import { Button } from './components/Button';
 import { AuthRouter } from './views/AuthRouter';
 import { Dashboard } from './views/Dashboard';
 import { ProjectDetailsView } from './views/ProjectDetailsView';
-import { AdminPanel } from './views/AdminPanel';
 import { ProfileView } from './views/ProfileView';
 import { StaffDirectory } from './views/StaffDirectory';
-import { ChatView } from './views/ChatView';
-import { TransportView, TransportDetailsView } from './views/TransportView';
 import { RidersView } from './views/RidersView';
 import { ExpensesView } from './views/ExpensesView';
 
@@ -48,6 +45,9 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState(null);
   const [directory, setDirectory] = useState([]); 
   const [activeRider, setActiveRider] = useState(null);
+  const [riderViewMode, setRiderViewMode] = useState('LIST');
+  const [riderEditTab, setRiderEditTab] = useState('GENERAL');
+  const [riderSingleSectionOnly, setRiderSingleSectionOnly] = useState(false);
   const [showPasswordAlert, setShowPasswordAlert] = useState(false);
   const [theme, setTheme] = useState(window.localStorage.getItem('esquemapps_theme') || 'dark');
   const [pendingCount, setPendingCount] = useState(0);
@@ -115,11 +115,13 @@ export default function App() {
        options.push({ id: 'EXPENSES', label: 'Gastos', icon: DollarSign });
     }
     
-    options.push({ id: 'STAFF', label: 'Directorio', icon: Users });
-    
-    if (effectiveUser.role === ROLES.ADMIN || (effectiveUser.permisos || []).includes('ADMIN_PANEL')) {
-       options.push({ id: 'ADMIN_PANEL', label: 'Admin Panel', icon: ShieldCheck, badgeCount: pendingCount });
-    }
+    const isDirAdmin = effectiveUser.role === ROLES.ADMIN || (effectiveUser.permisos || []).includes('ADMIN_PANEL');
+    options.push({ 
+      id: 'STAFF', 
+      label: 'Directorio', 
+      icon: Users,
+      badgeCount: isDirAdmin ? pendingCount : 0 
+    });
     
     options.push({ id: 'PROFILE', label: 'Mi Perfil', icon: User });
     return options;
@@ -434,14 +436,39 @@ export default function App() {
         <main className="flex-1 relative overflow-y-auto h-screen bg-slate-955 print:bg-white custom-scrollbar print:overflow-visible print:h-auto pb-[70px] lg:pb-0">
           <div className="p-3 md:p-6 print:p-0">
             {currentView === 'DASHBOARD' && <Dashboard currentUser={effectiveUser} setCurrentView={setCurrentView} setSelectedProject={setSelectedProject} showToast={showToast} directory={directory} />}
-            {currentView === 'PROJECT_DETAILS' && <ProjectDetailsView currentUser={effectiveUser} setCurrentView={setCurrentView} selectedProject={selectedProject} showToast={showToast} requestConfirm={requestConfirm} />}
-            {currentView === 'ADMIN_PANEL' && <AdminPanel currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} refreshPendingCount={() => fetchDirectoryGlobal(true)} />}
+            {currentView === 'PROJECT_DETAILS' && (
+              <ProjectDetailsView 
+                currentUser={effectiveUser} 
+                setCurrentView={setCurrentView} 
+                selectedProject={selectedProject} 
+                showToast={showToast} 
+                requestConfirm={requestConfirm} 
+                setActiveRider={setActiveRider}
+                setRiderViewMode={setRiderViewMode}
+                setRiderEditTab={setRiderEditTab}
+                setRiderSingleSectionOnly={setRiderSingleSectionOnly}
+              />
+            )}
             {currentView === 'PROFILE' && <ProfileView currentUser={effectiveUser} setCurrentUser={setCurrentUser} showToast={showToast} theme={theme} setTheme={setTheme} requestConfirm={requestConfirm} />}
-            {currentView === 'STAFF' && <StaffDirectory currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} />}
-            {currentView === 'CHAT' && <ChatView currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} />}
-            {currentView === 'TRANSPORT' && <TransportView currentUser={effectiveUser} setCurrentView={setCurrentView} showToast={showToast} selectedProject={selectedProject} />}
-            {currentView === 'TRANSPORT_DETAILS' && <TransportDetailsView currentUser={effectiveUser} setCurrentView={setCurrentView} showToast={showToast} />}
-            {currentView === 'RIDERS' && <RidersView currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} activeRider={activeRider} setActiveRider={setActiveRider} directory={directory} selectedProject={selectedProject} setCurrentView={setCurrentView} />}
+            {currentView === 'STAFF' && <StaffDirectory currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} refreshPendingCount={() => fetchDirectoryGlobal(true)} />}
+            {currentView === 'RIDERS' && (
+              <RidersView 
+                currentUser={effectiveUser} 
+                showToast={showToast} 
+                requestConfirm={requestConfirm} 
+                activeRider={activeRider} 
+                setActiveRider={setActiveRider} 
+                directory={directory} 
+                selectedProject={selectedProject} 
+                setCurrentView={setCurrentView} 
+                viewMode={riderViewMode}
+                setViewMode={setRiderViewMode}
+                editTab={riderEditTab}
+                setEditTab={setRiderEditTab}
+                singleSectionOnly={riderSingleSectionOnly}
+                setSingleSectionOnly={setRiderSingleSectionOnly}
+              />
+            )}
             {currentView === 'EXPENSES' && <ExpensesView currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} selectedProject={selectedProject} setSelectedProject={setSelectedProject} />}
           </div>
         </main>

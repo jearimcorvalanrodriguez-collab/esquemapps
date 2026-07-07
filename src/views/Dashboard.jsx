@@ -39,7 +39,7 @@ export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, sho
         if (isBackground) {
            const myOldCount = CACHE.proyectos ? CACHE.proyectos.filter(p => p.asignados.includes(currentUser.email)).length : 0;
            const myNewCount = parsed.filter(p => p.asignados.includes(currentUser.email)).length;
-           if (myNewCount > myOldCount) showToast("🎫 ¡Tienes una nueva asignación de Proyecto!");
+           if (myNewCount > myOldCount) showToast("Tienes una nueva asignación de Proyecto!");
         }
 
         CACHE.proyectos = parsed;

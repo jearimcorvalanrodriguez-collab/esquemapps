@@ -89,9 +89,9 @@ export const AddressAutocomplete = ({ value, onChange, placeholder, className, r
             <li 
               key={idx} 
               onClick={() => handleSelect(item)}
-              className="p-2.5 text-xs text-slate-200 hover:bg-slate-800 cursor-pointer border-b border-slate-800 last:border-0 leading-tight transition-colors"
+              className="p-2.5 text-xs text-slate-200 hover:bg-slate-800 cursor-pointer border-b border-slate-800 last:border-0 leading-tight transition-colors flex items-center gap-1.5"
             >
-              📍 {item.label}
+              <span className="text-emerald-400 font-bold">•</span> {item.label}
             </li>
           ))}
         </ul>

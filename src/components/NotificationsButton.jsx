@@ -28,37 +28,7 @@ export const NotificationsButton = ({ currentUser }) => {
     );
     const myProjectIds = myProjects.map(p => String(p.id));
 
-    // 1. Messages
-    const chatMsgs = (CACHE.mensajes || []).filter(m => myProjectIds.some(pid => compareProjectIds(pid, m.proyectoId)));
-    chatMsgs.forEach(m => {
-      const projName = myProjects.find(p => compareProjectIds(p.id, m.proyectoId))?.name || "Proyecto";
-      list.push({
-        id: 'msg-' + m.id,
-        type: 'chat',
-        title: `Mensaje de ${m.sender}`,
-        description: m.text,
-        time: m.time,
-        timestamp: Number(m.id) || 0,
-        projectName: projName
-      });
-    });
-
-    // 2. Transports
-    const trans = (CACHE.transportes || []).filter(t => myProjectIds.some(pid => compareProjectIds(pid, t.proyectoId)));
-    trans.forEach(t => {
-      const projName = myProjects.find(p => compareProjectIds(p.id, t.proyectoId))?.name || "Proyecto";
-      list.push({
-        id: 'trans-' + t.id,
-        type: 'transport',
-        title: `Nueva Ruta: ${t.title}`,
-        description: `${t.origin} ➡️ ${t.dest} (${t.date} ${t.time})`,
-        time: `${t.date} ${t.time}`,
-        timestamp: Number(t.id) || 0,
-        projectName: projName
-      });
-    });
-
-    // 3. Hitos
+    // Hitos
     const hitos = (CACHE.hitos || []).filter(h => myProjectIds.some(pid => compareProjectIds(pid, h.proyectoId)));
     hitos.forEach(h => {
       const projName = myProjects.find(p => compareProjectIds(p.id, h.proyectoId))?.name || "Proyecto";

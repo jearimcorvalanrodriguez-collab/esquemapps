@@ -80,8 +80,8 @@ export const ProfileView = ({ currentUser, setCurrentUser, showToast, theme, set
           <div className="pt-2">
             <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Aspecto Visual</label>
             <div className="flex gap-2">
-              <Button type="button" variant={theme === 'dark' ? 'primary' : 'secondary'} className="flex-1 py-2" onClick={() => setTheme('dark')}>🌙 Oscuro</Button>
-              <Button type="button" variant={theme === 'light' ? 'primary' : 'secondary'} className={`flex-1 py-2 ${theme === 'light' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-800 text-slate-300 border-slate-700'}`} onClick={() => setTheme('light')}>☀️ Claro</Button>
+              <Button type="button" variant={theme === 'dark' ? 'primary' : 'secondary'} className="flex-1 py-2" onClick={() => setTheme('dark')}>Oscuro</Button>
+              <Button type="button" variant={theme === 'light' ? 'primary' : 'secondary'} className={`flex-1 py-2 ${theme === 'light' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-800 text-slate-300 border-slate-700'}`} onClick={() => setTheme('light')}>Claro</Button>
             </div>
           </div>
 
