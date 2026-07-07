@@ -7,7 +7,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { NotificationsButton } from '../components/NotificationsButton';
 import { PianoLoader } from '../components/PianoLoader';
-import { CACHE, apiFetch, clearCache } from '../utils/api';
+import { CACHE, apiFetch, clearCache, setCache } from '../utils/api';
 import { ROLES } from '../utils/constants';
 
 export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast, directory }) => {
@@ -42,7 +42,7 @@ export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, sho
            if (myNewCount > myOldCount) showToast("Tienes una nueva asignación de Proyecto!");
         }
 
-        CACHE.proyectos = parsed;
+        setCache('proyectos', parsed);
         setProyectos(parsed);
       }
       else if(!isBackground) setFetchError(res.message || "Error al obtener proyectos");

@@ -11,6 +11,8 @@ export const CACHE = {
 
 export const clearCache = (key) => { CACHE[key] = null; };
 
+export const setCache = (key, value) => { CACHE[key] = value; };
+
 export const compareProjectIds = (idA, idB) => {
   if (idA === undefined || idA === null || idB === undefined || idB === null) return false;
   let strA = String(idA).trim();

@@ -16,7 +16,7 @@ import { RidersView } from './views/RidersView';
 import { ExpensesView } from './views/ExpensesView';
 
 // Utilities
-import { apiFetch, CACHE } from './utils/api';
+import { apiFetch, CACHE, setCache } from './utils/api';
 import { ROLES } from './utils/constants';
 
 export default function App() {
@@ -136,7 +136,7 @@ export default function App() {
     try {
       const res = await apiFetch('getUsuarios');
       if (res.status === 'success') {
-         CACHE.usuarios = res.data;
+         setCache('usuarios', res.data);
          setDirectory(res.data.filter(u => u.status === 'ACTIVO'));
          setPendingCount(res.data.filter(u => u.status === 'PENDING').length);
       }
@@ -195,18 +195,7 @@ export default function App() {
     document.documentElement.style.backgroundColor = theme === 'light' ? '#f8fafc' : '#020617';
   }, [theme]);
 
-  const ConfirmModal = () => {
-    if (!confirmDialog.isOpen) return null;
-    return (
-      <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">
-        <Card className="w-full max-w-sm p-4 md:p-6 bg-slate-900 border-red-500/50">
-          <div className="flex items-center gap-2 md:gap-3 text-red-500 mb-3 md:mb-4"><AlertCircle size={24} /><h2 className="text-lg md:text-xl font-black text-white">¿Estás seguro?</h2></div>
-          <p className="text-xs md:text-sm text-slate-300 mb-4 md:mb-6">{confirmDialog.text}</p>
-          <div className="flex gap-2.5"><Button variant="ghost" className="flex-1 bg-slate-800 hover:text-white py-2 md:py-2.5" onClick={() => setConfirmDialog({ isOpen: false, text: '', onConfirm: null })}>Cancelar</Button><Button variant="danger" className="flex-1 bg-red-600 text-white hover:bg-red-500 py-2 md:py-2.5" onClick={confirmDialog.onConfirm}>Confirmar</Button></div>
-        </Card>
-      </div>
-    );
-  };
+
 
   if (!effectiveUser) return (
     <>
@@ -348,7 +337,18 @@ export default function App() {
         `}</style>
       )}
 
-      <ConfirmModal />
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">
+          <Card className="w-full max-w-sm p-4 md:p-6 bg-slate-900 border-red-500/50">
+            <div className="flex items-center gap-2 md:gap-3 text-red-500 mb-3 md:mb-4"><AlertCircle size={24} /><h2 className="text-lg md:text-xl font-black text-white">¿Estás seguro?</h2></div>
+            <p className="text-xs md:text-sm text-slate-300 mb-4 md:mb-6">{confirmDialog.text}</p>
+            <div className="flex gap-2.5">
+              <Button variant="ghost" className="flex-1 bg-slate-800 hover:text-white py-2 md:py-2.5" onClick={() => setConfirmDialog({ isOpen: false, text: '', onConfirm: null })}>Cancelar</Button>
+              <Button variant="danger" className="flex-1 bg-red-600 text-white hover:bg-red-500 py-2 md:py-2.5" onClick={confirmDialog.onConfirm}>Confirmar</Button>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {showDisclaimerModal && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[250] flex items-center justify-center p-4 animate-fade-in print:hidden">

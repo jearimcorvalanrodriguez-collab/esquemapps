@@ -11,7 +11,7 @@ import { AddressAutocomplete } from '../components/AddressAutocomplete';
 import { LiveClock } from '../components/LiveClock';
 import { EventCard } from '../components/EventCard';
 import { PianoLoader } from '../components/PianoLoader';
-import { CACHE, apiFetch, clearCache, compareProjectIds } from '../utils/api';
+import { CACHE, apiFetch, clearCache, compareProjectIds, setCache } from '../utils/api';
 import { ROLES } from '../utils/constants';
 
 export const ProjectDetailsView = ({ 
@@ -122,7 +122,7 @@ export const ProjectDetailsView = ({
            const myNewHitos = res.data.filter(h => (compareProjectIds(h.proyectoId, p.id) || compareProjectIds(h.proyectoId, p.name)) && h.asignados?.includes(currentUser.email)).length;
            if (myNewHitos > myOldHitos) showToast("Tienes un nuevo Hito asignado");
         }
-        CACHE.hitos = res.data; 
+        setCache('hitos', res.data); 
         processHitos(res.data); 
       } 
       else if(!isBackground) setFetchError(res.message || "Error al obtener hitos");
@@ -138,7 +138,7 @@ export const ProjectDetailsView = ({
         const res = await apiFetch('getRiders');
         if (res.status === 'success') {
           rd = res.data;
-          CACHE.riders = rd;
+          setCache('riders', rd);
         }
       }
       if (rd) {

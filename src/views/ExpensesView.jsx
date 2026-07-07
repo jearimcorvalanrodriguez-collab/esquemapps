@@ -6,7 +6,7 @@ import {
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { PianoLoader } from '../components/PianoLoader';
-import { CACHE, apiFetch, clearCache, compareProjectIds } from '../utils/api';
+import { CACHE, apiFetch, clearCache, compareProjectIds, setCache } from '../utils/api';
 import { ROLES } from '../utils/constants';
 
 export const ExpensesView = ({ currentUser, showToast, requestConfirm, selectedProject, setSelectedProject }) => {
@@ -33,7 +33,7 @@ export const ExpensesView = ({ currentUser, showToast, requestConfirm, selectedP
       const res = await apiFetch('getProyectos');
       if (res.status === 'success') {
         setProyectos(res.data);
-        CACHE.proyectos = res.data;
+        setCache('proyectos', res.data);
       }
     } catch(e) {
       showToast("Error al cargar proyectos.");

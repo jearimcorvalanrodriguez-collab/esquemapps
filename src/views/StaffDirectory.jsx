@@ -10,7 +10,7 @@ import { Button } from '../components/Button';
 import { PianoLoader } from '../components/PianoLoader';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { openWhatsApp, openEmail } from '../components/NotificationsButton';
-import { CACHE, apiFetch, clearCache } from '../utils/api';
+import { CACHE, apiFetch, clearCache, setCache } from '../utils/api';
 import { ROLES } from '../utils/constants';
 
 const MODULOS = [
@@ -380,7 +380,7 @@ export const StaffDirectory = ({ currentUser, showToast, requestConfirm, refresh
       let users = CACHE.usuarios;
       if (force || !users) {
         const res = await apiFetch('getUsuarios');
-        if (res.status === 'success') { users = res.data; CACHE.usuarios = users; }
+        if (res.status === 'success') { users = res.data; setCache('usuarios', users); }
         else { users = []; }
       }
       
@@ -389,7 +389,7 @@ export const StaffDirectory = ({ currentUser, showToast, requestConfirm, refresh
         const resP = await apiFetch('getProyectos');
         if (resP.status === 'success') { 
           projs = resP.data.map(p => ({ ...p, asignados: Array.isArray(p.asignados) ? p.asignados : [] })); 
-          CACHE.proyectos = projs; 
+          setCache('proyectos', projs); 
         } else { projs = []; }
       }
       setProyectos(projs);

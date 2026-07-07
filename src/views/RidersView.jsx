@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, FileText, Printer, Edit3, Link, Plus, 
   RefreshCw, Trash2, Mic2, Lightbulb, Map as MapIcon, 
-  Utensils, Maximize, Save, AlertCircle, CheckCircle2, X 
+  Utensils, Maximize, Save, AlertCircle, CheckCircle2, X, MapPin
 } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
@@ -11,7 +11,7 @@ import { AutoResizeTextarea } from '../components/AutoResizeTextarea';
 import { MicDiSelect } from '../components/MicDiSelect';
 import { StageplotBuilder } from '../components/StageplotBuilder';
 import { PianoLoader } from '../components/PianoLoader';
-import { CACHE, apiFetch, clearCache, compareProjectIds } from '../utils/api';
+import { CACHE, apiFetch, clearCache, compareProjectIds, setCache } from '../utils/api';
 import { ROLES } from '../utils/constants';
 
 export const RidersView = ({ 
@@ -45,14 +45,6 @@ export const RidersView = ({
                         (!(currentUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(currentUser.role));
   const canManageRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(currentUser.role) || (currentUser.permisos || []).includes('RIDERS_MANAGE');
   const canDeleteRiders = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('RIDERS_MANAGE');
-
-  if (!canSeeRiders) {
-    return (
-      <div className="p-8 text-center text-red-500 font-bold border border-red-500/20 bg-red-500/5 rounded-xl">
-        Acceso Denegado: No tienes privilegios para ver la sección de Riders Técnicos.
-      </div>
-    );
-  }
 
   const defaultContent = {
     proyectoId: selectedProject ? selectedProject.id : '',
@@ -158,9 +150,9 @@ export const RidersView = ({
     try {
       let rd = CACHE.riders, hd = CACHE.hitos, pd = CACHE.proyectos;
       
-      if (force || !rd) { const res = await apiFetch('getRiders'); if(res.status==='success') { rd = res.data; CACHE.riders = rd; } }
-      if (force || !hd) { const res = await apiFetch('getHitos'); if(res.status==='success') { hd = res.data; CACHE.hitos = hd; } }
-      if (force || !pd) { const res = await apiFetch('getProyectos'); if(res.status==='success') { pd = res.data; CACHE.proyectos = pd; } }
+      if (force || !rd) { const res = await apiFetch('getRiders'); if(res.status==='success') { rd = res.data; setCache('riders', rd); } }
+      if (force || !hd) { const res = await apiFetch('getHitos'); if(res.status==='success') { hd = res.data; setCache('hitos', hd); } }
+      if (force || !pd) { const res = await apiFetch('getProyectos'); if(res.status==='success') { pd = res.data; setCache('proyectos', pd); } }
       
       if (hd) setAllHitos(hd);
       if (pd) setProyectos(pd);
@@ -200,6 +192,14 @@ export const RidersView = ({
   useEffect(() => {
     if (activeRider && propViewMode === undefined) setViewMode('DETAIL');
   }, [activeRider]);
+
+  if (!canSeeRiders) {
+    return (
+      <div className="p-8 text-center text-red-500 font-bold border border-red-500/20 bg-red-500/5 rounded-xl">
+        Acceso Denegado: No tienes privilegios para ver la sección de Riders Técnicos.
+      </div>
+    );
+  }
 
   if (!selectedProject) return <div className="text-center p-8"><Button onClick={() => setCurrentView('DASHBOARD')}>Volver a Proyectos</Button></div>;
 
