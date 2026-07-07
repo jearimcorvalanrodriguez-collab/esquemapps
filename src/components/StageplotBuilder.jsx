@@ -116,6 +116,10 @@ export const STAGE_ITEMS = {
       </svg>
     )
   },
+  TELECASTER: {
+    label: "Guitarra Telecaster", width: 13, height: 13, defaultRotation: 0,
+    render: () => STAGE_ITEMS.KEYS.render()
+  },
   BASS: {
     label: "Bajo", width: 13, height: 13, defaultRotation: 0,
     render: () => (
@@ -137,7 +141,7 @@ export const STAGE_ITEMS = {
           {/* Curved Jazz Bass Pickguard */}
           <path d="M 48,56 C 42,56 36,62 36,70 C 36,82 48,86 48,94 L 54,94 L 54,70 Z" className="fill-slate-950 print:fill-slate-200"/>
           {/* Curved Chrome Control Plate */}
-          <path d="M 56,88 C 56,88 64,88 66,96 C 68,104 60,110 54,110 L 52,98 Z" className="fill-slate-350 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <path d="M 56,88 C 56,88 64,88 66,96 C 68,104 60,110 54,110 L 52,98 Z" className="fill-slate-300 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1"/>
           {/* Two Jazz Bass Pickups */}
           <rect x="42" y="74" width="16" height="3" rx="0.5" className="fill-slate-900 print:fill-black"/>
           <rect x="42" y="82" width="16" height="3" rx="0.5" className="fill-slate-900 print:fill-black"/>
@@ -146,6 +150,10 @@ export const STAGE_ITEMS = {
         </g>
       </svg>
     )
+  },
+  JAZZBASS: {
+    label: "Bajo Jazz Bass", width: 13, height: 13, defaultRotation: 0,
+    render: () => STAGE_ITEMS.DRUMS.render()
   },
   VOCALS: {
     label: "Cantante / Coros", width: 11, height: 11, defaultRotation: 180,
@@ -233,8 +241,8 @@ export const STAGE_ITEMS = {
         {/* Jack input on left */}
         <rect x="18" y="44" width="12" height="12" rx="2" className="fill-slate-700 print:fill-black"/>
         <circle cx="24" cy="50" r="3" className="fill-slate-955 print:fill-white"/>
-        {/* Center detail line */}
-        <line x1="42" y1="30" x2="42" y2="70" strokeWidth="2" className="stroke-slate-600 print:stroke-black"/>
+        {/* Center D.I text */}
+        <text x="45" y="58" textAnchor="middle" className="fill-white print:fill-black font-sans font-bold select-none text-[22px] tracking-tighter">D.I</text>
       </svg>
     )
   },
