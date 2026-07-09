@@ -3,10 +3,12 @@ import { User, Shield, Key, EyeOff, Eye, Loader2, LogOut } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { apiFetch, clearCache } from '../utils/api';
+import { COUNTRY_CODES, parsePhone } from '../utils/phoneHelper';
 
-export const ProfileView = ({ currentUser, setCurrentUser, showToast, theme, setTheme, requestConfirm }) => {
-  const [pPhone, setPPhone] = useState(currentUser.phone ? String(currentUser.phone) : '');
-  const [pTalla, setPTalla] = useState(currentUser.talla || 'M');
+export const ProfileView = ({ currentUser, setCurrentUser, showToast, requestConfirm }) => {
+  const parsed = parsePhone(currentUser.phone);
+  const [pPhoneCode, setPTPhoneCode] = useState(parsed.code);
+  const [pPhoneNumber, setPTPhoneNumber] = useState(parsed.number);
   const [pDieta, setPDieta] = useState(currentUser.dieta || 'OMNÍVORA');
   
   const [oldPass, setOldPass] = useState('');
@@ -28,12 +30,12 @@ export const ProfileView = ({ currentUser, setCurrentUser, showToast, theme, set
 
     setSaving(true);
     try {
-      const trimmedPhone = String(pPhone).trim();
-      const payload = { email: currentUser.email.trim(), phone: trimmedPhone, talla: pTalla, dieta: pDieta };
+      const fullPhone = `${pPhoneCode}${pPhoneNumber}`.trim();
+      const payload = { email: currentUser.email.trim(), phone: fullPhone, dieta: pDieta };
       if (newPass && oldPass) { payload.oldPassword = oldPass.trim(); payload.newPassword = newPass.trim(); }
       const res = await apiFetch('updateProfile', payload);
       if (res.status === 'success') {
-        setCurrentUser({ ...currentUser, phone: trimmedPhone, talla: pTalla, dieta: pDieta });
+        setCurrentUser({ ...currentUser, phone: fullPhone, dieta: pDieta });
         setOldPass(''); setNewPass(''); setConfirmPass('');
         showToast(newPass ? "¡Perfil y Contraseña actualizados!" : "¡Perfil actualizado!");
         clearCache('usuarios');
@@ -58,32 +60,35 @@ export const ProfileView = ({ currentUser, setCurrentUser, showToast, theme, set
             <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Nombre</label>
             <input type="text" value={currentUser.name} disabled className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-500 text-sm cursor-not-allowed" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Teléfono</label>
-              <input type="tel" value={pPhone} onChange={e=>setPPhone(e.target.value.replace(/[^0-9+]/g, ''))} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500" required />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Talla (Merch)</label>
-              <select value={pTalla} onChange={e=>setPTalla(e.target.value)} className="w-full max-w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500 break-words whitespace-normal">
-                <option value="XS">XS - Extra Pequeño</option><option value="S">S - Pequeño</option><option value="M">M - Mediano</option><option value="L">L - Grande</option><option value="XL">XL - Extra Grande</option><option value="XXL">XXL - Doble Extra Grande</option>
+          <div className="pb-3 border-b border-slate-800">
+            <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Teléfono</label>
+            <div className="flex gap-1.5 max-w-md">
+              <select 
+                value={pPhoneCode} 
+                onChange={e => setPTPhoneCode(e.target.value)} 
+                className="w-[105px] shrink-0 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500 cursor-pointer"
+              >
+                {COUNTRY_CODES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
               </select>
+              <input 
+                type="text" 
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={pPhoneNumber} 
+                onChange={e => setPTPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))} 
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500" 
+                placeholder="Ej. 912345678"
+                required 
+              />
             </div>
           </div>
           <div>
             <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Preferencia Alimentación</label>
-            <select value={pDieta} onChange={e=>setPDieta(e.target.value)} className="w-full max-w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500 break-words whitespace-normal">
+            <select value={pDieta} onChange={e=>setPDieta(e.target.value)} className="w-full max-w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm outline-none focus:border-emerald-500 break-words whitespace-normal cursor-pointer">
               <option value="OMNÍVORA">Omnívora (Estándar)</option><option value="VEGETARIANA">Vegetariana</option><option value="VEGANA">Vegana</option><option value="CRUDÍVORA">Crudívora</option><option value="FLEXITARIANA">Flexitariana</option><option value="SIN GLUTEN">Sin Gluten</option><option value="BAJA EN FODMAP">Baja en FODMAP</option><option value="HIPOSÓDICA">Hiposódica</option><option value="DIABÉTICA">Diabética</option><option value="KETO">Keto</option><option value="MEDITERRÁNEA">Mediterránea</option>
             </select>
           </div>
           
-          <div className="pt-2">
-            <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Aspecto Visual</label>
-            <div className="flex gap-2">
-              <Button type="button" variant={theme === 'dark' ? 'primary' : 'secondary'} className="flex-1 py-2" onClick={() => setTheme('dark')}>Oscuro</Button>
-              <Button type="button" variant={theme === 'light' ? 'primary' : 'secondary'} className={`flex-1 py-2 ${theme === 'light' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-800 text-slate-300 border-slate-700'}`} onClick={() => setTheme('light')}>Claro</Button>
-            </div>
-          </div>
 
           <div className="bg-slate-800/80 border border-slate-700 rounded-lg p-2.5 flex gap-2.5 items-start mt-1">
             <Shield size={14} className="text-emerald-500 shrink-0 mt-0.5" />

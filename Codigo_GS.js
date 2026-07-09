@@ -47,7 +47,7 @@ function sanitizarEntrada(valor) {
     const valTrim = valor.trim();
     // Antepone comilla simple si empieza por caracteres ejecutables (=, +, -, @)
     if (valTrim.startsWith("=") || valTrim.startsWith("+") || valTrim.startsWith("-") || valTrim.startsWith("@")) {
-      return "\"" + valTrim;
+      return "'" + valTrim;
     }
     return valTrim;
   }
@@ -64,6 +64,18 @@ function verificarPermisoRequester(ss, requesterEmail, rolesPermitidos) {
     if (rows[i][2].toString().trim().toLowerCase() === requesterEmail.trim().toLowerCase() && rows[i][6] === "ACTIVO") {
       const fullRole = rows[i][4] ? rows[i][4].toString() : "";
       const baseRole = fullRole.split(":")[0].trim().toUpperCase();
+      // Tour Manager, Admin, and Manager get all administrative privileges
+      if (baseRole === "TOUR MANAGER" || baseRole === "ADMIN" || baseRole === "MANAGER") {
+        if (rolesPermitidos.includes("ADMIN") || rolesPermitidos.includes("MANAGER") || rolesPermitidos.includes("TOUR MANAGER")) {
+          return true;
+        }
+      }
+      // If action is for APV, Tech, Traslado, etc., Técnico role covers it
+      if (baseRole === "TÉCNICO" || baseRole === "TECH" || baseRole === "TEC. JEFE" || baseRole === "JEFE CAT/APV" || baseRole === "APV/CATERING" || baseRole === "TRASLADO") {
+        if (rolesPermitidos.includes("TÉCNICO") || rolesPermitidos.includes("TECH") || rolesPermitidos.includes("TEC. JEFE") || rolesPermitidos.includes("JEFE CAT/APV") || rolesPermitidos.includes("APV/CATERING") || rolesPermitidos.includes("TRASLADO")) {
+          return true;
+        }
+      }
       return rolesPermitidos.includes(baseRole) || rolesPermitidos.includes(fullRole);
     }
   }
@@ -89,32 +101,14 @@ function getDefaultPermisos(ss, role) {
   } catch(e) {}
 
   // Fallback to hardcoded defaults (updated with new granular permissions)
-  if (cleanRole === "ADMIN") {
+  if (cleanRole === "ADMIN" || cleanRole === "MANAGER" || cleanRole === "TOUR MANAGER") {
     return ["DASHBOARD", "PROJECTS_MANAGE", "PROJECT_ASSIGN", "PROJECT_STATUS", "RIDERS", "RIDERS_MANAGE", "TRANSPORT", "TRANSPORT_CREATE", "TRANSPORT_EDIT", "HITOS", "HITOS_MANAGE", "CHAT", "CHAT_SEND", "STAFF", "ADMIN_PANEL", "EXPENSES", "EXPENSES_MANAGE"];
-  }
-  if (cleanRole === "MANAGER") {
-    return ["DASHBOARD", "PROJECTS_MANAGE", "PROJECT_ASSIGN", "PROJECT_STATUS", "RIDERS", "RIDERS_MANAGE", "TRANSPORT", "TRANSPORT_CREATE", "TRANSPORT_EDIT", "HITOS", "HITOS_MANAGE", "CHAT", "CHAT_SEND", "STAFF", "EXPENSES", "EXPENSES_MANAGE"];
-  }
-  if (cleanRole === "TOUR MANAGER") {
-    return ["DASHBOARD", "PROJECTS_MANAGE", "PROJECT_ASSIGN", "PROJECT_STATUS", "RIDERS", "RIDERS_MANAGE", "TRANSPORT", "TRANSPORT_CREATE", "TRANSPORT_EDIT", "HITOS", "HITOS_MANAGE", "CHAT", "CHAT_SEND", "STAFF", "EXPENSES"];
-  }
-  if (cleanRole === "JEFE CAT/APV" || cleanRole === "JEFE CAT_APV") {
-    return ["DASHBOARD", "RIDERS", "RIDERS_MANAGE", "TRANSPORT", "TRANSPORT_CREATE", "HITOS", "HITOS_MANAGE", "CHAT", "CHAT_SEND", "STAFF", "EXPENSES"];
-  }
-  if (cleanRole === "TEC. JEFE" || cleanRole === "TEC_JEFE") {
-    return ["DASHBOARD", "RIDERS", "RIDERS_MANAGE", "TRANSPORT", "TRANSPORT_CREATE", "HITOS", "HITOS_MANAGE", "CHAT", "CHAT_SEND", "STAFF"];
-  }
-  if (cleanRole === "APV/CATERING" || cleanRole === "APV") {
-    return ["DASHBOARD", "RIDERS", "TRANSPORT", "HITOS", "CHAT", "CHAT_SEND", "STAFF"];
-  }
-  if (cleanRole === "TRASLADO") {
-    return ["TRANSPORT", "TRANSPORT_CREATE", "CHAT", "CHAT_SEND", "STAFF"];
   }
   if (cleanRole === "ARTISTA") {
     return ["DASHBOARD", "RIDERS"];
   }
-  // Técnico y otros roles por defecto (solo lectura)
-  return ["DASHBOARD", "RIDERS", "TRANSPORT", "HITOS", "CHAT", "STAFF"];
+  // Técnico y otros roles por defecto
+  return ["DASHBOARD", "RIDERS", "TRANSPORT", "HITOS", "CHAT", "CHAT_SEND", "STAFF"];
 }
 
 // Helper para envío de correos
@@ -209,7 +203,7 @@ function doPost(e) {
     }
 
     // Acciones administrativas de proyectos e hitos (ADMIN, MANAGER, TOUR MANAGER)
-    const managerActions = ["createProyecto", "updateProyectoStatus", "updateProyectoAsignaciones", "createHito", "updateHito", "deleteHito", "updateHitoAsignaciones"];
+    const managerActions = ["createProyecto", "updateProyectoStatus", "updateProyectoAsignaciones", "updateProyectoManager", "deleteProyecto", "createHito", "updateHito", "deleteHito", "updateHitoAsignaciones"];
     if (managerActions.includes(action)) {
       if (!verificarPermisoRequester(ss, requester, ["ADMIN", "MANAGER", "TOUR MANAGER"])) {
         return configurarCORS({ status: "error", message: "ACCION RECHAZADA: Requiere rol ADMIN o MANAGER." });
@@ -571,12 +565,72 @@ function doPost(e) {
       return configurarCORS({ status: "error", message: "Proyecto no encontrado" });
     }
 
+    if (action === "deleteProyecto") {
+      const sheet = ss.getSheetByName("Proyectos");
+      const rows = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][0] == data.payload.id) {
+          // Conservar presupuestos vinculados pasándolos a independientes
+          for (let k = 1; k < rows.length; k++) {
+            if (rows[k][2] === "PRESUPUESTO" && rows[k][3] === "PROYECTO_ID:" + data.payload.id) {
+              sheet.getRange(k + 1, 4).setValue("");
+            }
+          }
+          
+          sheet.deleteRow(i + 1);
+          
+          // Conservar hitos (cronogramas) pasándolos a "No asignado" ("")
+          const sheetHitos = ss.getSheetByName("Hitos");
+          if (sheetHitos) {
+            const hRows = sheetHitos.getDataRange().getValues();
+            for (let j = 1; j < hRows.length; j++) {
+              if (hRows[j][1] == data.payload.id) {
+                sheetHitos.getRange(j + 1, 2).setValue("");
+              }
+            }
+          }
+          
+          // Conservar riders técnicos pasándolos a "No asignado" ("")
+          const sheetRiders = ss.getSheetByName("Riders");
+          if (sheetRiders) {
+            const rRows = sheetRiders.getDataRange().getValues();
+            for (let l = 1; l < rRows.length; l++) {
+              if (rRows[l][3]) {
+                try {
+                  const contentObj = JSON.parse(rRows[l][3]);
+                  if (contentObj && String(contentObj.proyectoId) === String(data.payload.id)) {
+                    contentObj.proyectoId = "";
+                    sheetRiders.getRange(l + 1, 4).setValue(JSON.stringify(contentObj));
+                  }
+                } catch(e) {}
+              }
+            }
+          }
+          
+          return configurarCORS({ status: "success" });
+        }
+      }
+      return configurarCORS({ status: "error", message: "Proyecto no encontrado" });
+    }
+
     if (action === "updateProyectoAsignaciones") {
       const sheet = ss.getSheetByName("Proyectos");
       const rows = sheet.getDataRange().getValues();
       for (let i = 1; i < rows.length; i++) {
         if (rows[i][0] == data.payload.id) {
           sheet.getRange(i + 1, 6).setValue(JSON.stringify(data.payload.asignados));
+          return configurarCORS({ status: "success" });
+        }
+      }
+      return configurarCORS({ status: "error", message: "Proyecto no encontrado" });
+    }
+
+    if (action === "updateProyectoManager") {
+      const sheet = ss.getSheetByName("Proyectos");
+      const rows = sheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i][0] == data.payload.id) {
+          sheet.getRange(i + 1, 4).setValue(sanitizarEntrada(data.payload.manager));
           return configurarCORS({ status: "success" });
         }
       }

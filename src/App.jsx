@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Navigation, DollarSign, Users, ShieldCheck, User, 
-  Music, LogOut, AlertCircle, Key, CheckCircle2 
+  Music, LogOut, AlertCircle, Key, CheckCircle2, Clock, FileText
 } from 'lucide-react';
 import { Card } from './components/Card';
 import { Button } from './components/Button';
@@ -14,6 +14,8 @@ import { ProfileView } from './views/ProfileView';
 import { StaffDirectory } from './views/StaffDirectory';
 import { RidersView } from './views/RidersView';
 import { ExpensesView } from './views/ExpensesView';
+import { TimingView } from './views/TimingView';
+import { OnboardingModal } from './components/OnboardingModal';
 
 // Utilities
 import { apiFetch, CACHE, setCache } from './utils/api';
@@ -24,7 +26,18 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = window.localStorage.getItem('esquemapps_user');
-      return savedUser ? JSON.parse(savedUser) : null;
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.role) {
+          const clean = parsed.role.toString().trim().toUpperCase();
+          let norm = 'TÉCNICO';
+          if (clean.startsWith('ARTISTA')) norm = 'ARTISTA';
+          else if (clean === 'ADMIN' || clean === 'MANAGER' || clean === 'TOUR MANAGER') norm = 'TOUR MANAGER';
+          parsed.role = norm;
+        }
+        return parsed;
+      }
+      return null;
     } catch (error) {
       return null;
     }
@@ -49,9 +62,10 @@ export default function App() {
   const [riderEditTab, setRiderEditTab] = useState('GENERAL');
   const [riderSingleSectionOnly, setRiderSingleSectionOnly] = useState(false);
   const [showPasswordAlert, setShowPasswordAlert] = useState(false);
-  const [theme, setTheme] = useState(window.localStorage.getItem('esquemapps_theme') || 'light');
+  const [theme, setTheme] = useState(window.localStorage.getItem('esquemapps_theme') || 'dark');
   const [pendingCount, setPendingCount] = useState(0);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, text: '', onConfirm: null });
   const [simulatedRole, setSimulatedRole] = useState(null);
@@ -96,6 +110,22 @@ export default function App() {
     }});
   };
 
+  const handleQuickAction = (type) => {
+    if (type === 'ADD_RIDER') {
+      setActiveRider(null);
+      setRiderViewMode('EDIT');
+      setRiderEditTab('GENERAL');
+      setRiderSingleSectionOnly(false);
+      setCurrentView('RIDERS');
+    } else if (type === 'ADD_TIMING') {
+      window.localStorage.setItem('esquemapps_auto_create_timing', 'true');
+      setCurrentView('TIMING_VIEW');
+    } else if (type === 'ADD_EXPENSE') {
+      window.localStorage.setItem('esquemapps_auto_create_expense', 'true');
+      setCurrentView('EXPENSES');
+    }
+  };
+
   const effectiveUser = currentUser ? { 
     ...currentUser, 
     role: simulatedRole || currentUser.role, 
@@ -106,7 +136,8 @@ export default function App() {
     if (!effectiveUser) return [];
 
     const options = [
-      { id: 'DASHBOARD', label: 'Proyectos', icon: Navigation }
+      { id: 'DASHBOARD', label: 'Proyectos', icon: Navigation },
+      { id: 'TIMING_VIEW', label: 'Cronogramas', icon: Clock }
     ];
 
     const canSeeExpenses = (effectiveUser.permisos || []).includes('EXPENSES') || 
@@ -114,7 +145,14 @@ export default function App() {
     if (canSeeExpenses) {
        options.push({ id: 'EXPENSES', label: 'Gastos', icon: DollarSign });
     }
-    
+
+    const canSeeRidersOpt = effectiveUser.role === ROLES.ADMIN || 
+                            (effectiveUser.permisos || []).includes('RIDERS') || 
+                            (!(effectiveUser.permisos) && [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER, ROLES.TEC_JEFE, ROLES.JEFE_CAT_APV].includes(effectiveUser.role));
+    if (canSeeRidersOpt) {
+       options.push({ id: 'RIDERS', label: 'Riders', icon: FileText });
+    }
+
     const isDirAdmin = effectiveUser.role === ROLES.ADMIN || (effectiveUser.permisos || []).includes('ADMIN_PANEL');
     options.push({ 
       id: 'STAFF', 
@@ -183,6 +221,11 @@ export default function App() {
         setShowPasswordAlert(true);
         window.localStorage.setItem(`pwd_alert_${currentUser.email}`, 'true');
       }
+
+      const onboarded = window.localStorage.getItem('esquemapps_onboarded') === 'true';
+      if (!onboarded) {
+        setShowOnboarding(true);
+      }
     }
   }, [currentUser]);
 
@@ -191,9 +234,9 @@ export default function App() {
   }, [currentView]);
 
   useEffect(() => {
-    window.localStorage.setItem('esquemapps_theme', theme);
-    document.documentElement.style.backgroundColor = theme === 'light' ? '#faf5f2' : '#020617';
-  }, [theme]);
+    window.localStorage.setItem('esquemapps_theme', 'dark');
+    document.documentElement.style.backgroundColor = '#090908';
+  }, []);
 
 
 
@@ -225,8 +268,8 @@ export default function App() {
               }}
               className="bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-white outline-none focus:border-amber-500 cursor-pointer"
             >
-              <option value={currentUser.role}>ADMIN (Original)</option>
-              {Object.values(ROLES).filter(r => r !== 'ADMIN').map(r => (
+              <option value={currentUser.role}>{currentUser.role} (Original)</option>
+              {Array.from(new Set(Object.values(ROLES))).filter(r => r !== currentUser.role).map(r => (
                 <option key={r} value={r}>{r}</option>
               ))}
             </select>
@@ -245,13 +288,31 @@ export default function App() {
       {/* Light mode overrides handled in index.css */}
 
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">
-          <Card className="w-full max-w-sm p-4 md:p-6 bg-slate-900 border-red-500/50">
-            <div className="flex items-center gap-2 md:gap-3 text-red-500 mb-3 md:mb-4"><AlertCircle size={24} /><h2 className="text-lg md:text-xl font-black text-white">¿Estás seguro?</h2></div>
-            <p className="text-xs md:text-sm text-slate-300 mb-4 md:mb-6">{confirmDialog.text}</p>
-            <div className="flex gap-2.5">
-              <Button variant="ghost" className="flex-1 bg-slate-800 hover:text-white py-2 md:py-2.5" onClick={() => setConfirmDialog({ isOpen: false, text: '', onConfirm: null })}>Cancelar</Button>
-              <Button variant="danger" className="flex-1 bg-red-600 text-white hover:bg-red-500 py-2 md:py-2.5" onClick={confirmDialog.onConfirm}>Confirmar</Button>
+        <div className="fixed inset-0 bg-slate-955/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">
+          <Card className="w-full max-w-[280px] p-5 bg-slate-900 border-red-500/40 text-center flex flex-col items-center justify-center shadow-2xl rounded-2xl relative">
+            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-3 animate-pulse">
+              <AlertCircle size={24} />
+            </div>
+            
+            <h2 className="text-sm font-black text-white uppercase tracking-wider mb-1.5">¿Estás seguro?</h2>
+            
+            <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-5 px-1">{confirmDialog.text}</p>
+            
+            <div className="flex gap-2.5 w-full">
+              <button 
+                type="button" 
+                className="flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest bg-slate-955 hover:bg-slate-800 text-slate-450 hover:text-white border border-slate-800 hover:border-slate-700 rounded-lg transition-all"
+                onClick={() => setConfirmDialog({ isOpen: false, text: '', onConfirm: null })}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                className="flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                onClick={confirmDialog.onConfirm}
+              >
+                Confirmar
+              </button>
             </div>
           </Card>
         </div>
@@ -265,30 +326,32 @@ export default function App() {
               <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-wider">Términos de Privacidad y Tratamiento de Datos</h2>
             </div>
             
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              Para poder utilizar la plataforma <b>Esquemas Pro</b>, es necesario que aceptes nuestra política de recopilación y uso de datos operativos, personales y sensibles.
+            <p className="text-xs md:text-sm text-slate-350 leading-relaxed font-light">
+              De conformidad con la legislación chilena sobre protección de la vida privada (Ley N° 19.628) y las nuevas exigencias de la <b>Ley N° 21.719</b>, es necesario que otorgues tu consentimiento libre, expreso e informado para el tratamiento de tus datos personales en <b>Esquemas Pro</b>.
             </p>
 
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-[11px] md:text-xs text-slate-400 space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar leading-relaxed">
-              <p className="font-bold text-slate-200">1. DATOS RECOPILADOS Y SU FINALIDAD</p>
-              <ul className="list-disc pl-4 space-y-1">
-                <li><b>Datos de Identificación y Contacto:</b> Nombre completo, correo electrónico y número de teléfono (necesario para coordinaciones de logística del equipo y contacto directo mediante WhatsApp).</li>
-                <li><b>Datos de Operación Técnica:</b> Rol asignado y permisos de accesos a módulos de la aplicación.</li>
-                <li><b>Datos Sensibles y de Bienestar:</b> 
-                  <ul className="list-circle pl-4 mt-0.5">
-                    <li><b>Talla de Vestimenta:</b> Para la confección, compra y asignación de vestuario de trabajo, uniformes del equipo y merchandising.</li>
-                    <li><b>Preferencia de Alimentación / Alergias:</b> Para la planificación adecuada del catering en camarines, eventos y giras, resguardando tu salud y preferencias alimenticias.</li>
-                  </ul>
-                </li>
-              </ul>
-              <p className="font-bold text-slate-200 pt-1">2. PLAZO DE CONSERVACIÓN</p>
-              <p>
-                Los datos se conservarán y utilizarán de manera segura única y exclusivamente para los fines de coordinación del crew <b>mientras exista y se mantenga activa la aplicación y su base de datos web</b>.
-              </p>
-              <p className="font-bold text-slate-200 pt-1">3. ACEPTACIÓN</p>
-              <p>
-                Al hacer clic en "Aceptar y Continuar", declaras estar en conocimiento y autorizar el tratamiento de estos datos para la operación de los shows y giras correspondientes.
-              </p>
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-[11px] md:text-xs text-slate-400 space-y-2.5 max-h-[220px] overflow-y-auto custom-scrollbar leading-relaxed">
+              <div>
+                <p className="font-bold text-slate-200">1. DATOS RECOPILADOS Y SU FINALIDAD</p>
+                <ul className="list-disc pl-4 space-y-1 mt-1 text-[11px]">
+                  <li><b>Identificación y Contacto:</b> Nombre, correo electrónico y número de teléfono (exclusivos para la autenticación y coordinaciones logísticas directas en el staff).</li>
+                  <li><b>Preferencia de Alimentación (Sensible):</b> Información dietética o alergias únicamente para coordinar servicios de catering durante traslados, soundchecks y shows.</li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="font-bold text-slate-200">2. DERECHOS ARCO (LEY N° 21.719)</p>
+                <p className="text-[11px] mt-0.5">
+                  Como titular de los datos, tienes derecho a solicitar en cualquier momento el <b>Acceso, Rectificación, Cancelación u Oposición</b> al uso de tus datos personales, pudiendo actualizarlos en la sección "Mi Perfil" o solicitándolo formalmente al Administrador.
+                </p>
+              </div>
+
+              <div>
+                <p className="font-bold text-slate-200">3. SEGURIDAD Y FINALIDAD EXCLUSIVA</p>
+                <p className="text-[11px] mt-0.5">
+                  Tus datos son almacenados bajo medidas técnicas de seguridad (incluyendo encriptación SHA-256 de claves) y no serán compartidos, vendidos o utilizados para fines distintos a la logística técnica del equipo de gira.
+                </p>
+              </div>
             </div>
 
             <Button 
@@ -303,7 +366,7 @@ export default function App() {
       )}
 
       {showPasswordAlert && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">
+        <div className="fixed inset-0 bg-slate-955/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in print:hidden">
           <Card className="w-full max-w-sm p-6 bg-slate-900 border-amber-500/50 text-center shadow-2xl">
             <div className="mx-auto w-12 h-12 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center mb-4"><Key size={24} /></div>
             <h2 className="text-lg md:text-xl font-black text-white mb-2">¡Aviso de Seguridad!</h2>
@@ -313,9 +376,13 @@ export default function App() {
           </Card>
         </div>
       )}
+
+      {showOnboarding && (
+        <OnboardingModal onClose={() => setShowOnboarding(false)} />
+      )}
       {toastMessage && <div className="fixed top-4 right-4 z-[300] bg-emerald-500 text-white px-3 md:px-4 py-2.5 md:py-3 rounded-lg shadow-lg flex items-center gap-2.5 animate-fade-in print:hidden"><CheckCircle2 size={18} /><span className="font-bold text-xs md:text-sm">{toastMessage}</span></div>}
 
-      <div className={`flex-1 min-h-0 ${theme === 'light' ? 'light-mode bg-slate-50' : 'bg-slate-950'} flex flex-col lg:flex-row font-sans print:bg-white print:text-black`}>
+      <div className="flex-1 min-h-0 bg-slate-950 flex flex-col lg:flex-row font-sans print:bg-white print:text-black">
         <aside className="bg-slate-900 border-r border-slate-800 w-64 shrink-0 hidden lg:flex flex-col h-screen sticky top-0 print:hidden">
           <div className="p-4 flex items-center gap-2.5 border-b border-slate-800"><Music className="text-emerald-500" size={20} /><h1 className="text-lg font-black text-white tracking-widest">ESQUEMAPPS</h1></div>
           <div className="p-3 flex-1 space-y-1 overflow-y-auto custom-scrollbar">
@@ -333,8 +400,8 @@ export default function App() {
           </div>
           <div className="p-3 border-t border-slate-800">
              <div className="flex items-center gap-2.5 mb-3 px-1">
-               <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-xs font-black text-emerald-500 border border-emerald-500 shrink-0">{effectiveUser.name.charAt(0)}</div>
-               <div className="flex-1 min-w-0"><p className="text-xs font-bold text-white truncate">{effectiveUser.name}</p><p className="text-[9px] text-slate-400 uppercase font-bold truncate">{effectiveUser.role}</p></div>
+               <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-xs font-black text-emerald-500 border border-emerald-500 shrink-0">{(effectiveUser?.name || '').charAt(0)}</div>
+               <div className="flex-1 min-w-0"><p className="text-xs font-bold text-white truncate">{effectiveUser?.name || ''}</p><p className="text-[9px] text-slate-400 uppercase font-bold truncate">{effectiveUser?.role || ''}</p></div>
              </div>
              <Button variant="danger" icon={LogOut} onClick={() => requestConfirm("¿Cerrar sesión?", () => setCurrentUser(null))} className="w-full py-2 bg-transparent border-transparent hover:bg-red-500/10 text-xs">Cerrar Sesión</Button>
           </div>
@@ -342,7 +409,7 @@ export default function App() {
 
         <main className="flex-1 relative overflow-y-auto h-screen bg-slate-955 print:bg-white custom-scrollbar print:overflow-visible print:h-auto pb-[70px] lg:pb-0">
           <div className="p-3 md:p-6 print:p-0">
-            {currentView === 'DASHBOARD' && <Dashboard currentUser={effectiveUser} setCurrentView={setCurrentView} setSelectedProject={setSelectedProject} showToast={showToast} directory={directory} />}
+            {currentView === 'DASHBOARD' && <Dashboard currentUser={effectiveUser} setCurrentView={setCurrentView} setSelectedProject={setSelectedProject} showToast={showToast} directory={directory} requestConfirm={requestConfirm} handleQuickAction={handleQuickAction} />}
             {currentView === 'PROJECT_DETAILS' && (
               <ProjectDetailsView 
                 currentUser={effectiveUser} 
@@ -354,9 +421,11 @@ export default function App() {
                 setRiderViewMode={setRiderViewMode}
                 setRiderEditTab={setRiderEditTab}
                 setRiderSingleSectionOnly={setRiderSingleSectionOnly}
+                setSelectedProject={setSelectedProject}
+                handleQuickAction={handleQuickAction}
               />
             )}
-            {currentView === 'PROFILE' && <ProfileView currentUser={effectiveUser} setCurrentUser={setCurrentUser} showToast={showToast} theme={theme} setTheme={setTheme} requestConfirm={requestConfirm} />}
+            {currentView === 'PROFILE' && <ProfileView currentUser={effectiveUser} setCurrentUser={setCurrentUser} showToast={showToast} requestConfirm={requestConfirm} />}
             {currentView === 'STAFF' && <StaffDirectory currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} refreshPendingCount={() => fetchDirectoryGlobal(true)} />}
             {currentView === 'RIDERS' && (
               <RidersView 
@@ -374,9 +443,11 @@ export default function App() {
                 setEditTab={setRiderEditTab}
                 singleSectionOnly={riderSingleSectionOnly}
                 setSingleSectionOnly={setRiderSingleSectionOnly}
+                handleQuickAction={handleQuickAction}
               />
             )}
             {currentView === 'EXPENSES' && <ExpensesView currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} selectedProject={selectedProject} setSelectedProject={setSelectedProject} />}
+            {currentView === 'TIMING_VIEW' && <TimingView currentUser={effectiveUser} showToast={showToast} requestConfirm={requestConfirm} directory={directory} />}
           </div>
         </main>
         

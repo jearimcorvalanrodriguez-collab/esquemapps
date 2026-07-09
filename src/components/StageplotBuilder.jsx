@@ -73,31 +73,77 @@ export const STAGE_ITEMS = {
         <rect x="20" y="21" width="60" height="5" className="fill-slate-100 print:fill-white"/>
       </svg>
     )
-  },
-  GUITAR: {
+  },  GUITAR: {
     label: "Guitarra", width: 13, height: 13, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        {/* Telecaster Guitar only (no stand/bracket) - Centered and parallel (horizontal) */}
-        <g transform="translate(50, 50) rotate(-90 50 57.5) scale(0.8) translate(-50, -57.5)">
+        {/* Transform to scale and center 400x800 into 100x100 space, rotated -90 degrees */}
+        <g transform="translate(50, 50) rotate(-90 50 50) scale(0.12) translate(-200, -400)">
+          {/* Guitar body - Red */}
+          <path d="M 220 350 C 250 350, 260 360, 260 380 C 260 400, 240 410, 230 430 C 320 450, 330 550, 310 650 C 280 750, 120 750, 90 650 C 70 550, 80 450, 130 400 C 150 370, 170 350, 180 350 Z" fill="#ef4444" stroke="#991b1b" strokeWidth="4"/>
           {/* Neck */}
-          <rect x="47" y="10" width="6" height="50" fill="#fde68a" stroke="#d97706" className="print:fill-white print:stroke-black" strokeWidth="1"/>
+          <rect x="180" y="100" width="40" height="250" fill="#E8C58C" stroke="#B8945C" strokeWidth="2"/>
           {/* Headstock */}
-          <path d="M47,10 Q45,2 50,0 Q55,0 55,6 L53,10 Z" fill="#fde68a" stroke="#d97706" className="print:fill-white print:stroke-black" strokeWidth="1"/>
-          {/* Pegs */}
-          <circle cx="56" cy="2" r="1" className="fill-slate-500 print:fill-black"/>
-          <circle cx="56" cy="4" r="1" className="fill-slate-500 print:fill-black"/>
-          <circle cx="56" cy="6" r="1" className="fill-slate-500 print:fill-black"/>
-          <circle cx="56" cy="8" r="1" className="fill-slate-500 print:fill-black"/>
-          
-          {/* Telecaster Body */}
-          <path d="M 45,55 C 33,55 28,60 28,68 C 28,75 35,78 35,82 C 35,86 23,90 23,100 C 23,110 33,115 50,115 C 67,115 77,110 77,100 C 77,90 65,86 65,82 C 65,78 62,75 62,68 C 62,62 69,60 69,54 C 58,54 55,60 50,60 L 45,55 Z" fill="#ef4444" stroke="#b91c1c" className="print:fill-white print:stroke-black" strokeWidth="2.5"/>
+          <path d="M 180 100 L 180 40 C 180 20, 200 20, 220 30 C 240 40, 230 60, 210 70 C 200 75, 200 85, 220 100 Z" fill="#E8C58C" stroke="#B8945C" strokeWidth="2"/>
           {/* Pickguard */}
-          <path d="M 50,60 C 42,60 38,65 38,72 L 48,85 L 58,82 Z" className="fill-slate-950 print:fill-slate-200"/>
-          {/* Control Plate */}
-          <rect x="58" y="85" width="6" height="20" rx="1" className="fill-slate-300 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1" transform="rotate(-15 61 95)"/>
-          {/* Bridge & Pickups */}
-          <rect x="45" y="80" width="10" height="12" className="fill-slate-400 stroke-slate-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <path d="M 180 350 C 140 370, 110 420, 120 500 C 130 550, 170 580, 200 560 C 210 550, 210 530, 210 510 L 240 510 C 245 480, 245 450, 220 440 C 200 430, 200 380, 220 350 Z" fill="#1A1A1A" stroke="#000" strokeWidth="1"/>
+          {/* Controls */}
+          <g transform="rotate(-15 240 560)">
+            <rect x="240" y="540" width="22" height="100" rx="11" fill="#E0E0E0" stroke="#999" strokeWidth="2"/>
+            <line x1="251" y1="552" x2="251" y2="572" stroke="#111" strokeWidth="3" strokeLinecap="round"/>
+            <circle cx="251" cy="552" r="3.5" fill="#111"/>
+            <circle cx="251" cy="595" r="7" fill="#E0E0E0" stroke="#666" strokeWidth="1.5"/>
+            <circle cx="251" cy="595" r="5" fill="#333"/>
+            <circle cx="251" cy="620" r="7" fill="#E0E0E0" stroke="#666" strokeWidth="1.5"/>
+            <circle cx="251" cy="620" r="5" fill="#333"/>
+          </g>
+          {/* Bridge Plate */}
+          <rect x="168" y="550" width="64" height="75" rx="4" fill="#E0E0E0" stroke="#999" strokeWidth="2"/>
+          <g transform="translate(200, 580) rotate(-12)">
+            <rect x="-22" y="-8" width="44" height="16" rx="2" fill="#222"/>
+            <circle cx="-15" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="-9" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="-3" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="3" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="9" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="15" cy="0" r="2" fill="#E0E0E0"/>
+          </g>
+          <rect x="176" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+          <rect x="193" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+          <rect x="210" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+          {/* Neck Pickup */}
+          <rect x="183" y="460" width="34" height="14" rx="4" fill="#E0E0E0" stroke="#999" strokeWidth="1.5"/>
+          {/* Frets */}
+          <path d="M180 120 L220 120 M180 140 L220 140 M180 160 L220 160 M180 178 L220 178 M180 195 L220 195 M180 211 L220 211 M180 226 L220 226 M180 240 L220 240 M180 253 L220 253 M180 265 L220 265 M180 276 L220 276 M180 286 L220 286 M180 295 L220 295 M180 304 L220 304 M180 312 L220 312 M180 320 L220 320 M180 327 L220 327 M180 334 L220 334 M180 340 L220 340 M180 346 L220 346" stroke="#888" strokeWidth="1"/>
+          {/* Fretboard Markers */}
+          <circle cx="200" cy="150" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="186.5" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="218.5" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="246.5" r="2.5" fill="#111"/> 
+          <circle cx="193" cy="281" r="2" fill="#111"/> 
+          <circle cx="207" cy="281" r="2" fill="#111"/> 
+          <circle cx="200" cy="308" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="323.5" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="337" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="348" r="2.5" fill="#111"/> 
+          <rect x="180" y="96" width="40" height="4" fill="#FAFAFA" stroke="#CCC" strokeWidth="1"/>
+          {/* Tuning Pegs */}
+          <g fill="#E0E0E0" stroke="#999" strokeWidth="1">
+            <rect x="168" y="43" width="12" height="4" rx="1"/>
+            <rect x="168" y="53" width="12" height="4" rx="1"/>
+            <rect x="168" y="63" width="12" height="4" rx="1"/>
+            <rect x="168" y="73" width="12" height="4" rx="1"/>
+            <rect x="168" y="83" width="12" height="4" rx="1"/>
+            <rect x="168" y="93" width="12" height="4" rx="1"/>
+            <circle cx="188" cy="45" r="2"/>
+            <circle cx="188" cy="55" r="2"/>
+            <circle cx="188" cy="65" r="2"/>
+            <circle cx="188" cy="75" r="2"/>
+            <circle cx="188" cy="85" r="2"/>
+            <circle cx="188" cy="95" r="2"/>
+          </g>
+          {/* Strings */}
+          <path d="M 179 610 L 179 96 L 188 95 M 183.4 610 L 183.4 96 L 188 85 M 187.8 610 L 187.8 96 L 188 75 M 192.2 610 L 192.2 96 L 188 65 M 196.6 610 L 196.6 96 L 188 55 M 201 610 L 201 96 L 188 45" stroke="#CCC" strokeWidth="0.8" fill="none" opacity="0.8"/>
         </g>
       </svg>
     )
@@ -106,26 +152,73 @@ export const STAGE_ITEMS = {
     label: "Guitarra Telecaster", width: 13, height: 13, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
-        {/* Telecaster Guitar only - Centered and parallel (horizontal) */}
-        <g transform="translate(50, 50) rotate(-90 50 57.5) scale(0.8) translate(-50, -57.5)">
+        {/* Transform to scale and center 400x800 into 100x100 space, rotated -90 degrees */}
+        <g transform="translate(50, 50) rotate(-90 50 50) scale(0.12) translate(-200, -400)">
+          {/* Guitar body - Butterscotch Blonde */}
+          <path d="M 220 350 C 250 350, 260 360, 260 380 C 260 400, 240 410, 230 430 C 320 450, 330 550, 310 650 C 280 750, 120 750, 90 650 C 70 550, 80 450, 130 400 C 150 370, 170 350, 180 350 Z" fill="#F0C05A" stroke="#C7922D" strokeWidth="4"/>
           {/* Neck */}
-          <rect x="47" y="10" width="6" height="50" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <rect x="180" y="100" width="40" height="250" fill="#E8C58C" stroke="#B8945C" strokeWidth="2"/>
           {/* Headstock */}
-          <path d="M47,10 Q45,2 50,0 Q55,0 55,6 L53,10 Z" className="fill-amber-200 stroke-amber-600 print:fill-white print:stroke-black" strokeWidth="1"/>
-          {/* Pegs */}
-          <circle cx="56" cy="2" r="1" className="fill-slate-500 print:fill-black"/>
-          <circle cx="56" cy="4" r="1" className="fill-slate-500 print:fill-black"/>
-          <circle cx="56" cy="6" r="1" className="fill-slate-500 print:fill-black"/>
-          <circle cx="56" cy="8" r="1" className="fill-slate-500 print:fill-black"/>
-          
-          {/* Telecaster Body - Butterscotch Blonde */}
-          <path d="M 45,55 C 33,55 28,60 28,68 C 28,75 35,78 35,82 C 35,86 23,90 23,100 C 23,110 33,115 50,115 C 67,115 77,110 77,100 C 77,90 65,86 65,82 C 65,78 62,75 62,68 C 62,62 69,60 69,54 C 58,54 55,60 50,60 L 45,55 Z" fill="#e8c87d" stroke="#bc9f63" className="print:fill-white print:stroke-black" strokeWidth="2.5"/>
-          {/* Pickguard - Black */}
-          <path d="M 50,60 C 42,60 38,65 38,72 L 48,85 L 58,82 Z" className="fill-slate-950 print:fill-slate-200"/>
-          {/* Control Plate */}
-          <rect x="58" y="85" width="6" height="20" rx="1" className="fill-slate-300 stroke-slate-500 print:fill-white print:stroke-black" strokeWidth="1" transform="rotate(-15 61 95)"/>
-          {/* Bridge & Pickups */}
-          <rect x="45" y="80" width="10" height="12" className="fill-slate-400 stroke-slate-600 print:fill-white print:stroke-black" strokeWidth="1"/>
+          <path d="M 180 100 L 180 40 C 180 20, 200 20, 220 30 C 240 40, 230 60, 210 70 C 200 75, 200 85, 220 100 Z" fill="#E8C58C" stroke="#B8945C" strokeWidth="2"/>
+          {/* Pickguard */}
+          <path d="M 180 350 C 140 370, 110 420, 120 500 C 130 550, 170 580, 200 560 C 210 550, 210 530, 210 510 L 240 510 C 245 480, 245 450, 220 440 C 200 430, 200 380, 220 350 Z" fill="#1A1A1A" stroke="#000" strokeWidth="1"/>
+          {/* Controls */}
+          <g transform="rotate(-15 240 560)">
+            <rect x="240" y="540" width="22" height="100" rx="11" fill="#E0E0E0" stroke="#999" strokeWidth="2"/>
+            <line x1="251" y1="552" x2="251" y2="572" stroke="#111" strokeWidth="3" strokeLinecap="round"/>
+            <circle cx="251" cy="552" r="3.5" fill="#111"/>
+            <circle cx="251" cy="595" r="7" fill="#E0E0E0" stroke="#666" strokeWidth="1.5"/>
+            <circle cx="251" cy="595" r="5" fill="#333"/>
+            <circle cx="251" cy="620" r="7" fill="#E0E0E0" stroke="#666" strokeWidth="1.5"/>
+            <circle cx="251" cy="620" r="5" fill="#333"/>
+          </g>
+          {/* Bridge Plate */}
+          <rect x="168" y="550" width="64" height="75" rx="4" fill="#E0E0E0" stroke="#999" strokeWidth="2"/>
+          <g transform="translate(200, 580) rotate(-12)">
+            <rect x="-22" y="-8" width="44" height="16" rx="2" fill="#222"/>
+            <circle cx="-15" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="-9" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="-3" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="3" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="9" cy="0" r="2" fill="#E0E0E0"/>
+            <circle cx="15" cy="0" r="2" fill="#E0E0E0"/>
+          </g>
+          <rect x="176" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+          <rect x="193" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+          <rect x="210" y="605" width="13" height="8" rx="2" fill="#C5832E" stroke="#8A5A1F"/>
+          {/* Neck Pickup */}
+          <rect x="183" y="460" width="34" height="14" rx="4" fill="#E0E0E0" stroke="#999" strokeWidth="1.5"/>
+          {/* Frets */}
+          <path d="M180 120 L220 120 M180 140 L220 140 M180 160 L220 160 M180 178 L220 178 M180 195 L220 195 M180 211 L220 211 M180 226 L220 226 M180 240 L220 240 M180 253 L220 253 M180 265 L220 265 M180 276 L220 276 M180 286 L220 286 M180 295 L220 295 M180 304 L220 304 M180 312 L220 312 M180 320 L220 320 M180 327 L220 327 M180 334 L220 334 M180 340 L220 340 M180 346 L220 346" stroke="#888" strokeWidth="1"/>
+          {/* Fretboard Markers */}
+          <circle cx="200" cy="150" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="186.5" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="218.5" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="246.5" r="2.5" fill="#111"/> 
+          <circle cx="193" cy="281" r="2" fill="#111"/> 
+          <circle cx="207" cy="281" r="2" fill="#111"/> 
+          <circle cx="200" cy="308" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="323.5" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="337" r="2.5" fill="#111"/> 
+          <circle cx="200" cy="348" r="2.5" fill="#111"/> 
+          <rect x="180" y="96" width="40" height="4" fill="#FAFAFA" stroke="#CCC" strokeWidth="1"/>
+          {/* Tuning Pegs */}
+          <g fill="#E0E0E0" stroke="#999" strokeWidth="1">
+            <rect x="168" y="43" width="12" height="4" rx="1"/>
+            <rect x="168" y="53" width="12" height="4" rx="1"/>
+            <rect x="168" y="63" width="12" height="4" rx="1"/>
+            <rect x="168" y="73" width="12" height="4" rx="1"/>
+            <rect x="168" y="83" width="12" height="4" rx="1"/>
+            <rect x="168" y="93" width="12" height="4" rx="1"/>
+            <circle cx="188" cy="45" r="2"/>
+            <circle cx="188" cy="55" r="2"/>
+            <circle cx="188" cy="65" r="2"/>
+            <circle cx="188" cy="75" r="2"/>
+            <circle cx="188" cy="85" r="2"/>
+            <circle cx="188" cy="95" r="2"/>
+          </g>
+          {/* Strings */}
+          <path d="M 179 610 L 179 96 L 188 95 M 183.4 610 L 183.4 96 L 188 85 M 187.8 610 L 187.8 96 L 188 75 M 192.2 610 L 192.2 96 L 188 65 M 196.6 610 L 196.6 96 L 188 55 M 201 610 L 201 96 L 188 45" stroke="#CCC" strokeWidth="0.8" fill="none" opacity="0.8"/>
         </g>
       </svg>
     )
@@ -268,7 +361,7 @@ export const STAGE_ITEMS = {
     )
   },
   POWER: {
-    label: "Toma 220V", width: 3, height: 3, defaultRotation: 0,
+    label: "Toma 220V", width: 4.2, height: 4.2, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full">
         {/* Red square background */}
@@ -279,7 +372,7 @@ export const STAGE_ITEMS = {
     )
   },
   DI: {
-    label: "D.I. Box", width: 3, height: 2, defaultRotation: 0,
+    label: "D.I. Box", width: 4.2, height: 2.8, defaultRotation: 0,
     render: () => (
       <svg viewBox="0 0 100 100" className="w-full h-full">
         <rect x="8" y="20" width="84" height="60" rx="8" strokeWidth="3" className="fill-slate-855 stroke-slate-600 print:fill-white print:stroke-black"/>
@@ -424,8 +517,42 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
     const rect = canvasRef.current.getBoundingClientRect();
     let x = ((e.clientX - rect.left) / rect.width) * 100;
     let y = ((e.clientY - rect.top) / rect.height) * 100;
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
+
+    const item = items.find(it => it.id === draggedId);
+    if (item) {
+      const def = STAGE_ITEMS[item.type];
+      if (def) {
+        const w = Number(config.width) || 10;
+        const d = Number(config.depth) || 8;
+        const sizeScale = Math.max(0.6, Math.min(2.0, 10 / w));
+        
+        let deviceScale = 1.0;
+        const cw = canvasRef.current.clientWidth || 600;
+        if (cw < 500) {
+          deviceScale = 0.65;
+        } else if (cw < 850) {
+          deviceScale = 0.82;
+        }
+        const itemScale = item.scale !== undefined ? item.scale : 1.0;
+        const scale = sizeScale * deviceScale * itemScale;
+
+        const itemWidthPercent = def.width * scale;
+        const itemHeightPercent = itemWidthPercent * (def.height / def.width) * (w / d);
+
+        const halfW = itemWidthPercent / 2;
+        const halfH = itemHeightPercent / 2;
+
+        x = Math.max(halfW, Math.min(100 - halfW, x));
+        y = Math.max(halfH, Math.min(100 - halfH, y));
+      } else {
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+      }
+    } else {
+      x = Math.max(0, Math.min(100, x));
+      y = Math.max(0, Math.min(100, y));
+    }
+
     onChange(items.map(item => item.id === draggedId ? { ...item, x, y } : item));
   };
 
@@ -564,8 +691,6 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                 className="w-full bg-slate-800 border border-slate-700 rounded p-1 text-[10px] text-white outline-none focus:border-emerald-500 cursor-pointer"
               >
                 <option value="">Añadir músico...</option>
-                <option value="TELECASTER">Guitarra Telecaster</option>
-                <option value="JAZZBASS">Bajo Jazz Bass</option>
                 <option value="VOCALS">Voz Principal</option>
                 <option value="BACKING_VOCALS">Coros</option>
                 <option value="HORNS">Vientos</option>
@@ -677,7 +802,7 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
               </div>
             )}
 
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:5%_5%] opacity-20 print:opacity-10 pointer-events-none z-0"></div>
+            <div className="absolute inset-0 canvas-grid bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:5%_5%] opacity-20 print:opacity-10 pointer-events-none z-0"></div>
             
             <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none z-0">
               <span className="text-[9px] md:text-xs font-black tracking-widest text-slate-500 print:text-black uppercase">Público / Front of Stage</span>
@@ -738,17 +863,17 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                   }}
                 >
                   {isSelected && (
-                    <div className="absolute top-[-52px] left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-1.5 flex items-center gap-1.5 z-[60] cursor-default pointer-events-auto"
+                    <div className="absolute top-[-32px] left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 rounded shadow-2xl p-0.5 flex items-center gap-0.5 z-[60] cursor-default pointer-events-auto"
                          onPointerDown={e => e.stopPropagation()}>
                       <input 
-                        className="bg-slate-955 text-white border border-slate-800 rounded px-2.5 py-1 text-[11px] font-bold w-28 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" 
+                        className="bg-slate-955 text-white border border-slate-800 rounded-sm px-1 text-[8px] font-bold w-12 h-4 outline-none focus:border-emerald-500" 
                         value={item.label} 
                         onChange={e => updateSelected({ label: e.target.value })}
                         placeholder="Nombre..."
                       />
-                      <button type="button" onClick={() => updateSelected({ rotation: (item.rotation + 45) % 360 })} className="p-1.5 bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors" title="Girar 45º"><RotateCw size={12}/></button>
-                      <button type="button" onClick={duplicateSelected} className="p-1.5 bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors" title="Duplicar"><Copy size={12}/></button>
-                      <button type="button" onClick={removeSelected} className="p-1.5 bg-slate-800 hover:bg-red-600 rounded text-white border border-slate-700 transition-colors" title="Eliminar"><Trash2 size={12}/></button>
+                      <button type="button" onClick={() => updateSelected({ rotation: (item.rotation + 45) % 360 })} className="w-4 h-4 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded-sm text-white border border-slate-700 transition-colors" title="Girar 45º"><RotateCw size={8}/></button>
+                      <button type="button" onClick={duplicateSelected} className="w-4 h-4 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded-sm text-white border border-slate-700 transition-colors" title="Duplicar"><Copy size={8}/></button>
+                      <button type="button" onClick={removeSelected} className="w-4 h-4 flex items-center justify-center bg-slate-800 hover:bg-red-600 rounded-sm text-white border border-slate-700 transition-colors" title="Eliminar"><Trash2 size={8}/></button>
                     </div>
                   )}
 
@@ -761,9 +886,9 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                   </div>
                   
                   {item.label && (!isSelected || readOnly) && (
-                    <div className={`${labelPosClass} bg-white text-black border border-slate-300 px-1.5 py-0.5 rounded text-[8px] font-black pointer-events-none shadow-md flex items-center gap-1 z-40 whitespace-nowrap print:bg-white print:text-black print:border-black`}>
-                      <span className="text-emerald-655 font-black">#{originalIdx + 1}</span>
-                      <span>{item.label}</span>
+                    <div className="absolute top-[85%] left-1/2 -translate-x-1/2 bg-black text-white border border-[#bfa15f] px-1.5 py-0.5 rounded text-[8px] font-black pointer-events-none shadow-md flex items-center gap-1 z-40 whitespace-nowrap">
+                      <span className="text-[#bfa15f] font-black">#{originalIdx + 1}</span>
+                      <span className="truncate max-w-[70px]">{item.label}</span>
                     </div>
                   )}
                 </div>
@@ -773,15 +898,15 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
 
           {/* D-Pad & Scale Controller for mobile precise nudge and scaling adjustments */}
           {selectedId && !readOnly && (
-            <div className="absolute bottom-10 right-4 bg-slate-900/95 border border-slate-700/80 p-2.5 rounded-xl flex flex-col gap-2 items-center z-[70] shadow-2xl print:hidden animate-fade-in touch-none w-28 text-slate-100">
-              <span className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Ajuste Fino</span>
+            <div className="absolute bottom-10 right-4 bg-slate-900/95 border border-slate-700/80 p-1 rounded flex flex-col gap-0.5 items-center z-[70] shadow-2xl print:hidden animate-fade-in touch-none w-16 text-slate-100">
+              <span className="text-[6.5px] font-black uppercase text-slate-400 tracking-wider">Ajuste Fino</span>
               
-              <div className="grid grid-cols-3 gap-1 w-24">
+              <div className="grid grid-cols-3 gap-0.5 w-[48px]">
                 <div></div>
                 <button 
                   type="button" 
                   onClick={() => nudgeItem(0, -1)} 
-                  className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-xs"
+                  className="w-4 h-4 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-[7px]"
                 >
                   ▲
                 </button>
@@ -790,17 +915,17 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                 <button 
                   type="button" 
                   onClick={() => nudgeItem(-1, 0)} 
-                  className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-xs"
+                  className="w-4 h-4 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-[7px]"
                 >
                   ◀
                 </button>
-                <div className="w-7 h-7 bg-slate-955 border border-slate-850 rounded flex items-center justify-center text-[9px] font-bold text-slate-500">
+                <div className="w-4 h-4 bg-slate-955 border border-slate-850 rounded flex items-center justify-center text-[6px] font-bold text-slate-500">
                   {Math.round(items.find(it => it.id === selectedId)?.x)}%
                 </div>
                 <button 
                   type="button" 
                   onClick={() => nudgeItem(1, 0)} 
-                  className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-xs"
+                  className="w-4 h-4 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-[7px]"
                 >
                   ▶
                 </button>
@@ -809,7 +934,7 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                 <button 
                   type="button" 
                   onClick={() => nudgeItem(0, 1)} 
-                  className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-xs"
+                  className="w-4 h-4 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 transition-colors active:bg-emerald-700 text-[7px]"
                 >
                   ▼
                 </button>
@@ -817,23 +942,23 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
               </div>
 
               {/* Stash scaling slider/control */}
-              <div className="border-t border-slate-800 pt-1.5 w-full flex flex-col items-center gap-1.5">
-                <span className="text-[7.5px] font-black uppercase text-slate-400 tracking-wider">Escala</span>
-                <div className="flex gap-1.5 w-full justify-between">
+              <div className="border-t border-slate-800 pt-0.5 w-full flex flex-col items-center gap-0.5">
+                <span className="text-[6px] font-black uppercase text-slate-400 tracking-wider">Escala</span>
+                <div className="flex gap-0.5 w-full justify-between items-center">
                   <button 
                     type="button" 
                     onClick={() => updateSelected({ scale: Math.max(0.4, Number((items.find(it => it.id === selectedId)?.scale || 1.0) - 0.1).toFixed(1)) })}
-                    className="flex-1 py-0.5 bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 text-[10px] font-black active:bg-emerald-700"
+                    className="w-3.5 h-3.5 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 text-[7px] font-black active:bg-emerald-700"
                   >
                     -
                   </button>
-                  <span className="text-[9px] font-mono font-bold text-slate-300 self-center">
+                  <span className="text-[7px] font-mono font-bold text-slate-350">
                     {Math.round((items.find(it => it.id === selectedId)?.scale || 1.0) * 100)}%
                   </span>
                   <button 
                     type="button" 
                     onClick={() => updateSelected({ scale: Math.min(2.5, Number((items.find(it => it.id === selectedId)?.scale || 1.0) + 0.1).toFixed(1)) })}
-                    className="flex-1 py-0.5 bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 text-[10px] font-black active:bg-emerald-700"
+                    className="w-3.5 h-3.5 flex items-center justify-center bg-slate-800 hover:bg-emerald-600 rounded text-white border border-slate-700 text-[7px] font-black active:bg-emerald-700"
                   >
                     +
                   </button>
@@ -844,8 +969,8 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
         </div>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 mt-2 print:mt-4">
-        <div className="flex justify-between items-center mb-3">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 mt-2 print:mt-4">
+        <div className="flex justify-between items-center mb-2">
           <h4 className="text-xs font-black uppercase text-emerald-400 tracking-wider">Leyenda y Control de Escenario</h4>
           <span className="text-[10px] text-slate-500 font-bold">{items.length} {items.length === 1 ? 'objeto' : 'objetos'}</span>
         </div>
@@ -853,7 +978,7 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
         {items.length === 0 ? (
           <div className="text-center p-6 text-xs text-slate-500 italic">No hay equipos agregados en el escenario.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 print:grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 print:grid-cols-3 gap-1.5 text-xs">
             {items.map((item, idx) => {
               const def = STAGE_ITEMS[item.type];
               if (!def) return null;
@@ -861,19 +986,19 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                 <div 
                   key={item.id} 
                   onClick={() => !readOnly && setSelectedId(item.id)}
-                  className={`flex items-center justify-between gap-2 p-1.5 rounded-lg border transition-colors ${selectedId === item.id ? 'border-emerald-500 bg-emerald-500/5' : 'border-slate-800 bg-slate-950/20'} print:border-black print:bg-white`}
+                  className={`flex items-center justify-between gap-1 p-1 rounded border transition-colors ${selectedId === item.id ? 'border-emerald-500 bg-emerald-500/5' : 'border-slate-800 bg-slate-950/20'} print:border-black print:bg-white`}
                 >
-                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-[10px] border border-emerald-500/30 shrink-0">
-                      {idx + 1}
+                  <div className="flex items-center gap-1 flex-1 min-w-0">
+                    <span className="inline-flex items-center justify-center w-4.5 h-4.5 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-[9px] border border-emerald-500/30 shrink-0">
+                      #{idx + 1}
                     </span>
-                    <div className="w-4 h-4 shrink-0 text-slate-400">{def.render()}</div>
+                    <div className="w-3.5 h-3.5 shrink-0 text-slate-400 flex items-center justify-center">{def.render()}</div>
                     <div className="flex-1 min-w-0 text-left">
                       {readOnly ? (
-                        <p className="text-[11px] text-slate-300 font-bold truncate leading-none">{item.label || def.label}</p>
+                        <p className="text-[10px] text-slate-300 font-bold truncate leading-none">{item.label || def.label}</p>
                       ) : (
                         <input 
-                          className="w-full bg-white text-black border border-slate-300 focus:border-emerald-500 rounded px-1.5 py-0.5 text-[11px] font-bold outline-none transition-colors leading-none"
+                          className="legend-input w-full bg-white text-black border border-slate-300 focus:border-emerald-500 rounded px-1 text-[10px] font-bold outline-none transition-colors leading-none"
                           value={item.label}
                           onChange={(e) => {
                             onChange(items.map(it => it.id === item.id ? { ...it, label: e.target.value } : it));
@@ -885,17 +1010,17 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                   </div>
                   
                   {!readOnly && (
-                    <div className="flex items-center gap-1 shrink-0 print:hidden">
+                    <div className="flex items-center gap-0.5 shrink-0 print:hidden">
                       <button 
                         type="button" 
                         onClick={(e) => {
                           e.stopPropagation();
                           onChange(items.map(it => it.id === item.id ? { ...it, rotation: (it.rotation + 45) % 360 } : it));
                         }} 
-                        className="p-1 bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 rounded transition-colors"
+                        className="p-0.5 text-slate-400 hover:text-emerald-400 transition-colors"
                         title={`Rotar: ${item.rotation}°`}
                       >
-                        <RotateCw size={10}/>
+                        <RotateCw size={9}/>
                       </button>
                       <button 
                         type="button" 
@@ -904,10 +1029,10 @@ export const StageplotBuilder = ({ items, onChange, config, onConfigChange, read
                           onChange(items.filter(it => it.id !== item.id));
                           if (selectedId === item.id) setSelectedId(null);
                         }} 
-                        className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+                        className="p-0.5 text-red-500 hover:text-red-400 transition-colors"
                         title="Eliminar"
                       >
-                        <Trash2 size={10}/>
+                        <Trash2 size={9}/>
                       </button>
                     </div>
                   )}

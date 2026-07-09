@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Navigation, RefreshCw, FolderPlus, Music, Calendar, 
-  User, Users, AlertCircle, X, CheckSquare, Square 
+  User, Users, AlertCircle, X, CheckSquare, Square, Trash2, Plus 
 } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { NotificationsButton } from '../components/NotificationsButton';
+import { QuickActionsButton } from '../components/QuickActionsButton';
 import { PianoLoader } from '../components/PianoLoader';
 import { CACHE, apiFetch, clearCache, setCache } from '../utils/api';
 import { ROLES } from '../utils/constants';
 
-export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast, directory }) => {
+export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, showToast, directory, requestConfirm, handleQuickAction }) => {
   const canCreate = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECTS_MANAGE');
   const canAssignTeam = [ROLES.ADMIN, ROLES.MANAGER, ROLES.TOUR_MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECT_ASSIGN');
   const canStatusProject = [ROLES.ADMIN, ROLES.MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECT_STATUS');
@@ -80,6 +81,26 @@ export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, sho
     } catch(e) { showToast("Error al actualizar."); }
   };
 
+  const handleDeleteProyecto = async (proyecto) => {
+    const canDelete = [ROLES.ADMIN, ROLES.MANAGER].includes(currentUser.role) || (currentUser.permisos || []).includes('PROJECTS_MANAGE');
+    if (!canDelete) {
+      showToast("No tienes permisos para eliminar proyectos.");
+      return;
+    }
+    requestConfirm(`¿Eliminar el Proyecto/Gira "${proyecto.name}" permanentemente?`, async () => {
+      setLoading(true);
+      try {
+        await apiFetch('deleteProyecto', { id: proyecto.id });
+        showToast("Proyecto eliminado permanentemente.");
+        clearCache('proyectos');
+        fetchProyectos(true);
+      } catch(e) {
+        showToast("Error al eliminar el proyecto.");
+        setLoading(false);
+      }
+    });
+  };
+
   const toggleAssignProject = (email) => {
     setAssigningProject(prev => {
       const isAssigned = prev.asignados.includes(email);
@@ -96,16 +117,16 @@ export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, sho
     } catch(e) { showToast("Error al guardar."); }
   };
 
-  const visibleProyectos = canCreate ? proyectos : proyectos.filter(p => p.asignados.includes(currentUser.email));
+  const visibleProyectos = canCreate ? proyectos : proyectos.filter(p => (p.asignados || []).includes(currentUser?.email));
 
   return (
     <div className="space-y-4 md:space-y-6 animate-fade-in pb-24 max-w-6xl mx-auto">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-slate-800 pb-4">
-        <div><h1 className="text-2xl md:text-3xl font-black text-white leading-tight">Hola, {currentUser.name.split(' ')[0]}</h1><p className="text-emerald-400 text-xs md:text-sm font-black uppercase tracking-wider">{currentUser.role}</p></div>
+        <div><h1 className="text-2xl md:text-3xl font-black text-white leading-tight">Hola, {(currentUser?.name || '').split(' ')[0]}</h1><p className="text-emerald-400 text-xs md:text-sm font-black uppercase tracking-wider">{currentUser?.role || ''}</p></div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <NotificationsButton currentUser={currentUser} />
           <Button variant="ghost" icon={RefreshCw} onClick={() => fetchProyectos(true)} className="px-2 border border-slate-700 hover:text-emerald-400" title="Actualizar Proyectos" />
-          {canCreate && !isCreating && <Button icon={FolderPlus} variant="primary" className="flex-1 sm:flex-none" onClick={() => setIsCreating(true)}>Nuevo Proyecto</Button>}
+          {canCreate && !isCreating && proyectos.length > 0 && <Button icon={FolderPlus} variant="primary" className="flex-1 sm:flex-none" onClick={() => setIsCreating(true)}>Nuevo Proyecto</Button>}
         </div>
       </header>
 
@@ -132,6 +153,21 @@ export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, sho
           <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-xl text-red-400 flex items-center gap-2 text-sm"><AlertCircle size={18} /> {fetchError}</div>
         ) : loading && proyectos.length === 0 ? (
           <div className="flex justify-center p-8"><PianoLoader size={40} /></div>
+        ) : proyectos.length === 0 ? (
+          !isCreating && (
+            <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50 mt-4 flex flex-col items-center justify-center">
+               <Navigation className="mx-auto text-slate-600 mb-3" size={48} />
+               <p className="text-slate-400 font-light text-sm mb-4">Acá estarán los proyectos creados</p>
+               {canCreate && (
+                 <button 
+                   onClick={() => setIsCreating(true)}
+                   className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-light px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1"
+                 >
+                   <span>+ Crear Proyecto</span>
+                 </button>
+               )}
+            </div>
+          )
         ) : visibleProyectos.length === 0 ? (
           <div className="text-center p-12 border border-slate-800 border-dashed rounded-xl bg-slate-900/50 mt-6">
              <Navigation className="mx-auto text-slate-600 mb-4" size={48} />
@@ -147,14 +183,25 @@ export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, sho
                 <Card 
                   key={proyecto.id} 
                   onClick={() => { setSelectedProject(proyecto); setCurrentView('PROJECT_DETAILS'); }}
-                  className={`group cursor-pointer ${proyecto.status === 'ACTIVO' ? 'hover:border-emerald-500' : 'opacity-70 grayscale hover:grayscale-0'}`}
+                  className={`group cursor-pointer ${proyecto.status === 'ACTIVO' ? 'hover:border-emerald-500' : 'opacity-70 grayscale hover:grayscale-0'} relative`}
                 >
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-3">
-                      <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><Music className="text-emerald-500" size={20} /></div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded block w-fit ${proyecto.status === 'ACTIVO' ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-400 bg-slate-800 border border-slate-700'}`}>{proyecto.status}</span>
-                        <span className="text-[9px] md:text-[10px] bg-slate-800 text-emerald-400 px-2 py-0.5 rounded border border-slate-700 uppercase font-bold tracking-wider">{proyecto.type}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/20"><Music className="text-emerald-500" size={20} /></div>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSelectedProject(proyecto); setCurrentView('PROJECT_DETAILS'); }}
+                          className="text-[10px] font-black uppercase tracking-wider text-emerald-450 hover:text-emerald-350 transition-colors bg-transparent border-0 outline-none p-0 cursor-pointer"
+                        >
+                          Planificación
+                        </button>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 pr-6">
+                        {proyecto.status !== 'PLANIFICACION' && (
+                          <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded block w-fit ${proyecto.status === 'ACTIVO' ? 'text-emerald-500 bg-emerald-500/10' : 'text-slate-400 bg-slate-800 border border-slate-700'}`}>{proyecto.status}</span>
+                        )}
+                        <span className="text-[9px] md:text-[10px] text-emerald-400 uppercase font-bold tracking-wider">{proyecto.type}</span>
                       </div>
                     </div>
                     
@@ -169,18 +216,36 @@ export const Dashboard = ({ currentUser, setCurrentView, setSelectedProject, sho
                     <div className="flex flex-col gap-1.5 border-t border-slate-700 pt-3">
                       {canAssignTeam && (
                         <Button variant="ghost" className="w-full bg-slate-900 border border-slate-700 hover:text-white text-[10px] md:text-xs py-1.5 mb-1" icon={Users} onClick={(e) => { e.stopPropagation(); setAssigningProject(proyecto); }}>
-                          Asignar Equipo ({proyecto.asignados.length})
+                          Asignar Equipo ({(proyecto.asignados || []).length})
                         </Button>
                       )}
                       {canStatusProject && (
                         <div className="flex gap-1.5">
                           <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 hover:text-white text-[10px] md:text-xs py-1.5" onClick={(e) => { e.stopPropagation(); showToast("Para editar nombre hazlo desde la BD."); }}>Editar</Button>
-                          <Button variant="ghost" className="flex-1 bg-slate-900 border border-slate-700 hover:text-emerald-400 text-[10px] md:text-xs py-1.5" onClick={(e) => handleUpdateStatus(e, proyecto.id, proyecto.status)}>
-                            {proyecto.status === 'ACTIVO' ? 'Finalizar' : 'Reactivar'}
+                          <Button 
+                            variant="ghost" 
+                            className={`flex-1 text-[10px] md:text-xs py-1.5 border font-bold transition-all duration-200 ${
+                              proyecto.status === 'ACTIVO' 
+                                ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400 hover:bg-red-950/40 hover:border-red-500 hover:text-red-400' 
+                                : 'bg-red-950/50 border-red-500 text-red-400 hover:bg-emerald-950/40 hover:border-emerald-500 hover:text-emerald-450'
+                            }`} 
+                            onClick={(e) => handleUpdateStatus(e, proyecto.id, proyecto.status)}
+                          >
+                            {proyecto.status === 'ACTIVO' ? 'Activo' : 'Inactivo'}
                           </Button>
                         </div>
                       )}
                     </div>
+                    {(currentUser.role === ROLES.ADMIN || currentUser.role === ROLES.MANAGER || (currentUser.permisos || []).includes('PROJECTS_MANAGE')) && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteProyecto(proyecto); }}
+                        className="absolute top-3 right-3 text-slate-500 hover:text-red-500 transition-colors p-1 bg-slate-900/50 border border-slate-800 hover:border-red-500/30 rounded z-10"
+                        title="Eliminar Proyecto"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </div>
                 </Card>
               )

@@ -66,218 +66,452 @@
 }
 
 /* ==========================================
-   ☀️ DAYLIGHT COMPUTER DC-1 DESIGN SYSTEM
+   🎬 MIX WITH THE MASTERS PREMIUM STUDIO THEME (Default / Dark)
    ========================================== */
-.light-mode {
-  color: #0c0d0e !important;
-  background-color: #faf5f2 !important;
+@media screen {
+  body,
+  .bg-slate-955,
+  .bg-slate-955\/90,
+  .bg-slate-955\/20,
+  .bg-slate-950,
+  .bg-slate-950\/80 {
+    background-color: #090908 !important;
+    color: #ffffff !important;
+  }
+
+  /* Sidebar */
+  aside,
+  nav,
+  .bg-slate-900,
+  .bg-slate-900\/40,
+  .bg-slate-900\/50,
+  .bg-slate-900.border-b,
+  .lg\:w-64 {
+    background-color: #121210 !important;
+    color: #ffffff !important;
+    border-color: #242421 !important;
+  }
+
+  /* Title Containers - blend completely with the darkest background & compact layout */
+  header,
+  header.border-b {
+    background-color: #090908 !important;
+    border-color: #242421 !important;
+    padding: 0.25rem 0 0.5rem 0 !important; /* Extremely compact vertical padding */
+    margin-top: 0px !important;
+    margin-bottom: 0.75rem !important; /* Reduced margin to bring up content */
+    box-shadow: none !important;
+  }
+
+  header h1 {
+    font-size: 1.35rem !important; /* Compact header size */
+    line-height: 1.25 !important;
+    font-weight: 900 !important;
+  }
+
+  header p {
+    font-size: 0.65rem !important; /* Muted subtitle */
+    margin-top: 0.1rem !important;
+  }
+
+  /* Compact button padding inside headers */
+  header button,
+  header .btn,
+  header a {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Studio Cards & Sheets */
+  .bg-slate-800,
+  .bg-slate-850,
+  .bg-slate-900\/80,
+  .bg-slate-950\/60,
+  .bg-slate-900\/90,
+  .bg-slate-900\/95 {
+    background-color: #171715 !important;
+    color: #ffffff !important;
+    border-color: #2a2a26 !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  /* Form inputs & dropdowns */
+  input:not([type="checkbox"]),
+  select,
+  textarea,
+  .bg-slate-900\/20 {
+    background-color: #1d1d1b !important;
+    color: #ffffff !important;
+    border-color: #2e2e2a !important;
+  }
+  
+  /* Guarantee white text color on screen for all input/select/textarea by default */
+  input, select, textarea {
+    color: #ffffff !important;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #bfa15f !important; /* Gold */
+    outline: none !important;
+    box-shadow: 0 0 0 1px #bfa15f !important;
+  }
+
+  /* Dark theme Borders */
+  .border-slate-800,
+  .border-slate-700,
+  .border-slate-850,
+  .border-slate-900,
+  .border-slate-700\/50,
+  .border-slate-800\/50,
+  .border-slate-655,
+  .border-slate-600 {
+    border-color: #2a2a26 !important;
+  }
+
+  /* Texts */
+  .text-slate-300,
+  .text-slate-400,
+  p {
+    color: #a8a5a0 !important; /* Warm silver */
+  }
+
+  .text-slate-500 {
+    color: #6b6864 !important; /* Muted warm grey */
+  }
+
+  /* Hover and active states */
+  .hover\:bg-slate-800:hover {
+    background-color: #1e1e1b !important;
+    color: #bfa15f !important;
+  }
+  .hover\:bg-slate-800\/50:hover,
+  .hover\:bg-slate-850\/50:hover {
+    background-color: #1e1e1b !important;
+    color: #bfa15f !important;
+  }
+
+  /* Gold active menu wash */
+  .bg-emerald-500\/10 {
+    background-color: rgba(191, 161, 95, 0.08) !important;
+    border-color: rgba(191, 161, 95, 0.2) !important;
+    color: #bfa15f !important;
+  }
+  .text-emerald-400 {
+    color: #bfa15f !important;
+  }
+
+  /* Primary Gold Action Buttons */
+  .bg-emerald-600, 
+  .bg-emerald-500,
+  .bg-blue-600,
+  .bg-blue-500 {
+    background-color: #bfa15f !important;
+    color: #090908 !important;
+    border: none !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.025em !important;
+  }
+  .bg-emerald-600:hover, 
+  .bg-emerald-500:hover,
+  .bg-blue-600:hover,
+  .bg-blue-500:hover {
+    background-color: #ac8d4c !important;
+  }
+
+  /* Secondary dark grey buttons */
+  .bg-slate-700 {
+    background-color: #242421 !important;
+    color: #ffffff !important;
+    border-color: #2e2e2a !important;
+  }
+  .bg-slate-700:hover {
+    background-color: #2e2e2a !important;
+  }
+
+  .bg-slate-800 {
+    background-color: #1d1d1b !important;
+    color: #ffffff !important;
+    border-color: #2a2a26 !important;
+  }
+  .bg-slate-800:hover {
+    background-color: #242421 !important;
+  }
+
+  /* Red / Crimson buttons */
+  .bg-red-600, 
+  .bg-red-500 {
+    background-color: #a83232 !important;
+    color: #ffffff !important;
+  }
+  .bg-red-600:hover, 
+  .bg-red-500:hover {
+    background-color: #8c2626 !important;
+  }
+
+  /* Status text color mapping to Gold */
+  .text-emerald-500,
+  .text-emerald-350,
+  .text-emerald-300 { color: #bfa15f !important; }
+  .text-emerald-600,
+  .text-emerald-700 { color: #ac8d4c !important; }
+
+  .text-amber-500,
+  .text-amber-400 { color: #bfa15f !important; }
+  .text-blue-500,
+  .text-blue-400 { color: #bfa15f !important; }
+
+  /* Tables in dark theme */
+  thead.bg-slate-800,
+  thead.bg-slate-900 { background-color: #121210 !important; }
+  thead th { color: #a8a5a0 !important; }
+  tr { border-color: #242421 !important; }
+
+  /* Stageplot canvas background in dark theme */
+  #canvas-bg {
+    background-color: #0d0d0c !important;
+    border-color: #242421 !important;
+  }
+
+  /* Ensure all inputs and textareas in tables have crisp white text and compact layout */
+  table input,
+  table textarea,
+  table select {
+    color: #ffffff !important;
+  }
+  
+  table td {
+    color: #ffffff;
+  }
+
+  table textarea {
+    padding: 0.25rem 0.5rem !important;
+    min-height: 36px !important;
+    line-height: 1.2 !important;
+    border-radius: 4px !important;
+  }
+
+  table input {
+    padding: 0.25rem 0.5rem !important;
+    height: 26px !important;
+    border-radius: 4px !important;
+  }
+
+  /* Compact select, inputs and buttons inside Stageplot Builder left sidebar */
+  .w-full.md\:w-56 select,
+  .w-full.md\:w-56 input,
+  .w-full.md\:w-56 button {
+    padding: 0.25rem 0.5rem !important;
+    height: 26px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+  }
+
+  /* Do not force small height/padding on instrument select grid buttons, to show thumbnails fully */
+  .w-full.md\:w-56 .grid button {
+    height: auto !important;
+    padding: 0.5rem !important;
+    min-height: 58px !important;
+  }
+
+  /* Specific overrides to force 30% size increase on Stageplot Builder floating and nudge controls */
+  .absolute.top-\[-32px\] {
+    padding: 3px !important;
+    border-radius: 5px !important;
+    background-color: #121210 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+    height: 26px !important;
+  }
+
+  .absolute.top-\[-32px\] input {
+    width: 78px !important;
+    height: 20px !important;
+    padding: 0px 6px !important;
+    font-size: 10px !important;
+    border-radius: 3px !important;
+    background-color: #090908 !important;
+    color: #ffffff !important;
+  }
+
+  .absolute.top-\[-32px\] button {
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    border-radius: 3px !important;
+    min-width: unset !important;
+    min-height: unset !important;
+  }
+  
+  .absolute.top-\[-32px\] button svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  /* Nudge/D-Pad controller absolute override */
+  .absolute.bottom-10.right-4 {
+    padding: 5px !important;
+    border-radius: 8px !important;
+    width: 88px !important;
+    background-color: rgba(18, 18, 16, 0.95) !important;
+  }
+  
+  .absolute.bottom-10.right-4 button {
+    width: 21px !important;
+    height: 21px !important;
+    padding: 0 !important;
+    border-radius: 3px !important;
+    font-size: 9px !important;
+    min-width: unset !important;
+    min-height: unset !important;
+  }
+
+  .absolute.bottom-10.right-4 .w-4.h-4 {
+    width: 21px !important;
+    height: 21px !important;
+  }
+
+  .absolute.bottom-10.right-4 .w-3\.5.h-3\.5 {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 9px !important;
+  }
+  
+  .absolute.bottom-10.right-4 span {
+    font-size: 8px !important;
+  }
+
+  /* Legend input override */
+  .legend-input {
+    padding: 2px 4px !important;
+    height: 18px !important;
+    font-size: 10px !important;
+    border-radius: 3px !important;
+    background-color: #090908 !important;
+    color: #ffffff !important;
+    border-color: #2e2e2a !important;
+  }
 }
 
-/* Calm Page Background (Warm Paper) */
-.light-mode,
-.light-mode .bg-slate-955,
-.light-mode .bg-slate-955\/20,
-.light-mode .bg-slate-950,
-.light-mode .bg-slate-950\/80,
-.light-mode .bg-slate-955\/90 {
-  background-color: #faf5f2 !important;
-  color: #0c0d0e !important;
+
+/* ==========================================
+   🎨 TEXT CONTRAST & SPACIOUS SPACING OVERRIDES
+   ========================================== */
+/* Fix dark text on dark studio background - make them pearl white */
+.text-slate-900,
+.text-slate-950,
+.text-slate-800,
+.text-slate-700,
+.text-slate-600,
+.text-black,
+.text-slate-900\/50,
+.text-slate-800\/80 {
+  color: #f3eae1 !important; /* Premium Pearl / Cream White */
 }
 
-/* Notebook Margin Sidebar */
-.light-mode aside,
-.light-mode header,
-.light-mode nav,
-.light-mode .bg-slate-900,
-.light-mode .bg-slate-900\/40,
-.light-mode .bg-slate-900\/50,
-.light-mode .bg-slate-900.border-b,
-.light-mode .lg\:w-64 {
-  background-color: #f5ede8 !important; /* Notebook paper edge color */
-  color: #0c0d0e !important;
-  border-color: rgba(12, 13, 14, 0.08) !important;
+/* Except on elements with gold backgrounds (like primary buttons, badges, selectors) where text must remain dark for contrast */
+.bg-emerald-500 .text-slate-900,
+.bg-emerald-600 .text-slate-900,
+.bg-emerald-500 .text-black,
+.bg-emerald-600 .text-black,
+.bg-emerald-500 .text-slate-800,
+.bg-emerald-600 .text-slate-800,
+.bg-blue-500 .text-slate-900,
+.bg-blue-600 .text-slate-900,
+.bg-blue-500 .text-black,
+.bg-blue-600 .text-black,
+.bg-blue-500 .text-slate-800,
+.bg-blue-600 .text-slate-800,
+button.bg-emerald-500,
+button.bg-emerald-600,
+button.bg-blue-500,
+button.bg-blue-600,
+.bg-amber-400,
+.bg-amber-500,
+.bg-emerald-400,
+.bg-emerald-500,
+.bg-emerald-600 {
+  color: #090908 !important;
 }
 
-/* Tactile Cards & Sections (Paper Sheets) */
-.light-mode .bg-slate-800,
-.light-mode .bg-slate-850,
-.light-mode .bg-slate-900\/80,
-.light-mode .bg-slate-950\/60,
-.light-mode .bg-slate-900\/90,
-.light-mode .bg-slate-900\/95 {
-  background-color: #ffffff !important;
-  color: #0c0d0e !important;
-  border-color: rgba(12, 13, 14, 0.08) !important;
-  box-shadow: 0 1px 2px 0 rgba(12, 13, 14, 0.03) !important;
+/* Spacious Container padding / margins (look & feel MWTM) */
+.bg-slate-800, 
+.bg-slate-850,
+.bg-slate-900\/80,
+.bg-slate-950\/60,
+.bg-slate-900\/90,
+.bg-slate-900\/95 {
+  padding: 1rem !important; /* Compact interior padding on mobile/tablet */
+  border-radius: 12px !important;
 }
 
-/* Tactile Inputs & Selects */
-.light-mode input:not([type="checkbox"]),
-.light-mode select,
-.light-mode textarea,
-.light-mode .bg-slate-900\/20 {
-  background-color: #ffffff !important;
-  color: #0c0d0e !important;
-  border-color: rgba(12, 13, 14, 0.15) !important;
+@media (min-width: 1024px) {
+  .bg-slate-800, 
+  .bg-slate-850,
+  .bg-slate-900\/80,
+  .bg-slate-950\/60,
+  .bg-slate-900\/90,
+  .bg-slate-900\/95 {
+    padding: 1.5rem !important; /* Generous interior padding on desktop */
+  }
+}
+
+/* Sidebar and compact sections - maintain clean spacing */
+aside, 
+aside * {
+  border-radius: inherit !important;
+}
+
+aside .p-4 {
+  padding: 1.25rem 1.5rem !important;
+}
+
+aside button {
+  padding: 0.75rem 1.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Text inputs and selects - standard compact height and styling */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="image"]),
+select {
+  height: 2rem !important; /* exactly 32px */
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
   border-radius: 6px !important;
-}
-.light-mode input:focus,
-.light-mode select:focus,
-.light-mode textarea:focus {
-  border-color: #e58a2d !important; /* Daylight signature Amber Glow */
-  outline: none !important;
-  box-shadow: 0 0 0 1px #e58a2d !important;
+  font-size: 0.75rem !important; /* text-xs */
 }
 
-/* Fine-line borders */
-.light-mode .border-slate-800,
-.light-mode .border-slate-700,
-.light-mode .border-slate-850,
-.light-mode .border-slate-900,
-.light-mode .border-slate-700\/50,
-.light-mode .border-slate-800\/50,
-.light-mode .border-slate-600 {
-  border-color: rgba(12, 13, 14, 0.08) !important;
+textarea {
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important; /* text-xs */
 }
 
-/* Dynamic text color contrast */
-.light-mode .text-white,
-.light-mode .text-slate-50,
-.light-mode .text-slate-100,
-.light-mode .text-slate-200,
-.light-mode h1,
-.light-mode h2,
-.light-mode h3,
-.light-mode h4,
-.light-mode .font-bold {
-  color: #0c0d0e !important;
+/* Table cells - beautiful studio dashboard margins */
+th, td {
+  padding: 0.5rem 0.75rem !important; /* Compact margins on mobile/tablet */
+  border-bottom-width: 1px !important;
 }
 
-.light-mode .text-slate-300,
-.light-mode .text-slate-400,
-.light-mode p {
-  color: #55524f !important; /* Charcoal brown */
+@media (min-width: 1024px) {
+  th, td {
+    padding: 0.75rem 1.25rem !important; /* Luxury margins on desktop */
+  }
 }
 
-.light-mode .text-slate-500 {
-  color: #8c8884 !important; /* Warm gray */
+span.rounded-full:not([class*="w-"]):not([class*="h-"]) {
+  padding: 0.35rem 0.85rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  font-size: 0.65rem !important;
 }
 
-.light-mode input::placeholder,
-.light-mode textarea::placeholder {
-  color: #a39f9b !important;
-}
-
-/* Sidebar and menu hover states */
-.light-mode .hover\:bg-slate-800:hover {
-  background-color: rgba(12, 13, 14, 0.04) !important;
-  color: #0c0d0e !important;
-}
-.light-mode .hover\:bg-slate-800\/50:hover,
-.light-mode .hover\:bg-slate-850\/50:hover {
-  background-color: rgba(12, 13, 14, 0.04) !important;
-  color: #0c0d0e !important;
-}
-
-.light-mode .bg-slate-800\/50,
-.light-mode .bg-slate-800\/80 {
-  background-color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Soft Amber Glow Active Highlights */
-.light-mode .bg-emerald-500\/10 {
-  background-color: rgba(229, 138, 45, 0.08) !important;
-  border-color: rgba(229, 138, 45, 0.2) !important;
-}
-.light-mode .bg-emerald-500\/20 {
-  background-color: rgba(229, 138, 45, 0.12) !important;
-  border-color: rgba(229, 138, 45, 0.3) !important;
-}
-.light-mode .bg-emerald-500\/5 {
-  background-color: rgba(229, 138, 45, 0.04) !important;
-}
-
-/* Buttons */
-.light-mode .bg-slate-700 {
-  background-color: #e8e2de !important;
-  color: #0c0d0e !important;
-  border-color: rgba(12, 13, 14, 0.1) !important;
-}
-.light-mode .bg-slate-700:hover {
-  background-color: #dcd5d0 !important;
-}
-
-.light-mode .bg-slate-800 {
-  background-color: #f5ede8 !important;
-  color: #0c0d0e !important;
-  border-color: rgba(12, 13, 14, 0.08) !important;
-}
-.light-mode .bg-slate-800:hover {
-  background-color: #e8e2de !important;
-}
-
-/* Signature Daylight Amber pill button */
-.light-mode .bg-emerald-600, 
-.light-mode .bg-emerald-500,
-.light-mode .bg-blue-600,
-.light-mode .bg-blue-500 {
-  background-color: #e58a2d !important;
-  color: #ffffff !important;
-  border-radius: 9999px !important;
-  border: none !important;
-  font-weight: 600 !important;
-}
-.light-mode .bg-emerald-600:hover, 
-.light-mode .bg-emerald-500:hover,
-.light-mode .bg-blue-600:hover,
-.light-mode .bg-blue-500:hover {
-  background-color: #c9721d !important;
-}
-
-/* Terracotta Red pill button */
-.light-mode .bg-red-600, 
-.light-mode .bg-red-500 {
-  background-color: #c94c3c !important;
-  color: #ffffff !important;
-  border-radius: 9999px !important;
-}
-.light-mode .bg-red-600:hover, 
-.light-mode .bg-red-500:hover {
-  background-color: #ad3c2f !important;
-}
-
-.light-mode .bg-slate-955\/40, .light-mode .bg-slate-955\/20 {
-  background-color: rgba(12, 13, 14, 0.03) !important;
-}
-
-/* Statuses and colors mapped to Amber & Terracotta */
-.light-mode .text-emerald-500,
-.light-mode .text-emerald-400,
-.light-mode .text-emerald-350,
-.light-mode .text-emerald-300 { color: #e58a2d !important; }
-.light-mode .text-emerald-600,
-.light-mode .text-emerald-700 { color: #c9721d !important; }
-
-.light-mode .text-red-500,
-.light-mode .text-red-400 { color: #c94c3c !important; }
-.light-mode .text-red-600,
-.light-mode .text-red-700 { color: #ad3c2f !important; }
-
-.light-mode .text-amber-500,
-.light-mode .text-amber-400 { color: #e58a2d !important; }
-.light-mode .text-blue-500,
-.light-mode .text-blue-400 { color: #e58a2d !important; }
-
-/* Tables in warm tones */
-.light-mode thead.bg-slate-800,
-.light-mode thead.bg-slate-900 { background-color: #f5ede8 !important; }
-.light-mode thead th { color: #55524f !important; font-weight: 700 !important; }
-.light-mode tr { border-color: rgba(12, 13, 14, 0.08) !important; }
-
-/* Stageplot Builder layout overrides */
-.light-mode #canvas-bg {
-  background-color: #faf5f2 !important;
-  border-color: rgba(12, 13, 14, 0.15) !important;
+/* Stageplot control bar padding */
+.stageplot-controls {
+  padding: 1rem 1.5rem !important;
 }
 
 /* ==========================================
@@ -318,3 +552,132 @@
 .animate-bkey-3 { animation: press-bkey 1.6s infinite 0.7s ease-in-out; }
 .animate-bkey-4 { animation: press-bkey 1.6s infinite 0.9s ease-in-out; }
 .animate-bkey-5 { animation: press-bkey 1.6s infinite 1.1s ease-in-out; }
+
+/* Custom resets to bypass global important select padding */
+select[class*="h-"], select.custom-select-height, select[style*="height"] {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* ==========================================
+   🖨️ PDF & PRINT STYLE SHEET OVERRIDES
+   ========================================== */
+@media print {
+  /* Reset document and containers for high contrast print output */
+  body, 
+  #root, 
+  main,
+  div, 
+  span, 
+  h1, 
+  h2, 
+  h3, 
+  h4, 
+  p, 
+  a, 
+  th, 
+  td,
+  .flex-1 {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #e2e8f0 !important;
+  }
+  
+  /* Make all text content clean black for printing */
+  .text-slate-900,
+  .text-slate-950,
+  .text-slate-800,
+  .text-slate-700,
+  .text-slate-600,
+  .text-black,
+  .text-white,
+  .text-slate-300,
+  .text-slate-400,
+  .text-slate-500,
+  .text-emerald-400,
+  .text-emerald-500,
+  .text-emerald-655 {
+    color: #000000 !important;
+  }
+
+  /* Stageplot print canvas setup */
+  #canvas-bg {
+    background-color: #ffffff !important;
+    border: 2px solid #000000 !important;
+  }
+
+  /* Hide background design grid lines when printing to save ink */
+  .canvas-grid {
+    background-image: none !important;
+    opacity: 0 !important;
+  }
+
+  /* Style placed stage items' labels for clean reading on paper */
+  .absolute.bg-black {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+  }
+
+  .absolute.bg-black span {
+    color: #000000 !important;
+  }
+
+  /* Borders in tables and cards */
+  .border,
+  .border-b,
+  .border-t,
+  .border-r,
+  .border-l,
+  tr {
+    border-color: #000000 !important;
+  }
+
+  /* Table head styles */
+  thead {
+    background-color: #f1f5f9 !important;
+  }
+  thead th {
+    color: #000000 !important;
+    font-weight: bold !important;
+  }
+
+  /* Force all SVG stage layout items to print as white silhouettes with clear black lines */
+  svg rect,
+  svg circle,
+  svg path,
+  svg line,
+  svg polygon,
+  svg ellipse {
+    fill: #ffffff !important;
+    stroke: #000000 !important;
+    stroke-width: 2px !important;
+  }
+
+  /* Keep text vectors inside SVGs (like D.I, DI, 220V labels) as pure black with no outline */
+  svg text {
+    fill: #000000 !important;
+    color: #000000 !important;
+    font-weight: 900 !important;
+    stroke: none !important;
+  }
+
+  /* Specifically force paths with fill/stroke attributes to match high contrast white/black theme */
+  path[fill] {
+    fill: #ffffff !important;
+    stroke: #000000 !important;
+  }
+  path[stroke] {
+    stroke: #000000 !important;
+  }
+
+  /* Force table cells, inputs, selects, and textareas to render text in black when printing */
+  table td,
+  table th,
+  table input,
+  table textarea,
+  table select {
+    color: #000000 !important;
+  }
+}

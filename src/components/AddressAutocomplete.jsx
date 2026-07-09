@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapPin } from 'lucide-react';
 import { PianoLoader } from './PianoLoader';
+
+const DEFAULT_SUGGESTIONS = [
+  { label: "Movistar Arena, Santiago, Chile", value: "Movistar Arena, Santiago, Chile" },
+  { label: "Teatro Caupolicán, San Diego, Santiago, Chile", value: "Teatro Caupolicán, San Diego, Santiago, Chile" },
+  { label: "Espacio Riesco, Huechuraba, Santiago, Chile", value: "Espacio Riesco, Huechuraba, Santiago, Chile" },
+  { label: "Estadio Nacional, Ñuñoa, Santiago, Chile", value: "Estadio Nacional, Ñuñoa, Santiago, Chile" },
+  { label: "Club Hípico de Santiago, Santiago, Chile", value: "Club Hípico de Santiago, Santiago, Chile" }
+];
 
 export const AddressAutocomplete = ({ value, onChange, placeholder, className, required }) => {
   const [suggestions, setSuggestions] = useState([]);
@@ -59,24 +66,21 @@ export const AddressAutocomplete = ({ value, onChange, placeholder, className, r
 
   return (
     <div ref={wrapperRef} className="relative w-full">
-      <div className="flex gap-2">
-        <input 
-          required={required}
-          className={className}
-          value={value}
-          onChange={handleInputChange}
-          placeholder={placeholder}
-          onFocus={() => { if (value && value.length >= 3) setShowDropdown(true); }}
-        />
-        <button 
-          type="button" 
-          onClick={() => window.open(value ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}` : 'https://www.google.com/maps', '_blank')} 
-          className="p-2.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-blue-400 rounded-lg transition-colors shrink-0" 
-          title="Ver en Google Maps"
-        >
-          <MapPin size={14} />
-        </button>
-      </div>
+      <input 
+        required={required}
+        className={className}
+        value={value}
+        onChange={handleInputChange}
+        placeholder={placeholder}
+        onFocus={() => {
+          setShowDropdown(true);
+          if (!value) {
+            setSuggestions(DEFAULT_SUGGESTIONS);
+          } else {
+            searchAddress(value);
+          }
+        }}
+      />
       {showDropdown && (suggestions.length > 0 || loading) && (
         <ul className="absolute z-[9999] w-full bg-slate-900 border border-slate-700 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-2xl text-left">
           {loading && (

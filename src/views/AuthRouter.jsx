@@ -4,6 +4,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { ROLES } from '../utils/constants';
 import { apiFetch } from '../utils/api';
+import { COUNTRY_CODES, detectCountryCode } from '../utils/phoneHelper';
 
 export const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
   const [mode, setMode] = useState('LOGIN'); 
@@ -16,7 +17,8 @@ export const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
 
   const [regName, setRegName] = useState('');
   const [regRole, setRegRole] = useState(ROLES.TECH);
-  const [regPhone, setRegPhone] = useState('+569');
+  const [regPhoneCode, setRegPhoneCode] = useState(detectCountryCode());
+  const [regPhoneNumber, setRegPhoneNumber] = useState('');
   const [adminTempPass, setAdminTempPass] = useState('');
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [tcAccepted, setTcAccepted] = useState(false);
@@ -83,10 +85,11 @@ export const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
     }
     setError(''); setLoading(true);
     try {
+      const fullPhone = `${regPhoneCode}${regPhoneNumber}`.trim();
       const result = await apiFetch('solicitarAcceso', { 
         name: regName.trim(), 
         email: email.trim(), 
-        phone: regPhone.trim(), 
+        phone: fullPhone, 
         role: regRole,
         disclaimerAceptado: true,
         tcVersion: 'v1.0'
@@ -178,32 +181,50 @@ export const AuthRouter = ({ setCurrentUser, setCurrentView, showToast }) => {
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 mb-1">Teléfono</label>
-                <input type="tel" value={regPhone} onChange={e=>setRegPhone(e.target.value.replace(/[^0-9+]/g, ''))} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm focus:border-emerald-500 outline-none" required />
+                <div className="flex gap-1.5">
+                  <select 
+                    value={regPhoneCode} 
+                    onChange={e => setRegPhoneCode(e.target.value)} 
+                    className="w-[82px] shrink-0 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm focus:border-emerald-500 outline-none cursor-pointer"
+                  >
+                    {COUNTRY_CODES.map(c => <option key={c.code} value={c.code}>{c.label}</option>)}
+                  </select>
+                  <input 
+                    type="text" 
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={regPhoneNumber} 
+                    onChange={e=>setRegPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))} 
+                    className="flex-1 min-w-0 bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm focus:border-emerald-500 outline-none" 
+                    placeholder="912345678"
+                    required 
+                  />
+                </div>
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-400 mb-1">Rol</label>
-              <select value={regRole} onChange={e=>setRegRole(e.target.value)} className="w-full max-w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm focus:border-emerald-500 outline-none break-words whitespace-normal">
-                {Object.values(ROLES).filter(r => r !== ROLES.ADMIN).map(r => <option key={r} value={r}>{r}</option>)}
+              <select value={regRole} onChange={e=>setRegRole(e.target.value)} className="w-full max-w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white text-sm focus:border-emerald-500 outline-none break-words whitespace-normal cursor-pointer">
+                {Array.from(new Set(Object.values(ROLES))).filter(r => r !== ROLES.TOUR_MANAGER).map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
 
             {!alreadyAcceptedTC && (
-               <div className="space-y-2 pt-1 text-left">
-                 <div className="bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-[10px] text-slate-400 max-h-20 overflow-y-auto custom-scrollbar leading-relaxed">
-                   <p className="font-bold text-slate-300 mb-0.5">AVISO DE TRATAMIENTO DE DATOS</p>
-                   Al solicitar acceso, aceptas que recopilamos tu nombre, correo, teléfono (para contacto/WhatsApp), talla de vestimenta (para uniformes/merch) y restricciones alimenticias (para catering). Estos datos se usarán solo para fines operativos y se conservarán mientras existan la app y web app.
-                 </div>
-                 <label className="flex items-start gap-2 text-[11px] text-slate-300 cursor-pointer select-none">
-                   <input type="checkbox" required checked={disclaimerAccepted} onChange={e => setDisclaimerAccepted(e.target.checked)} className="accent-emerald-500 rounded bg-slate-900 border-slate-700 mt-0.5" />
-                   <span>Acepto el tratamiento de mis datos personales y sensibles.</span>
-                 </label>
-                 <label className="flex items-start gap-2 text-[11px] text-slate-300 cursor-pointer select-none pt-1">
-                   <input type="checkbox" required checked={tcAccepted} onChange={e => setTcAccepted(e.target.checked)} className="accent-emerald-500 rounded bg-slate-900 border-slate-700 mt-0.5" />
-                   <span>He leído y acepto los <a href="#" className="text-emerald-500 hover:underline font-bold">Términos y Condiciones</a> y la <a href="#" className="text-emerald-500 hover:underline font-bold">Política de Privacidad</a>.</span>
-                 </label>
-               </div>
-             )}
+              <div className="space-y-2 pt-1 text-left">
+                <div className="bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-[10px] text-slate-400 max-h-20 overflow-y-auto custom-scrollbar leading-relaxed">
+                  <p className="font-bold text-slate-300 mb-0.5">AVISO DE TRATAMIENTO DE DATOS (LEY N° 21.719)</p>
+                  Al solicitar acceso, autorizas libre y expresamente el tratamiento de tu nombre, correo, teléfono (para contacto) y restricciones alimenticias (para catering) conforme a la Ley chilena N° 21.719. Estos datos se tratarán de forma confidencial y exclusiva para fines de la logística del staff.
+                </div>
+                <label className="flex items-start gap-2 text-[11px] text-slate-300 cursor-pointer select-none">
+                  <input type="checkbox" required checked={disclaimerAccepted} onChange={e => setDisclaimerAccepted(e.target.checked)} className="accent-emerald-500 rounded bg-slate-900 border-slate-700 mt-0.5" />
+                  <span>Acepto el tratamiento de mis datos personales y sensibles.</span>
+                </label>
+                <label className="flex items-start gap-2 text-[11px] text-slate-300 cursor-pointer select-none pt-1">
+                  <input type="checkbox" required checked={tcAccepted} onChange={e => setTcAccepted(e.target.checked)} className="accent-emerald-500 rounded bg-slate-900 border-slate-700 mt-0.5" />
+                  <span>He leído y acepto los <a href="#" onClick={(e) => { e.preventDefault(); alert("Los Términos y Condiciones de Uso y Políticas de Privacidad (conforme a la Ley N° 21.719) han sido creados y se encuentran alojados en la raíz de la aplicación en el archivo 'TERMINOS_Y_CONDICIONES.md' para tu consulta."); }} className="text-emerald-500 hover:underline font-bold">Términos y Condiciones</a> y la <a href="#" onClick={(e) => { e.preventDefault(); alert("Las Políticas de Privacidad detallan el tratamiento confidencial de tus datos personales e informativos. Consulta el archivo 'TERMINOS_Y_CONDICIONES.md' para más información."); }} className="text-emerald-500 hover:underline font-bold">Política de Privacidad</a>.</span>
+                </label>
+              </div>
+            )}
 
             <Button type="submit" className="w-full py-2.5 mt-2" disabled={loading}>{loading ? <Loader2 className="animate-spin"/> : 'Enviar Solicitud'}</Button>
             <p className="text-center text-xs text-slate-400 mt-3"><button type="button" onClick={()=>setMode('LOGIN')} className="text-emerald-500 font-bold hover:underline">Volver al Login</button></p>

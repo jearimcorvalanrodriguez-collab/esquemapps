@@ -8,6 +8,10 @@ export const NotificationsButton = ({ currentUser }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const wrapperRef = useRef(null);
+  const [lastReadTimestamp, setLastReadTimestamp] = useState(() => {
+    if (!currentUser) return 0;
+    return Number(window.localStorage.getItem(`notif_read_ts_${currentUser.email}`)) || 0;
+  });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -47,23 +51,40 @@ export const NotificationsButton = ({ currentUser }) => {
     setNotifications(list.slice(0, 8));
   };
 
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 4000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
   const handleToggle = () => {
     if (!isOpen) {
       loadNotifications();
+      const now = Date.now();
+      setLastReadTimestamp(now);
+      if (currentUser) {
+        window.localStorage.setItem(`notif_read_ts_${currentUser.email}`, String(now));
+      }
     }
     setIsOpen(!isOpen);
   };
+
+  const unreadCount = notifications.filter(n => n.timestamp > lastReadTimestamp).length;
 
   return (
     <div ref={wrapperRef} className="relative inline-block text-left print:hidden">
       <button 
         type="button" 
         onClick={handleToggle}
-        className="p-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-amber-500 hover:text-amber-400 rounded-lg transition-colors flex items-center justify-center shrink-0 relative"
+        className="p-1.5 text-amber-500 hover:text-amber-400 transition-colors flex items-center justify-center shrink-0 relative"
         title="Notificaciones de Proyectos"
       >
-        <Bell size={14} />
-        <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+        <Bell size={15} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[8px] font-black rounded-full w-3.5 h-3.5 flex items-center justify-center shadow-lg border border-[#090908]">
+            {unreadCount}
+          </span>
+        )}
       </button>
 
       {isOpen && (
