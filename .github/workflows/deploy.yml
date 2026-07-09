@@ -38,6 +38,8 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Build
+      env:
+      VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: npm run build
 
       - name: Setup Pages
